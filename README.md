@@ -25,6 +25,11 @@
 - **[协作指南](./docs/collaboration.md)** - 协作模式参考
 - **[API契约](./docs/api-contract.md)** - 前后端接口约定（明天填写）
 
+### 赛前准备
+- **[环境检查报告](./docs/preparation/环境检查报告.md)** - 开发环境就绪状态
+- **[赛前准备资料](./docs/preparation/赛前准备资料.md)** - 赛题解读、获奖作品分析、技术方向
+- **[黑客松经验速查表](./docs/preparation/黑客松经验速查表.md)** - 实战经验速查（待填充）
+
 ### 记录系统
 - **[开发日志](./docs/devlog/)** - 每4-6小时更新
 - **[决策记录](./docs/decisions/)** - 重大决策追溯
@@ -64,16 +69,24 @@
 ├── CLAUDE.md             # 项目背景和赛道说明
 ├── .gitignore            # Git 忽略规则
 ├── docs/                 # 文档系统
+│   ├── preparation/     # 赛前准备资料
+│   │   ├── 环境检查报告.md
+│   │   ├── 赛前准备资料.md
+│   │   └── 黑客松经验速查表.md
 │   ├── collaboration.md  # 协作模式参考
 │   ├── api-contract.md   # API 接口契约
 │   ├── folder-structure.md # 文件夹结构规划
 │   ├── team.md          # 团队信息
+│   ├── GUIDE.md         # 开发指南
 │   ├── decisions/       # 决策记录
 │   ├── devlog/          # 开发日志
+│   ├── meetings/        # 会议记录
 │   └── retrospective.md # 复盘总结
 ├── design/              # 设计资源
+│   ├── mockups/         # 界面原型
+│   ├── poster/          # 游园会海报
+│   └── wireframes/      # 线框图
 ├── src/                 # 源代码（明天开始）
-├── data/                # 数据和样本
 ├── scripts/             # 开发脚本
 └── assets/              # 静态资源
 ```
