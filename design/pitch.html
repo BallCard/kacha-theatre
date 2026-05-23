@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>摸鱼御史 · 项目提案</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #0e0d12; color: #f4f1ea; font-family: -apple-system, "Helvetica Neue", "PingFang SC", "Microsoft YaHei", sans-serif; line-height: 1.65; }
+  body { max-width: 920px; margin: 0 auto; padding: 56px 32px 96px; }
+
+  .tag { display: inline-block; padding: 4px 10px; border-radius: 4px; font-size: 12px; letter-spacing: 1px; background: #d4222b; color: #fff; margin-right: 6px; }
+  .tag.ghost { background: transparent; border: 1px solid #4a4750; color: #a09c95; }
+
+  h1 { font-size: 44px; font-weight: 800; letter-spacing: 2px; margin: 18px 0 8px; }
+  h1 .stamp { color: #d4222b; }
+  h2 { font-size: 22px; margin: 56px 0 18px; padding-bottom: 8px; border-bottom: 1px solid #2a2830; letter-spacing: 1px; }
+  h2 .num { color: #d4222b; font-family: "Times New Roman", serif; font-style: italic; margin-right: 10px; }
+  h3 { font-size: 16px; margin: 20px 0 8px; color: #f0c869; }
+  p, li { font-size: 15px; color: #d6d2c8; }
+  li { margin: 4px 0 4px 20px; }
+  strong { color: #f4f1ea; }
+  .muted { color: #8a8680; font-size: 13px; }
+
+  .hero { padding: 32px; border: 1px solid #2a2830; border-radius: 8px; background: linear-gradient(135deg, #1a1820 0%, #0e0d12 100%); }
+  .hero .lead { font-size: 18px; margin-top: 14px; color: #e8e3d8; }
+  .hero .meta { margin-top: 18px; font-size: 13px; color: #8a8680; }
+
+  .grid { display: grid; gap: 14px; margin-top: 12px; }
+  .grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+  .grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+  .card { padding: 18px; border: 1px solid #2a2830; border-radius: 6px; background: #15131b; }
+  .card .label { font-size: 11px; color: #d4222b; letter-spacing: 2px; margin-bottom: 6px; }
+  .card .big { font-size: 22px; font-weight: 700; color: #f4f1ea; margin-bottom: 4px; }
+
+  .flow { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 16px; }
+  .step { padding: 14px 10px; background: #15131b; border: 1px solid #2a2830; border-radius: 6px; position: relative; }
+  .step .n { font-family: "Times New Roman", serif; font-style: italic; color: #d4222b; font-size: 28px; line-height: 1; }
+  .step .t { font-weight: 700; margin: 6px 0 4px; font-size: 14px; }
+  .step .d { font-size: 12px; color: #8a8680; line-height: 1.5; }
+
+  table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 14px; }
+  th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #2a2830; }
+  th { color: #f0c869; font-weight: 600; font-size: 13px; }
+  td.weight { color: #d4222b; font-weight: 700; font-family: "Times New Roman", serif; }
+
+  .demo-mock { margin-top: 20px; padding: 24px; background: #1a1820; border: 1px solid #2a2830; border-radius: 8px; }
+  .phone { width: 240px; margin: 0 auto; aspect-ratio: 9/19; background: #0e0d12; border: 2px solid #3a3640; border-radius: 22px; padding: 16px 12px; position: relative; overflow: hidden; }
+  .phone .photo { aspect-ratio: 4/3; background: linear-gradient(135deg, #2c2832 0%, #1a1820 100%); border-radius: 4px; position: relative; display: flex; align-items: center; justify-content: center; color: #4a4750; font-size: 11px; }
+  .phone .sticker { position: absolute; padding: 3px 8px; border-radius: 3px; font-size: 10px; font-weight: 700; transform: rotate(-8deg); }
+  .phone .s1 { top: 12px; right: 14px; background: #d4222b; color: #fff; }
+  .phone .s2 { bottom: 18px; left: 18px; background: #f0c869; color: #1a1820; transform: rotate(6deg); }
+  .phone .s3 { top: 42%; left: 30%; background: rgba(255,255,255,0.92); color: #d4222b; font-size: 9px; }
+  .phone .report { margin-top: 10px; padding: 10px; background: #15131b; border: 1px solid #2a2830; border-radius: 4px; }
+  .phone .report .tt { color: #f0c869; font-size: 9px; letter-spacing: 1px; margin-bottom: 4px; }
+  .phone .report .ll { font-size: 10px; color: #d6d2c8; line-height: 1.6; }
+  .phone .report .yj { display: flex; gap: 6px; margin-top: 6px; }
+  .phone .report .yj span { font-size: 9px; padding: 2px 5px; border-radius: 2px; background: #0e0d12; }
+  .phone .report .yj .y { color: #6ec070; }
+  .phone .report .yj .j { color: #d4222b; }
+
+  .timeline { margin-top: 14px; }
+  .tl-row { display: grid; grid-template-columns: 130px 1fr; gap: 16px; padding: 10px 0; border-bottom: 1px dashed #2a2830; align-items: baseline; }
+  .tl-row .when { color: #d4222b; font-family: "Times New Roman", serif; font-style: italic; font-size: 14px; }
+  .tl-row .what { font-size: 14px; color: #d6d2c8; }
+
+  .cta { margin-top: 56px; padding: 24px; border: 1px dashed #d4222b; border-radius: 8px; text-align: center; color: #f0c869; font-size: 15px; }
+  .cta strong { color: #fff; }
+
+  @media (max-width: 720px) {
+    body { padding: 32px 18px 64px; }
+    h1 { font-size: 32px; }
+    .grid.cols-2, .grid.cols-3 { grid-template-columns: 1fr; }
+    .flow { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <span class="tag">赛道四 · 视觉搜索</span>
+  <span class="tag ghost">25H 黑客松</span>
+  <span class="tag ghost">2026 · 抖音创变者</span>
+  <h1>摸鱼<span class="stamp">御史</span></h1>
+  <p class="lead">给工位上摸鱼午睡的同事拍一张，AI 自动盖戳出一份玄学御史报告 + 贴纸大字报，一键导出群聊梗图。</p>
+  <p class="meta">长三角 TOP 高校站 · 杭州 AI 视觉专场 · 队长：波尔卡德</p>
+</div>
+
+<h2><span class="num">§1</span>为什么是这个</h2>
+
+<div class="grid cols-3">
+  <div class="card">
+    <div class="label">真实场景</div>
+    <div class="big">下午 3 点</div>
+    <p class="muted">对面同事头一歪睡过去了，你想发群里玩梗，但配文懒得想。这就是日常被忽略、又每天都发生的视觉触发时刻。</p>
+  </div>
+  <div class="card">
+    <div class="label">目标用户</div>
+    <div class="big">20–35 白领</div>
+    <p class="muted">熟抖音梗文化、有自我嘲讽 + 群聊玩梗刚需。摸鱼是社交货币，不是负面词。</p>
+  </div>
+  <div class="card">
+    <div class="label">竞品参考</div>
+    <div class="big">Faceboost</div>
+    <p class="muted">深客松获奖路线：面部 + 玄学 + 视觉触发。我们升级到 <strong>全图理解 + 可拖拽再创作</strong>。</p>
+  </div>
+</div>
+
+<h2><span class="num">§2</span>核心闭环（&lt; 30 秒）</h2>
+
+<div class="flow">
+  <div class="step"><div class="n">01</div><div class="t">触发</div><div class="d">H5 首页"拍一个" 调起摄像头/相册</div></div>
+  <div class="step"><div class="n">02</div><div class="t">理解</div><div class="d">VLM 一次调用 输出姿态+坐标+玄学+贴纸建议</div></div>
+  <div class="step"><div class="n">03</div><div class="t">重构</div><div class="d">Canvas 自动盖戳 + 渲染御史报告卡</div></div>
+  <div class="step"><div class="n">04</div><div class="t">微调</div><div class="d">拖拽/缩放/删贴纸 换今日宜忌</div></div>
+  <div class="step"><div class="n">05</div><div class="t">分发</div><div class="d">一键导竖版长图 + 匿名上同事名人堂</div></div>
+</div>
+
+<h3 style="margin-top:24px">效果速写</h3>
+<div class="demo-mock">
+  <div class="phone">
+    <div class="photo">
+      [ 同事午睡照 ]
+      <span class="sticker s1">划水大将军</span>
+      <span class="sticker s3">ZZZ...</span>
+      <span class="sticker s2">摸鱼 +20</span>
+    </div>
+    <div class="report">
+      <div class="tt">御史房 · 今日批复</div>
+      <div class="ll">紫微星偏移 3 度，宜小憩养气。此姿态属"虎落平阳式"，主午后必有续命咖啡。</div>
+      <div class="yj">
+        <span class="y">宜：摸鱼 划水 假装思考</span>
+      </div>
+      <div class="yj">
+        <span class="j">忌：开会 改 PPT 接电话</span>
+      </div>
+    </div>
+  </div>
+  <p class="muted" style="text-align:center; margin-top:14px;">↑ 一张图 = 同事图鉴 + 御史报告 + 抹茶群素材</p>
+</div>
+
+<h2><span class="num">§3</span>AI 在哪里发挥作用</h2>
+
+<p>不是"识别完贴个标签"那种工具型 AI。我们让 <strong>一次 VLM 调用</strong> 同时承担四件事，token 开销可控、效果集中：</p>
+
+<div class="grid cols-2">
+  <div class="card">
+    <div class="label">视觉理解</div>
+    <div class="big">姿态 + 物体 + 坐标</div>
+    <p class="muted">趴桌型/仰头型/手撑头型... 配桌面线索（咖啡/键盘/文件）作为玄学素材。</p>
+  </div>
+  <div class="card">
+    <div class="label">内容生成</div>
+    <div class="big">玄学御史口吻</div>
+    <p class="muted">运势、性格、今日宜忌、一句中二金句。固定 prompt 模板保证调性统一。</p>
+  </div>
+  <div class="card">
+    <div class="label">视觉重构</div>
+    <div class="big">贴纸坐标驱动</div>
+    <p class="muted">VLM 直接吐 JSON 坐标，前端按坐标自动盖戳。AI 真的在"动手改图"，而不只是描述。</p>
+  </div>
+  <div class="card">
+    <div class="label">用户再创作</div>
+    <div class="big">可拖拽微调</div>
+    <p class="muted">不准的位置用户能拖；好玩的贴纸可以加。AI 是搭子，不是上帝。</p>
+  </div>
+</div>
+
+<h2><span class="num">§4</span>对照评审打分（赛道四）</h2>
+
+<table>
+  <thead><tr><th>维度</th><th>权重</th><th>我们怎么打</th></tr></thead>
+  <tbody>
+    <tr><td>场景与问题洞察</td><td class="weight">15%</td><td>办公室摸鱼是高频、真实、自然的视觉触发场景</td></tr>
+    <tr><td>AI 能力与产品结合</td><td class="weight">30%</td><td>VLM 输出坐标 + 玄学解读，驱动整个视觉重构，不只是识别</td></tr>
+    <tr><td>体验完整性</td><td class="weight">20%</td><td>触发→理解→改造→微调→分发→社区，闭环完整</td></tr>
+    <tr><td>用户价值感</td><td class="weight">20%</td><td>从一张睡照 → 可分享的梗素材 + 社交货币，超越"知道是什么"</td></tr>
+    <tr><td>创新性与延展</td><td class="weight">15%</td><td>视觉理解 + LLM 玩梗 + 可拖拽再创作 三件套，可扩展到自拍/宠物/视频</td></tr>
+  </tbody>
+</table>
+
+<h2><span class="num">§5</span>MVP 范围（25H 能交付的）</h2>
+
+<div class="grid cols-2">
+  <div class="card">
+    <div class="label">必做 P0</div>
+    <div class="big">主闭环 5 步</div>
+    <ul>
+      <li>上传/拍照 → 后端 VLM</li>
+      <li>报告卡 + 贴纸自动盖戳</li>
+      <li>拖拽微调（基础手势）</li>
+      <li>导出长图 / 复制保存</li>
+      <li>10–20 个贴纸素材库</li>
+    </ul>
+  </div>
+  <div class="card">
+    <div class="label">能做 P1</div>
+    <div class="big">同事名人堂</div>
+    <ul>
+      <li>匿名上传到 waterfall</li>
+      <li>今日运势排行榜</li>
+      <li>宠物彩蛋（VLM 自动识别走另一套 prompt）</li>
+    </ul>
+  </div>
+</div>
+
+<p class="muted" style="margin-top:14px;">P2 砍掉：AI 重绘魔改、多图连拍连续剧、登录账号体系、长期数据沉淀。</p>
+
+<h2><span class="num">§6</span>时间分配</h2>
+
+<div class="timeline">
+  <div class="tl-row"><span class="when">5.23 早</span><span class="what">2h 创意定型 + 技术栈敲定 + 分工</span></div>
+  <div class="tl-row"><span class="when">5.23 中–晚</span><span class="what">12h MVP 主闭环（前端拍照+Canvas、后端 VLM、贴纸库） / 海报并行</span></div>
+  <div class="tl-row"><span class="when">5.24 凌晨</span><span class="what">主闭环跑通的死线。跑不通就立刻砍 P1</span></div>
+  <div class="tl-row"><span class="when">5.24 早</span><span class="what">6h 联调 + 体验打磨 + 名人堂 P1</span></div>
+  <div class="tl-row"><span class="when">5.24 上午</span><span class="what">4h 睡 / 演示物料 / 12:00 提交</span></div>
+  <div class="tl-row"><span class="when">5.24 下午</span><span class="what">游园会现场试玩 — 这才是真正的拉票主场</span></div>
+</div>
+
+<h2><span class="num">§7</span>需要队友拍板的事</h2>
+
+<ul>
+  <li><strong>名字</strong>：摸鱼御史 / 御史房 / 同事图鉴 / 其他？</li>
+  <li><strong>VLM 选型</strong>：豆包 vs GPT-4o vs Claude vs 通义千问 — 哪家 token 便宜 + 中文调性强？</li>
+  <li><strong>分工</strong>：前端 Canvas + 拖拽（1 人）/ 后端 + prompt 工程（1 人）/ 贴纸素材 + 海报（1 人）/ 队长统筹 + 演示稿（1 人）</li>
+  <li><strong>隐私话术</strong>："匿名提交"还是"模糊脸部"？走哪个不踩线？</li>
+</ul>
+
+<div class="cta">
+  <strong>核心论点</strong>：场景真实、AI 干活、闭环完整、可即玩可分享。<br>
+  下一步：定名字 + 定 VLM → 11:00 启动开发。
+</div>
+
+</body>
+</html>
