@@ -1,0 +1,27 @@
+{
+  "name": "moyu-yushi-server",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vercel dev --listen 3000",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "bench": "tsx scripts/prompt-bench.ts",
+    "seed-demo": "tsx scripts/seed-demo-json.ts"
+  },
+  "dependencies": {
+    "ajv": "^8.12.0",
+    "dotenv": "^16.4.5",
+    "undici": "^6.19.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.0",
+    "@vercel/node": "^3.2.0",
+    "tsx": "^4.16.0",
+    "typescript": "^5.5.0",
+    "vercel": "^34.0.0",
+    "vitest": "^1.6.0"
+  }
+}
