@@ -40,10 +40,16 @@ logs/
 # Playwright / 调试截图
 .playwright-cli/
 home.png
-edit.png
-preview.png
-export.png
+edit*.png
+preview*.png
+export*.png
+poster*.png
 test-office.png
 
 # 原始素材压缩包（解压后已进 src/frontend）
 摸鱼御史.zip
+
+# 后端运行时副产物（在 feature/poster-design 分支上 server/ 只是本地跑出来的数据/依赖，
+# 真实代码在 feature/backend-api 分支）
+server/data/
+server/node_modules/

@@ -4,7 +4,7 @@ import { CanvasItem, AnalyzeResult } from "./types";
 import { StickerCanvas } from "./components/StickerCanvas";
 import { ToolBar } from "./components/ToolBar";
 import { PosterPreview } from "./components/PosterPreview";
-import { getStickerUrl } from "./utils/assets";
+import { getStickerUrl, getBigTierStampUrl, getScoreTicketUrl } from "./utils/assets";
 import { 
   Camera, 
   Image as ImageIcon, 
@@ -69,19 +69,45 @@ export default function App() {
           
           // Reset canvas states
           const initialCanvasItems: CanvasItem[] = [];
-          
-          // Face detection auto annotation boxes
+
+          // 1. 右上角自动盖大段位印章（倾斜 -12°）
+          initialCanvasItems.push({
+            id: `tier_stamp_${Date.now()}`,
+            type: 'sticker',
+            src: getBigTierStampUrl(result.level_tier),
+            stickerType: `${result.level_tier}印章`,
+            x: 395,
+            y: 110,
+            width: 170,
+            height: 170,
+            rotation: -12,
+          });
+
+          // 2. 左下角自动盖摸鱼+N 金牌票据（轻微倾斜）
+          initialCanvasItems.push({
+            id: `score_ticket_${Date.now() + 1}`,
+            type: 'sticker',
+            src: getScoreTicketUrl(result.moyu_score),
+            stickerType: `摸鱼+${result.moyu_score}`,
+            x: 130,
+            y: 410,
+            width: 200,
+            height: 90,
+            rotation: -4,
+          });
+
+          // 3. 人脸框（如果有）盖小印
           result.face_boxes.forEach((box, i) => {
             initialCanvasItems.push({
-              id: `face_seal_${i}_${Date.now()}`,
+              id: `face_seal_${i}_${Date.now() + 2 + i}`,
               type: 'sticker',
               src: getStickerUrl('face_seal_big'),
               stickerType: '御史封脸印',
-              x: box.x * 500 + (box.w * 500) / 2, // Convert coordinates relative to logical space (500x500)
+              x: box.x * 500 + (box.w * 500) / 2,
               y: box.y * 500 + (box.h * 500) / 2,
               width: box.w * 500 * 1.5,
               height: box.h * 500 * 1.5,
-              rotation: (Math.random() - 0.5) * 20, // slightly random tilted angle
+              rotation: (i - 0.5) * 8,
             });
           });
 
