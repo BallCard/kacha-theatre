@@ -1,36 +1,36 @@
 import { fetch } from 'undici';
 
-const OPENAI_URL = 'https://api.openai.com/v1/chat/completions';
-
-export interface GPT4oCallOptions {
+export interface RelayCallOptions {
   imageBase64: string;
   systemPrompt: string;
   userPrompt: string;
+  model: string;
   timeoutMs?: number;
 }
 
-export type GPT4oCallResult =
+export type RelayCallResult =
   | { ok: true; raw: string; latencyMs: number }
   | { ok: false; error: string; latencyMs: number };
 
-export async function callGPT4o(opts: GPT4oCallOptions): Promise<GPT4oCallResult> {
+export async function callRelay(opts: RelayCallOptions): Promise<RelayCallResult> {
   const apiKey = process.env.OPENAI_API_KEY;
-  const model = process.env.OPENAI_MODEL ?? 'gpt-4o';
+  const baseUrl = (process.env.OPENAI_BASE_URL ?? 'https://api.openai.com/v1').replace(/\/$/, '');
   if (!apiKey) return { ok: false, error: 'OPENAI_API_KEY missing', latencyMs: 0 };
 
+  const url = `${baseUrl}/chat/completions`;
   const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), opts.timeoutMs ?? 15000);
+  const timer = setTimeout(() => ctrl.abort(), opts.timeoutMs ?? 20000);
   const start = Date.now();
 
   try {
-    const res = await fetch(OPENAI_URL, {
+    const res = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model,
+        model: opts.model,
         messages: [
           { role: 'system', content: opts.systemPrompt },
           {
@@ -42,7 +42,7 @@ export async function callGPT4o(opts: GPT4oCallOptions): Promise<GPT4oCallResult
           },
         ],
         temperature: 0.7,
-        max_tokens: 800,
+        max_tokens: 2000,
         response_format: { type: 'json_object' },
       }),
       signal: ctrl.signal,
