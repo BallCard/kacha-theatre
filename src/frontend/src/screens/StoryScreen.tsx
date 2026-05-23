@@ -6,12 +6,13 @@ import {
   StoryChoice,
   EndingSpec,
   PanelSpec,
-  StoryRunState,
+  EndingType,
 } from '../types';
 import {
   generateStoryArc,
   generatePanelImage,
   generateEndingImage,
+  determineEnding,
 } from '../services/storyEngine';
 import { MOCK_STORY_ARC, isMockMode } from '../mock/storyMocks';
 import { StoryPanel } from '../components/StoryPanel';
@@ -74,6 +75,11 @@ export function StoryScreen({ context, onExit, onBackHome, onRestart }: StoryScr
   // 玩家走过的节点 + 每个节点选了哪个选项的文案；与 visitedNodeIds 等长
   const [visitedNodeIds, setVisitedNodeIds] = useState<string[]>([]);
   const [visitedChoiceLabels, setVisitedChoiceLabels] = useState<string[]>([]);
+  // Part 2 宜忌计数器（用于结局判定）
+  const [yiHits, setYiHits] = useState(0);
+  const [jiHits, setJiHits] = useState(0);
+  const [matchedYiKeywords, setMatchedYiKeywords] = useState<string[]>([]);
+  const [matchedJiKeywords, setMatchedJiKeywords] = useState<string[]>([]);
   const imageGenInFlight = useRef<Set<string>>(new Set());
 
   // ===== 1. 玩家提交名字后再触发剧情树生成 =====
@@ -182,7 +188,7 @@ export function StoryScreen({ context, onExit, onBackHome, onRestart }: StoryScr
 
   // ===== 4. 选项点击 =====
   const handleChoice = (choice: StoryChoice) => {
-    // 应用数值变化
+    // 应用数值变化（statDelta 仍保留作 UI 数值反馈，但不再决定结局）
     setStats((prev) => {
       const next = { ...prev };
       for (const [k, v] of Object.entries(choice.statDelta)) {
@@ -190,6 +196,27 @@ export function StoryScreen({ context, onExit, onBackHome, onRestart }: StoryScr
       }
       return next;
     });
+
+    // 累计宜忌命中数（Part 2 核心逻辑）
+    let nextYi = yiHits;
+    let nextJi = jiHits;
+    if (choice.yijiMatch === 'yi') {
+      nextYi = yiHits + 1;
+      setYiHits(nextYi);
+      if (choice.yijiKeyword) {
+        setMatchedYiKeywords((prev) =>
+          prev.includes(choice.yijiKeyword!) ? prev : [...prev, choice.yijiKeyword!]
+        );
+      }
+    } else if (choice.yijiMatch === 'ji') {
+      nextJi = jiHits + 1;
+      setJiHits(nextJi);
+      if (choice.yijiKeyword) {
+        setMatchedJiKeywords((prev) =>
+          prev.includes(choice.yijiKeyword!) ? prev : [...prev, choice.yijiKeyword!]
+        );
+      }
+    }
 
     // 记录玩家当前在哪个节点 + 选了什么（phase 必为 node）
     if (phase.kind === 'node') {
@@ -201,7 +228,18 @@ export function StoryScreen({ context, onExit, onBackHome, onRestart }: StoryScr
 
     // 路由到下一节点 / 结局
     if (choice.nextNodeId.startsWith('ending:')) {
-      const endingKey = choice.nextNodeId.slice('ending:'.length);
+      // Part 2：结局由规则函数判定，忽略 LLM/mock 写的 nextNodeId 具体 key
+      const endingType: EndingType = determineEnding(context, nextYi, nextJi);
+      // arc.endings 优先按 endingType 作 key 命中；没命中再 fallback 到原 key 或第一个
+      let endingKey: string = endingType;
+      if (arc && !arc.endings[endingKey]) {
+        const fallbackByType = Object.values(arc.endings).find((e) => e.endingType === endingType);
+        if (fallbackByType) endingKey = fallbackByType.key;
+        else {
+          const explicit = choice.nextNodeId.slice('ending:'.length);
+          endingKey = arc.endings[explicit] ? explicit : Object.keys(arc.endings)[0] ?? endingType;
+        }
+      }
       setPhase({ kind: 'ending', endingKey });
     } else {
       setPhase({ kind: 'node', nodeId: choice.nextNodeId });
@@ -301,7 +339,12 @@ export function StoryScreen({ context, onExit, onBackHome, onRestart }: StoryScr
             ending={currentEnding}
             finalStats={stats}
             themeName={context.theme.name}
+            protagonistName={protagonistName}
             imageLoading={!currentEnding.imageUrl}
+            yiHits={yiHits}
+            jiHits={jiHits}
+            matchedYiKeywords={matchedYiKeywords}
+            matchedJiKeywords={matchedJiKeywords}
           />
           {degradedNotice && <DegradedBanner text={degradedNotice} />}
         </main>
@@ -362,6 +405,10 @@ export function StoryScreen({ context, onExit, onBackHome, onRestart }: StoryScr
               visitedChoiceLabels={visitedChoiceLabels}
               ending={currentEnding}
               finalStats={stats}
+              yiHits={yiHits}
+              jiHits={jiHits}
+              matchedYiKeywords={matchedYiKeywords}
+              matchedJiKeywords={matchedJiKeywords}
             />
           </div>
         )}
@@ -378,7 +425,7 @@ export function StoryScreen({ context, onExit, onBackHome, onRestart }: StoryScr
   const node = isNode ? arc.nodes.find((n) => n.id === (phase as any).nodeId) : null;
   const panel: PanelSpec | StoryNode = isNode ? node! : arc.introPanel;
   const progressLabel = isNode
-    ? `第 ${arc.nodes.findIndex((n) => n.id === node!.id) + 1} 卷 · 共 ${arc.nodes.length} 卷`
+    ? `${node?.timeSlot ?? `第 ${arc.nodes.findIndex((n) => n.id === node!.id) + 1} 幕`} · ${arc.nodes.findIndex((n) => n.id === node!.id) + 1}/${arc.nodes.length}`
     : '开篇';
 
   return (
@@ -413,6 +460,8 @@ export function StoryScreen({ context, onExit, onBackHome, onRestart }: StoryScr
         stats={stats}
         imageLoading={!panel.imageUrl}
         progressLabel={progressLabel}
+        yiHits={yiHits}
+        jiHits={jiHits}
         onChoose={isNode ? handleChoice : undefined}
         onStart={!isNode ? () => setPhase({ kind: 'node', nodeId: 'node-0' }) : undefined}
       />

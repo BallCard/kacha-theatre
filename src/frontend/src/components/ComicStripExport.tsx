@@ -8,6 +8,11 @@ interface ComicStripExportProps {
   visitedChoiceLabels: string[];    // 与 visitedNodes 等长，记录每个节点最终选了哪个选项
   ending: EndingSpec;
   finalStats: Record<string, number>;
+  // Part 2 增量
+  yiHits?: number;
+  jiHits?: number;
+  matchedYiKeywords?: string[];
+  matchedJiKeywords?: string[];
 }
 
 /**
@@ -24,6 +29,10 @@ export function ComicStripExport({
   visitedChoiceLabels,
   ending,
   finalStats,
+  yiHits,
+  jiHits,
+  matchedYiKeywords,
+  matchedJiKeywords,
 }: ComicStripExportProps) {
   const totalPages = 1 + visitedNodes.length + 1; // intro + nodes + ending
 
@@ -84,7 +93,7 @@ export function ComicStripExport({
           key={node.id}
           pageIndex={i + 1}
           totalPages={totalPages}
-          label={`第 ${i + 1} 卷`}
+          label={node.sceneTitle || `第 ${i + 1} 幕`}
           panel={node}
           choiceLabel={visitedChoiceLabels[i]}
         />
@@ -94,10 +103,73 @@ export function ComicStripExport({
       <ComicPage
         pageIndex={totalPages - 1}
         totalPages={totalPages}
-        label={`结 · ${ending.title}`}
+        label={ending.endingType ? `结 · ${ending.endingType}` : `结 · ${ending.title}`}
         panel={ending}
         isEnding
       />
+
+      {/* Part 2：宜忌总结 + 授封 */}
+      {(yiHits !== undefined || jiHits !== undefined || ending.titleAward) && (
+        <div className="bg-[#fdfaf2] border border-[#dfd9bf] rounded-2xl p-4 mt-2 mb-2">
+          {ending.titleAward && (
+            <div className="text-center pb-3 mb-3 border-b border-dashed border-[#dcbca0]">
+              <div className="text-[10px] font-bold text-[#85744f] uppercase tracking-[0.3em] font-mono mb-1">
+                · 授 封 ·
+              </div>
+              <div
+                className="text-2xl font-black text-[#d4222b] tracking-widest font-serif"
+                style={{ fontFamily: "'STKaiti', 'Kaiti', serif" }}
+              >
+                {ending.titleAward}
+              </div>
+            </div>
+          )}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-[#f0c869]/15 border border-[#f0c869]/60 rounded-xl p-3">
+              <div className="flex items-center justify-between mb-1">
+                <span
+                  className="text-xs font-bold text-[#8a7243] tracking-widest font-serif"
+                  style={{ fontFamily: "'STKaiti', 'Kaiti', serif" }}
+                >
+                  今 日 宜
+                </span>
+                <span className="text-xl font-black text-[#d4222b] font-mono">
+                  {yiHits ?? 0}
+                </span>
+              </div>
+              <p
+                className="text-xs text-[#85744f] font-serif leading-relaxed"
+                style={{ fontFamily: "'STKaiti', 'Kaiti', serif" }}
+              >
+                {matchedYiKeywords && matchedYiKeywords.length > 0
+                  ? matchedYiKeywords.join('、')
+                  : '今日未命中'}
+              </p>
+            </div>
+            <div className="bg-[#d4222b]/15 border border-[#d4222b]/60 rounded-xl p-3">
+              <div className="flex items-center justify-between mb-1">
+                <span
+                  className="text-xs font-bold text-[#8a3a3a] tracking-widest font-serif"
+                  style={{ fontFamily: "'STKaiti', 'Kaiti', serif" }}
+                >
+                  今 日 忌
+                </span>
+                <span className="text-xl font-black text-[#d4222b] font-mono">
+                  {jiHits ?? 0}
+                </span>
+              </div>
+              <p
+                className="text-xs text-[#85744f] font-serif leading-relaxed"
+                style={{ fontFamily: "'STKaiti', 'Kaiti', serif" }}
+              >
+                {matchedJiKeywords && matchedJiKeywords.length > 0
+                  ? matchedJiKeywords.join('、')
+                  : '今日未触犯'}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 数值面板 */}
       <div className="bg-[#fdfaf2] border border-[#dfd9bf] rounded-2xl p-4 mt-2 mb-4">
@@ -244,12 +316,30 @@ function ComicPage({
       {/* 结局长文案 */}
       {isEnding && (
         <div className="px-4 py-3 bg-[#fdfaf2] border-t border-[#e8dfc7]">
+          {(panel as EndingSpec).endingType && (
+            <div className="inline-block bg-[#d4222b] text-[#fdfaf2] px-3 py-1 rounded-full mb-2">
+              <span
+                className="text-[11px] font-black tracking-[0.3em] font-serif"
+                style={{ fontFamily: "'STKaiti', 'Kaiti', serif" }}
+              >
+                ★ {(panel as EndingSpec).endingType} ★
+              </span>
+            </div>
+          )}
           {title && (
             <div
               className="text-lg font-black text-[#d4222b] mb-1.5 font-serif tracking-wider text-center"
               style={{ fontFamily: "'STKaiti', 'Kaiti', serif" }}
             >
               {title}
+            </div>
+          )}
+          {(panel as EndingSpec).titleAward && (
+            <div
+              className="text-sm text-[#8a7243] mb-2 font-serif font-bold tracking-widest text-center"
+              style={{ fontFamily: "'STKaiti', 'Kaiti', serif" }}
+            >
+              授 封 · {(panel as EndingSpec).titleAward}
             </div>
           )}
           <p

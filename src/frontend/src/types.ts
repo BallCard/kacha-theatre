@@ -61,7 +61,26 @@ export interface StoryContext {
   };
   tags: string[];                  // 初始标签
   initialStats: Record<string, number>;  // 初始数值，如 { 摸鱼值: 87, 警觉度: 12 }
+  // Part 2 增量：宜忌种子 + 段位（来自 Part 1 奏折）。剧情引擎用这些做选项强约束 + 结局判定。
+  seedYi?: string[];               // Part 1 奏折的"宜"清单
+  seedJi?: string[];               // Part 1 奏折的"忌"清单
+  levelTier?: '打工新丁' | '划水学徒' | '摸鱼修士' | '划水侍郎' | '摸鱼大将军' | '假寐天尊';
+  moyuScore?: number;              // 摸鱼分（0-100），影响剧情基调
 }
+
+// ============================================================
+// Part 2 增量：策略 / 宜忌 / 结局类型
+// ============================================================
+export type ChoiceStrategy = '顺应天命' | '逆天而行' | '中立观望';
+export type YijiMatch = 'yi' | 'ji' | 'neutral';
+export type ChoiceOutcome = 'success' | 'fail' | 'neutral';
+export type EndingType =
+  | '天降祥瑞'
+  | '御史降罚'
+  | '逆天改命'
+  | '贵人相助'
+  | '天命应验'
+  | '哭笑不得';
 
 /**
  * 单个分镜：连环画的一页。
@@ -78,7 +97,9 @@ export interface PanelSpec {
  */
 export interface StoryNode extends PanelSpec {
   id: string;                      // "node-0" / "node-1" / ...
-  choices: StoryChoice[];          // 2-3 个选项
+  sceneTitle?: string;             // 8-12 字，带时辰前缀，如"辰时·御史临朝"
+  timeSlot?: '辰时' | '午前' | '未时' | '申时' | '酉时';
+  choices: StoryChoice[];          // 3 个选项（Part 2 硬约束）
 }
 
 /**
@@ -88,6 +109,10 @@ export interface StoryChoice {
   label: string;                   // "推说在写汇报"
   statDelta: Record<string, number>;  // { 摸鱼值: -5, 警觉度: +10 }
   nextNodeId: string;              // 下一个节点 id；指向 "ending:<key>" 时跳结局
+  // Part 2 增量
+  strategy?: ChoiceStrategy;       // 顺应天命 / 逆天而行 / 中立观望
+  yijiMatch?: YijiMatch;           // 'yi' = 命中今日宜；'ji' = 命中今日忌；'neutral' = 中性
+  yijiKeyword?: string | null;     // 命中的关键词（必须来自 Part 1 奏折的 yi/ji 列表）
 }
 
 /**
@@ -99,6 +124,9 @@ export interface EndingSpec {
   narration: string;               // 结局长文案
   imagePrompt: string;
   imageUrl?: string;
+  // Part 2 增量
+  endingType?: EndingType;         // 6 种结局之一
+  titleAward?: string;             // 4-6 字额外封号，比 Part 1 称号更戏剧性
 }
 
 /**

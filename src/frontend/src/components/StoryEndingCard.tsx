@@ -7,6 +7,11 @@ interface StoryEndingCardProps {
   themeName: string;
   protagonistName?: string;
   imageLoading: boolean;
+  // Part 2 增量：宜忌命中数 + 命中关键词
+  yiHits?: number;
+  jiHits?: number;
+  matchedYiKeywords?: string[];
+  matchedJiKeywords?: string[];
 }
 
 /**
@@ -18,7 +23,17 @@ interface StoryEndingCardProps {
  *
  * 通过 id="printable-ending-card" 暴露给 html-to-image 用作截图节点。
  */
-export function StoryEndingCard({ ending, finalStats, themeName, protagonistName, imageLoading }: StoryEndingCardProps) {
+export function StoryEndingCard({
+  ending,
+  finalStats,
+  themeName,
+  protagonistName,
+  imageLoading,
+  yiHits,
+  jiHits,
+  matchedYiKeywords,
+  matchedJiKeywords,
+}: StoryEndingCardProps) {
   return (
     <div
       id="printable-ending-card"
@@ -42,12 +57,38 @@ export function StoryEndingCard({ ending, finalStats, themeName, protagonistName
             ENDING · 御 印
           </span>
         </div>
+        {ending.endingType && (
+          <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#d4222b] mb-1.5 shadow-xs">
+            <span
+              className="text-[11px] font-black text-[#fdfaf2] tracking-[0.3em] font-serif"
+              style={{ fontFamily: "'STKaiti', 'Kaiti', serif" }}
+            >
+              ★ {ending.endingType} ★
+            </span>
+          </div>
+        )}
         <h1
           className="text-2xl font-black text-[#d4222b] tracking-widest font-serif drop-shadow-xs leading-tight"
           style={{ fontFamily: "'STKaiti', 'Kaiti', 'STSong', serif" }}
         >
           {ending.title}
         </h1>
+        {ending.titleAward && (
+          <p
+            className="text-xs text-[#8a7243] mt-1.5 font-serif tracking-widest font-bold"
+            style={{ fontFamily: "'STKaiti', 'Kaiti', serif" }}
+          >
+            授 封 · {ending.titleAward}
+          </p>
+        )}
+        {protagonistName && (
+          <p
+            className="text-xs text-[#2a2830] mt-1.5 font-serif tracking-wider font-bold"
+            style={{ fontFamily: "'STKaiti', 'Kaiti', serif" }}
+          >
+            主 角 · {protagonistName}
+          </p>
+        )}
         <p
           className="text-[10px] text-[#85744f] mt-1.5 font-serif tracking-wider"
           style={{ fontFamily: "'STKaiti', 'Kaiti', serif" }}
@@ -92,6 +133,54 @@ export function StoryEndingCard({ ending, finalStats, themeName, protagonistName
           {ending.narration}
         </p>
       </section>
+
+      {/* 宜忌命中总结 */}
+      {(yiHits !== undefined || jiHits !== undefined) && (
+        <section className="mb-3 grid grid-cols-2 gap-2">
+          <div className="bg-[#f0c869]/10 border border-[#f0c869]/60 rounded-xl px-3 py-2">
+            <div className="flex items-center justify-between mb-1">
+              <span
+                className="text-[10px] font-bold text-[#8a7243] tracking-widest font-serif"
+                style={{ fontFamily: "'STKaiti', 'Kaiti', serif" }}
+              >
+                今 日 宜
+              </span>
+              <span className="text-base font-black text-[#d4222b] font-mono">
+                {yiHits ?? 0}
+              </span>
+            </div>
+            <p
+              className="text-[10px] text-[#85744f] font-serif leading-relaxed"
+              style={{ fontFamily: "'STKaiti', 'Kaiti', serif" }}
+            >
+              {matchedYiKeywords && matchedYiKeywords.length > 0
+                ? matchedYiKeywords.join('、')
+                : '今日未命中'}
+            </p>
+          </div>
+          <div className="bg-[#d4222b]/10 border border-[#d4222b]/60 rounded-xl px-3 py-2">
+            <div className="flex items-center justify-between mb-1">
+              <span
+                className="text-[10px] font-bold text-[#8a3a3a] tracking-widest font-serif"
+                style={{ fontFamily: "'STKaiti', 'Kaiti', serif" }}
+              >
+                今 日 忌
+              </span>
+              <span className="text-base font-black text-[#d4222b] font-mono">
+                {jiHits ?? 0}
+              </span>
+            </div>
+            <p
+              className="text-[10px] text-[#85744f] font-serif leading-relaxed"
+              style={{ fontFamily: "'STKaiti', 'Kaiti', serif" }}
+            >
+              {matchedJiKeywords && matchedJiKeywords.length > 0
+                ? matchedJiKeywords.join('、')
+                : '今日未触犯'}
+            </p>
+          </div>
+        </section>
+      )}
 
       {/* 数值面板 */}
       <section className="mb-3 bg-[#fdfaf2] border border-[#dfd9bf] rounded-2xl p-3">

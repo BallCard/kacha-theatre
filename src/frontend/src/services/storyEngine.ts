@@ -1,8 +1,15 @@
 /**
  * 剧情引擎：核心负责生成「整棵剧情树」和「每帧连环画」。
  *
+ * Part 2 设计（见 docs/superpowers/specs/2026-05-23-摸鱼御史-part2-剧情游戏.md）：
+ *   - 1 开篇 + 5 节点（辰/午前/未/申/酉）+ 6 结局
+ *   - 每节点 3 选项分别对应「顺应天命 / 逆天而行 / 中立观望」
+ *   - 每节点至少 1 个选项 yijiMatch='yi'、至少 1 个 yijiMatch='ji'，关键词必须来自 Part 1 奏折
+ *   - 结局由前端规则函数 determineEnding(yi_hits, ji_hits, level_tier) 判定，不依赖 LLM
+ *
  * 流程：
- *   generateStoryArc(ctx)   → 1 次 LLM 调用，出 intro + 3 节点 + 2 结局的完整 JSON
+ *   generateStoryArc(ctx)   → 1 次 LLM 调用，出 intro + 5 节点 + 6 结局的完整 JSON
+ *   determineEnding(ctx, hits) → 纯前端规则，返回 EndingType key
  *   generatePanelImage(...) → 按需出图（gpt-image-2 走参考图保留真人特征）
  *   generateEndingImage(...) → 同上，但是 keepsake 风格
  */
@@ -13,6 +20,10 @@ import {
   PanelSpec,
   EndingSpec,
   StoryNode,
+  StoryChoice,
+  ChoiceStrategy,
+  YijiMatch,
+  EndingType,
 } from '../types';
 import { chatCompletion, imageEdit, ImageEditResult } from './openaiClient';
 
@@ -20,59 +31,82 @@ import { chatCompletion, imageEdit, ImageEditResult } from './openaiClient';
 // 1. 剧情树生成
 // ============================================================
 
-const STORY_SYSTEM_PROMPT = `你是一位连环画互动剧情编剧。
-你会拿到一份"世界观设定 + 主角设定"，需要输出一个完整剧情树，要素包括：
+const TIME_SLOTS = ['辰时', '午前', '未时', '申时', '酉时'] as const;
+const STRATEGY_ORDER: ChoiceStrategy[] = ['顺应天命', '逆天而行', '中立观望'];
+const ALL_ENDING_TYPES: EndingType[] = [
+  '天降祥瑞',
+  '御史降罚',
+  '逆天改命',
+  '贵人相助',
+  '天命应验',
+  '哭笑不得',
+];
 
-- 1 个开篇分镜（intro）：把场景"漫画化"地铺开，建立世界观和角色身份
-- 3 个互动节点（nodes）：每个节点是一帧分镜 + 3 个选项，选项会改变数值和走向
-- 至少 2 个结局（endings）：根据数值或选择路径分流
+const STORY_SYSTEM_PROMPT = `你是「摸鱼御史」剧情编剧。请把一张办公室照片演成 5 幕互动剧。
 
-输出格式严格遵循以下 JSON Schema（不要任何解释文字，只返回 JSON）：
+【调性】
+- 半文半白御史腔为主，可塞「周报 / KPI / 开会 / 划水 / 加班 / 钉钉」等现代办公词制造反差
+- 嘲讽但不刻薄，不评价相貌身份，只描述行为与桌面物件
+- 不识别真实身份，用「卿」「该员」「尔」或玩家提供的姓名作代称
 
+【铁律】
+1. 严格 5 节点，时段顺序固定为 辰时 / 午前 / 未时 / 申时 / 酉时
+2. 每节点 3 选项，顺序固定为 A=顺应天命 / B=逆天而行 / C=中立观望
+3. 每节点至少 1 个选项 yijiMatch='yi'（命中今日宜），至少 1 个 yijiMatch='ji'（命中今日忌），剩下 1 个 yijiMatch='neutral'
+4. 选项的 yijiKeyword 必须从用户提供的「今日宜」「今日忌」原文里挑，不要造新词
+5. 至少有 1 个选项的描述里嵌入用户照片中的 desk_objects 元素，让用户感到"这就是我"
+6. 输出 6 个结局，endings 的 key 必须正好是 ${ALL_ENDING_TYPES.map((e) => `"${e}"`).join(' / ')}
+7. 严格 JSON，不要 markdown 包裹
+
+【JSON Schema】
 {
   "introPanel": {
-    "narration": "string, 30-80字, 旁白",
-    "characterLine": "string?, 20-40字, 主角内心独白或对白（可选）",
-    "imagePrompt": "string, 详细英文场景 prompt 用于图生图，必须包含具体动作/光线/构图"
+    "narration": "30-80字 旁白",
+    "characterLine": "可选 20-40字 主角内心独白",
+    "imagePrompt": "英文场景 prompt，必含 preserve facial features of the reference person"
   },
   "nodes": [
     {
       "id": "node-0",
-      "narration": "string, 30-80字",
-      "characterLine": "string?, 20-40字",
-      "imagePrompt": "string, 详细英文场景 prompt",
+      "sceneTitle": "8-12字，带时辰前缀，如「辰时·御史临朝」",
+      "timeSlot": "辰时|午前|未时|申时|酉时",
+      "narration": "80-150字 旁白，至少 1 个 desk_objects 出现",
+      "characterLine": "可选 20-40字 对白",
+      "imagePrompt": "英文场景 prompt",
       "choices": [
         {
-          "label": "string, 8-16字, 选项文案",
-          "statDelta": { "数值名": +/- 数字, ... },
-          "nextNodeId": "node-1 | node-2 | ending:good | ending:bad | ending:weird"
+          "label": "12-20字 选项文案",
+          "strategy": "顺应天命|逆天而行|中立观望",
+          "yijiMatch": "yi|ji|neutral",
+          "yijiKeyword": "来自今日宜/忌列表的关键词，neutral 时为 null",
+          "statDelta": { "数值名": +/- 数字 },
+          "nextNodeId": "node-1|node-2|node-3|node-4|ending:<type>"
         }
       ]
     }
   ],
   "endings": {
-    "good": {
-      "key": "good",
-      "title": "string, 6-12字, 结局标题，最好带主题风格印章感",
-      "narration": "string, 50-120字, 结局长文案",
-      "imagePrompt": "string, 详细英文场景 prompt，keepsake poster style"
-    },
-    "bad": { ... }
+    "天降祥瑞": { "title": "...", "narration": "120-180字", "imagePrompt": "...", "titleAward": "4-6字封号" },
+    "御史降罚": { ... },
+    "逆天改命": { ... },
+    "贵人相助": { ... },
+    "天命应验": { ... },
+    "哭笑不得": { ... }
   }
 }
 
-硬性要求：
-1. nodes 长度必须是 3
-2. 每个 node 的 choices 长度必须是 3
-3. endings 至少 2 个，key 任选（good/bad/weird/perfect/disaster…）
-4. node-2（最后一个互动节点）的选项 nextNodeId 必须指向 ending:xxx
-5. 文案语言风格必须严格匹配输入的 languageStyle
-6. 数值变化范围合理（±3 到 ±20 之间）
-7. 旁白和对白要有戏剧张力，避免说教
-8. imagePrompt 用英文，必须包含「preserve facial features of the reference person」
-9. 如果输入提供了「主角姓名」，旁白和对白中至少自然出现 2 次该姓名（不要生硬地把名字塞到每句话开头）`;
+【硬性要求】
+- nodes 长度必须是 5
+- 每个 node 的 choices 长度必须是 3，按 顺应天命 / 逆天而行 / 中立观望 顺序
+- node-4（酉时·最后一个互动节点）的 choices 的 nextNodeId 必须都是 ending:xxx
+- 中间节点（0-3）的 nextNodeId 指向下一个 node-N
+- endings 必须正好 6 个，key 必须是 ${ALL_ENDING_TYPES.join(' / ')}
+- imagePrompt 一律英文，必须含「preserve facial features of the reference person」
+- 如玩家提供了姓名，旁白和对白中至少自然出现 2 次该姓名`;
 
 function buildUserPrompt(ctx: StoryContext): string {
+  const yi = ctx.seedYi && ctx.seedYi.length ? ctx.seedYi.join('、') : '（未提供）';
+  const ji = ctx.seedJi && ctx.seedJi.length ? ctx.seedJi.join('、') : '（未提供）';
   return `世界观设定：
 - 主题名：${ctx.theme.name}
 - 视觉风格：${ctx.theme.visualStyle}
@@ -82,21 +116,28 @@ function buildUserPrompt(ctx: StoryContext): string {
 - 姓名：${ctx.protagonist.name || '（玩家未填，旁白请用"该员/卿/汝"等代称，不要瞎编名字）'}
 - 身份：${ctx.protagonist.role}
 - 外观锚点：${ctx.protagonist.appearanceHint}
+- 段位：${ctx.levelTier ?? '（未指定）'}（摸鱼指数 ${ctx.moyuScore ?? '-'}）
 
 场景：
 - 当前场景：${ctx.scene.description}
-- 关键道具：${ctx.scene.keyObjects.join('、') || '（无）'}
+- 桌面物件 desk_objects：${ctx.scene.keyObjects.join('、') || '（无）'}
+
+今日奏折：
+- 宜：${yi}
+- 忌：${ji}
 
 初始标签：${ctx.tags.join('、')}
 初始数值：${JSON.stringify(ctx.initialStats, null, 2)}
 
-请基于以上设定，生成完整剧情树 JSON。剧情节奏建议：
-- 开篇铺设世界观，引出"今日有事发生"
-- 节点 0：第一个抉择（小事，定基调）
-- 节点 1：转折（出现意外或冲突）
-- 节点 2：高潮抉择（指向结局分流）
+请基于以上设定，生成完整 5 幕剧情树 JSON。剧情节奏建议：
+- 开篇 intro：主角刚到工位，铺垫世界观
+- 辰时（node-0）：到岗，第一个抉择（小事，定基调）
+- 午前（node-1）：突发事件（领导 / 群消息 / 任务）
+- 未时（node-2）：困倦高峰，摸鱼诱惑最大
+- 申时（node-3）：危机降临
+- 酉时（node-4）：终局抉择，3 选项分别指向不同结局类型
 
-记住：结局要有反转或情绪点，不要平庸收尾。`;
+记住：选项的 yijiKeyword **必须从上方"宜/忌"列表里挑**，不要造新词；neutral 时该字段为 null。`;
 }
 
 export async function generateStoryArc(ctx: StoryContext): Promise<StoryArc> {
@@ -107,7 +148,7 @@ export async function generateStoryArc(ctx: StoryContext): Promise<StoryArc> {
     ],
     jsonMode: true,
     temperature: 0.95,
-    maxTokens: 2500,
+    maxTokens: 4500,
   });
 
   let parsed: any;
@@ -117,12 +158,20 @@ export async function generateStoryArc(ctx: StoryContext): Promise<StoryArc> {
     throw new Error(`剧情 JSON 解析失败：${(err as Error).message}\n原文：${raw.slice(0, 200)}…`);
   }
 
-  // 软校验 + 自愈
-  const arc = normalizeArc(parsed);
+  const arc = normalizeArc(parsed, ctx);
   return arc;
 }
 
-function normalizeArc(raw: any): StoryArc {
+function pickYijiFiller(prev: YijiMatch[]): YijiMatch {
+  // 兜底补 yijiMatch：保证 yi + ji 至少各 1 个，剩下补 neutral
+  const hasYi = prev.includes('yi');
+  const hasJi = prev.includes('ji');
+  if (!hasYi) return 'yi';
+  if (!hasJi) return 'ji';
+  return 'neutral';
+}
+
+function normalizeArc(raw: any, ctx: StoryContext): StoryArc {
   if (!raw?.introPanel?.imagePrompt) {
     throw new Error('剧情 JSON 缺 introPanel');
   }
@@ -133,24 +182,80 @@ function normalizeArc(raw: any): StoryArc {
     throw new Error('剧情 JSON 缺 endings');
   }
 
-  // 强制 nodes id 规范化为 node-0/1/2，避免 LLM 乱起名
-  const nodes: StoryNode[] = raw.nodes.slice(0, 3).map((n: any, i: number) => {
-    const fallbackNext = i < 2 ? `node-${i + 1}` : 'ending:good';
+  // 强制 nodes id 规范化为 node-0..4，5 节点
+  const sliced = raw.nodes.slice(0, 5);
+  const nodes: StoryNode[] = sliced.map((n: any, i: number) => {
+    const isLast = i === 4 || i === sliced.length - 1;
+    const fallbackNext = isLast ? `ending:${ALL_ENDING_TYPES[i % ALL_ENDING_TYPES.length]}` : `node-${i + 1}`;
     const rawChoices: any[] = Array.isArray(n.choices) ? n.choices : [];
-    let choices = rawChoices.slice(0, 3).map((c: any) => ({
-      label: String(c.label ?? '继续'),
-      statDelta: typeof c.statDelta === 'object' && c.statDelta ? c.statDelta : {},
-      nextNodeId: String(c.nextNodeId ?? fallbackNext),
-    }));
-    // 不足 3 个就补兜底选项，保证 UI 永远 3 选 1
-    const fillers = [
-      { label: '继续观望', statDelta: {}, nextNodeId: fallbackNext },
-      { label: '另作他想', statDelta: {}, nextNodeId: fallbackNext },
-      { label: '听天由命', statDelta: {}, nextNodeId: fallbackNext },
-    ];
-    while (choices.length < 3) choices.push(fillers[choices.length]);
+
+    let choices: StoryChoice[] = rawChoices.slice(0, 3).map((c: any, ci: number): StoryChoice => {
+      const strategy = (STRATEGY_ORDER.includes(c.strategy) ? c.strategy : STRATEGY_ORDER[ci % 3]) as ChoiceStrategy;
+      const yijiMatch: YijiMatch =
+        c.yijiMatch === 'yi' || c.yijiMatch === 'ji' || c.yijiMatch === 'neutral'
+          ? c.yijiMatch
+          : strategy === '顺应天命'
+          ? 'yi'
+          : strategy === '逆天而行'
+          ? 'ji'
+          : 'neutral';
+      return {
+        label: String(c.label ?? '继续'),
+        statDelta: typeof c.statDelta === 'object' && c.statDelta ? c.statDelta : {},
+        nextNodeId: String(c.nextNodeId ?? fallbackNext),
+        strategy,
+        yijiMatch,
+        yijiKeyword:
+          yijiMatch === 'neutral'
+            ? null
+            : typeof c.yijiKeyword === 'string'
+            ? c.yijiKeyword
+            : pickFirstSeed(ctx, yijiMatch) ?? null,
+      };
+    });
+
+    // 不足 3 个就补足
+    while (choices.length < 3) {
+      const ci = choices.length;
+      const strategy = STRATEGY_ORDER[ci];
+      const yijiMatch = pickYijiFiller(choices.map((c) => c.yijiMatch ?? 'neutral'));
+      choices.push({
+        label: ['继续观望', '听天由命', '另作他想'][ci],
+        statDelta: {},
+        nextNodeId: fallbackNext,
+        strategy,
+        yijiMatch,
+        yijiKeyword: yijiMatch === 'neutral' ? null : pickFirstSeed(ctx, yijiMatch) ?? null,
+      });
+    }
+
+    // 强约束：yi 至少 1，ji 至少 1
+    const hasYi = choices.some((c) => c.yijiMatch === 'yi');
+    const hasJi = choices.some((c) => c.yijiMatch === 'ji');
+    if (!hasYi) {
+      // 找一个 neutral 改成 yi
+      const idx = choices.findIndex((c) => c.yijiMatch === 'neutral');
+      const target = idx >= 0 ? idx : 0;
+      choices[target] = {
+        ...choices[target],
+        yijiMatch: 'yi',
+        yijiKeyword: pickFirstSeed(ctx, 'yi') ?? choices[target].yijiKeyword ?? null,
+      };
+    }
+    if (!hasJi) {
+      const idx = choices.findIndex((c) => c.yijiMatch === 'neutral');
+      const target = idx >= 0 ? idx : choices.length - 1;
+      choices[target] = {
+        ...choices[target],
+        yijiMatch: 'ji',
+        yijiKeyword: pickFirstSeed(ctx, 'ji') ?? choices[target].yijiKeyword ?? null,
+      };
+    }
+
     return {
       id: `node-${i}`,
+      sceneTitle: String(n.sceneTitle ?? `${TIME_SLOTS[i] ?? ''}·第${i + 1}幕`),
+      timeSlot: (TIME_SLOTS as readonly string[]).includes(n.timeSlot) ? n.timeSlot : TIME_SLOTS[i],
       narration: String(n.narration ?? ''),
       characterLine: n.characterLine ? String(n.characterLine) : undefined,
       imagePrompt: String(n.imagePrompt ?? ''),
@@ -158,22 +263,68 @@ function normalizeArc(raw: any): StoryArc {
     };
   });
 
-  // 强制最后一个节点的选项指向 ending
+  // 补足到 5 节点（如果 LLM 少出）
+  while (nodes.length < 5) {
+    const i = nodes.length;
+    const isLast = i === 4;
+    const fallbackNext = isLast ? `ending:${ALL_ENDING_TYPES[0]}` : `node-${i + 1}`;
+    nodes.push({
+      id: `node-${i}`,
+      sceneTitle: `${TIME_SLOTS[i]}·留白幕`,
+      timeSlot: TIME_SLOTS[i],
+      narration: `（${TIME_SLOTS[i]}·此幕暂留白）`,
+      imagePrompt: 'placeholder office scene, preserve facial features of the reference person',
+      choices: STRATEGY_ORDER.map((s, ci): StoryChoice => ({
+        label: `（${s}）继续`,
+        statDelta: {},
+        nextNodeId: fallbackNext,
+        strategy: s,
+        yijiMatch: ci === 0 ? 'yi' : ci === 1 ? 'ji' : 'neutral',
+        yijiKeyword:
+          ci === 0 ? pickFirstSeed(ctx, 'yi') ?? null : ci === 1 ? pickFirstSeed(ctx, 'ji') ?? null : null,
+      })),
+    });
+  }
+
+  // 最后一个节点 (node-4) 的选项必须指向 ending
   const lastNode = nodes[nodes.length - 1];
-  lastNode.choices = lastNode.choices.map((c) =>
-    c.nextNodeId.startsWith('ending:') ? c : { ...c, nextNodeId: 'ending:good' }
+  lastNode.choices = lastNode.choices.map((c, ci) =>
+    c.nextNodeId.startsWith('ending:')
+      ? c
+      : { ...c, nextNodeId: `ending:${ALL_ENDING_TYPES[ci % ALL_ENDING_TYPES.length]}` }
   );
 
+  // endings：补足 6 种，缺的用 LLM 出过的任意结局兜底
   const endings: Record<string, EndingSpec> = {};
   for (const key of Object.keys(raw.endings)) {
     const e = raw.endings[key];
-    if (!e?.imagePrompt) continue;
+    if (!e) continue;
+    const endingType = (ALL_ENDING_TYPES as readonly string[]).includes(key)
+      ? (key as EndingType)
+      : undefined;
     endings[key] = {
       key,
-      title: String(e.title ?? '神秘结局'),
+      title: String(e.title ?? key),
       narration: String(e.narration ?? ''),
-      imagePrompt: String(e.imagePrompt),
+      imagePrompt: String(e.imagePrompt ?? 'imperial keepsake poster, preserve facial features of the reference person'),
+      endingType,
+      titleAward: typeof e.titleAward === 'string' ? e.titleAward : undefined,
     };
+  }
+  // 缺的 ending 用第一个兜底
+  const firstExisting = Object.values(endings)[0];
+  for (const t of ALL_ENDING_TYPES) {
+    if (!endings[t]) {
+      endings[t] = firstExisting
+        ? { ...firstExisting, key: t, endingType: t, title: `${t}·御史秘录` }
+        : {
+            key: t,
+            title: `${t}·御史秘录`,
+            narration: `（${t}·此结局留白）`,
+            imagePrompt: 'imperial keepsake poster, preserve facial features of the reference person',
+            endingType: t,
+          };
+    }
   }
 
   return {
@@ -185,6 +336,41 @@ function normalizeArc(raw: any): StoryArc {
     nodes,
     endings,
   };
+}
+
+function pickFirstSeed(ctx: StoryContext, kind: 'yi' | 'ji'): string | null {
+  const list = kind === 'yi' ? ctx.seedYi : ctx.seedJi;
+  return list && list.length ? list[0] : null;
+}
+
+// ============================================================
+// 1.5 结局判定规则（前端纯本地，不依赖 LLM）
+// 见 §4.2 of part2-剧情游戏.md
+// ============================================================
+export function determineEnding(
+  ctx: StoryContext,
+  yiHits: number,
+  jiHits: number
+): EndingType {
+  const tier = ctx.levelTier;
+
+  // 优先级 1: level_tier == 假寐天尊 且 yi_hits >= 3
+  if (tier === '假寐天尊' && yiHits >= 3) return '天降祥瑞';
+
+  // 优先级 2: ji_hits >= 3
+  if (jiHits >= 3) return '御史降罚';
+
+  // 优先级 3: 打工新丁/划水学徒 且 yi_hits >= 4
+  if ((tier === '打工新丁' || tier === '划水学徒') && yiHits >= 4) return '逆天改命';
+
+  // 优先级 4: 打工新丁/划水学徒 且 ji_hits >= 2 但未触发降罚
+  if ((tier === '打工新丁' || tier === '划水学徒') && jiHits >= 2) return '贵人相助';
+
+  // 优先级 5: yi_hits >= 3 且 ji_hits <= 1
+  if (yiHits >= 3 && jiHits <= 1) return '天命应验';
+
+  // 兜底
+  return '哭笑不得';
 }
 
 // ============================================================

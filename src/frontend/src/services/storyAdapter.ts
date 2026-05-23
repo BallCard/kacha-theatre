@@ -44,6 +44,11 @@ export function adaptMoyuYushi(
       '警觉度': Math.max(5, 100 - result.moyu_score - Math.floor(Math.random() * 20)),
       '玄学值': 50 + Math.floor(Math.random() * 30),
     },
+    // Part 2 增量：把奏折的宜忌 + 段位作为剧情种子
+    seedYi: result.report.yi,
+    seedJi: result.report.ji,
+    levelTier: result.level_tier,
+    moyuScore: result.moyu_score,
   };
 }
 

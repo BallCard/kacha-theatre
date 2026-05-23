@@ -1,4 +1,4 @@
-import { StoryNode, PanelSpec, StoryChoice } from '../types';
+import { StoryNode, PanelSpec, StoryChoice, ChoiceStrategy, YijiMatch } from '../types';
 import { Loader2 } from 'lucide-react';
 
 interface StoryPanelProps {
@@ -12,11 +12,26 @@ interface StoryPanelProps {
   imageLoading: boolean;
   /** 节点进度提示，例如 "1 / 3" */
   progressLabel?: string;
+  /** Part 2 宜忌命中（用于底部计数） */
+  yiHits?: number;
+  jiHits?: number;
   /** 选项点击 */
   onChoose?: (choice: StoryChoice, index: number) => void;
   /** intro 页的"开始"按钮 */
   onStart?: () => void;
 }
+
+const STRATEGY_BADGE: Record<ChoiceStrategy, { label: string; cls: string }> = {
+  '顺应天命': { label: '顺', cls: 'bg-emerald-900/60 text-emerald-300 border-emerald-700/60' },
+  '逆天而行': { label: '逆', cls: 'bg-rose-900/60 text-rose-300 border-rose-700/60' },
+  '中立观望': { label: '中', cls: 'bg-amber-900/60 text-amber-300 border-amber-700/60' },
+};
+
+const YIJI_BADGE: Record<YijiMatch, { label: string; cls: string }> = {
+  yi: { label: '宜', cls: 'bg-[#f0c869]/15 text-[#f0c869] border-[#f0c869]/60' },
+  ji: { label: '忌', cls: 'bg-[#d4222b]/20 text-[#ff8a8a] border-[#d4222b]/70' },
+  neutral: { label: '·', cls: 'bg-white/5 text-[#b39e70] border-[#3a2f24]' },
+};
 
 export function StoryPanel({
   panel,
@@ -24,11 +39,14 @@ export function StoryPanel({
   isNode,
   imageLoading,
   progressLabel,
+  yiHits,
+  jiHits,
   onChoose,
   onStart,
 }: StoryPanelProps) {
   const node = isNode ? (panel as StoryNode) : null;
   const hasImage = !!panel.imageUrl && !imageLoading;
+  const sceneTitle = node?.sceneTitle;
 
   return (
     <div className="flex flex-col w-full flex-1 min-h-0 bg-[#1d1916] overflow-hidden">
@@ -57,11 +75,23 @@ export function StoryPanel({
           <PanelLoadingState />
         )}
 
+        {/* 场景标题（仅 node 有） */}
+        {sceneTitle && (
+          <div className="absolute top-3 left-3 z-20 bg-[#d4222b] border border-[#f0c869] rounded-r-full rounded-tl-full px-3 py-1">
+            <span
+              className="text-[11px] font-bold text-[#fdfaf2] tracking-widest font-serif"
+              style={{ fontFamily: "'STKaiti', 'Kaiti', serif" }}
+            >
+              {sceneTitle}
+            </span>
+          </div>
+        )}
+
         {/* 顶部旁白带 */}
         {panel.narration && (
-          <div className="absolute top-0 left-0 right-0 bg-gradient-to-b from-black/85 via-black/60 to-transparent px-5 pt-5 pb-10 z-20">
+          <div className="absolute top-0 left-0 right-0 bg-gradient-to-b from-black/85 via-black/60 to-transparent px-5 pt-5 pb-10 z-10">
             <p
-              className="text-[#fdfaf2] text-[13px] leading-relaxed font-serif drop-shadow-md"
+              className={`text-[#fdfaf2] text-[13px] leading-relaxed font-serif drop-shadow-md ${sceneTitle ? 'mt-7' : ''}`}
               style={{ fontFamily: "'STKaiti', 'Kaiti', serif", textShadow: '0 2px 6px rgba(0,0,0,0.85)' }}
             >
               {panel.narration}
@@ -84,39 +114,62 @@ export function StoryPanel({
         )}
       </div>
 
-      {/* ===== 3. 数值条 ===== */}
-      <div className="shrink-0 bg-[#0e0c0a] border-t border-[#3a2f24] px-4 py-2 flex items-center justify-around gap-2">
-        {Object.entries(stats).map(([name, value]) => (
-          <div key={name} className="flex flex-col items-center min-w-0 flex-1">
-            <span
-              className="text-[9px] text-[#b39e70] font-serif tracking-wide truncate"
-              style={{ fontFamily: "'STKaiti', 'Kaiti', serif" }}
-            >
-              {name}
-            </span>
-            <span className="text-sm font-bold text-[#f0c869] font-mono mt-0.5">{value}</span>
+      {/* ===== 3. 宜忌命中条 + 数值条 ===== */}
+      <div className="shrink-0 bg-[#0e0c0a] border-t border-[#3a2f24] px-3 py-1.5 flex items-center justify-between gap-2">
+        {/* 左：宜忌命中 */}
+        {(yiHits !== undefined || jiHits !== undefined) && (
+          <div className="flex items-center gap-2 shrink-0">
+            <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#f0c869]/15 border border-[#f0c869]/60">
+              <span
+                className="text-[10px] font-bold text-[#f0c869] font-serif"
+                style={{ fontFamily: "'STKaiti', 'Kaiti', serif" }}
+              >
+                宜
+              </span>
+              <span className="text-xs font-bold text-[#f0c869] font-mono">{yiHits ?? 0}</span>
+            </div>
+            <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#d4222b]/20 border border-[#d4222b]/70">
+              <span
+                className="text-[10px] font-bold text-[#ff8a8a] font-serif"
+                style={{ fontFamily: "'STKaiti', 'Kaiti', serif" }}
+              >
+                忌
+              </span>
+              <span className="text-xs font-bold text-[#ff8a8a] font-mono">{jiHits ?? 0}</span>
+            </div>
           </div>
-        ))}
+        )}
+
+        {/* 右：原有数值（紧凑展示） */}
+        <div className="flex items-center gap-2 min-w-0 overflow-x-auto">
+          {Object.entries(stats).map(([name, value]) => (
+            <div key={name} className="flex items-center gap-1 shrink-0">
+              <span
+                className="text-[9px] text-[#b39e70] font-serif"
+                style={{ fontFamily: "'STKaiti', 'Kaiti', serif" }}
+              >
+                {name}
+              </span>
+              <span className="text-xs font-bold text-[#f0c869] font-mono">{value}</span>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* ===== 4. 选项 / 开始按钮 ===== */}
-      <div className="shrink-0 bg-[#1d1916] border-t border-[#3a2f24] p-4 flex flex-col gap-2.5">
+      <div className="shrink-0 bg-[#1d1916] border-t border-[#3a2f24] p-3 flex flex-col gap-2">
         {isNode && node && onChoose ? (
           <>
-            <div className="text-[10px] text-[#b39e70] font-serif text-center mb-1 tracking-widest">
+            <div className="text-[10px] text-[#b39e70] font-serif text-center mb-0.5 tracking-widest">
               · 御史请定夺 ·
             </div>
             {node.choices.map((c, i) => (
-              <button
+              <ChoiceButton
                 key={i}
-                onClick={() => onChoose(c, i)}
+                choice={c}
                 disabled={imageLoading}
-                className="w-full py-2.5 px-4 bg-gradient-to-r from-[#2a2520] to-[#3a2f24] border border-[#f0c869]/50 rounded-xl text-[#fdfaf2] text-sm font-bold tracking-wider text-left hover:border-[#f0c869] hover:from-[#3a2f24] active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-between font-serif"
-                style={{ fontFamily: "'STKaiti', 'Kaiti', serif" }}
-              >
-                <span>{c.label}</span>
-                <ChoiceStatPreview delta={c.statDelta} />
-              </button>
+                onClick={() => onChoose(c, i)}
+              />
             ))}
           </>
         ) : onStart ? (
@@ -142,22 +195,56 @@ export function StoryPanel({
   );
 }
 
-function ChoiceStatPreview({ delta }: { delta: Record<string, number> }) {
-  const entries = Object.entries(delta);
-  if (entries.length === 0) return null;
+function ChoiceButton({
+  choice,
+  disabled,
+  onClick,
+}: {
+  choice: StoryChoice;
+  disabled: boolean;
+  onClick: () => void;
+}) {
+  const strategy = choice.strategy;
+  const yiji = choice.yijiMatch;
+  const strategyBadge = strategy ? STRATEGY_BADGE[strategy] : null;
+  const yijiBadge = yiji ? YIJI_BADGE[yiji] : null;
+
   return (
-    <span className="flex items-center gap-1 text-[10px] font-mono shrink-0 ml-2">
-      {entries.slice(0, 2).map(([name, v]) => (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className="w-full px-3 py-2.5 bg-gradient-to-r from-[#2a2520] to-[#3a2f24] border border-[#f0c869]/50 rounded-xl text-[#fdfaf2] text-sm font-bold tracking-wide text-left hover:border-[#f0c869] hover:from-[#3a2f24] active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2 font-serif"
+      style={{ fontFamily: "'STKaiti', 'Kaiti', serif" }}
+    >
+      {/* 策略色标 */}
+      {strategyBadge && (
         <span
-          key={name}
-          className={`px-1.5 py-0.5 rounded ${v > 0 ? 'bg-emerald-900/50 text-emerald-300' : 'bg-rose-900/50 text-rose-300'}`}
+          className={`shrink-0 w-7 h-7 rounded-full border text-[12px] font-black flex items-center justify-center ${strategyBadge.cls}`}
+          title={strategy ?? ''}
         >
-          {name.slice(0, 2)}
-          {v > 0 ? '+' : ''}
-          {v}
+          {strategyBadge.label}
         </span>
-      ))}
-    </span>
+      )}
+      <span className="flex-1 min-w-0 leading-snug">{choice.label}</span>
+      {/* 宜忌标签 */}
+      {yijiBadge && (
+        <span
+          className={`shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md border text-[10px] font-mono ${yijiBadge.cls}`}
+        >
+          <span
+            className="font-serif font-black"
+            style={{ fontFamily: "'STKaiti', 'Kaiti', serif" }}
+          >
+            {yijiBadge.label}
+          </span>
+          {choice.yijiKeyword && (
+            <span className="font-serif" style={{ fontFamily: "'STKaiti', 'Kaiti', serif" }}>
+              {choice.yijiKeyword}
+            </span>
+          )}
+        </span>
+      )}
+    </button>
   );
 }
 
