@@ -1,5 +1,32 @@
 # 协作模式指南
 
+## 远程仓库
+
+- **GitHub**: https://github.com/BallCard/dy-creator-hackathon-2026
+- **默认分支**: `main`（稳定可演示版本）
+- **开发分支**: `dev`（日常集成分支）
+- **功能分支**: `feature/xxx`
+
+### 快速开始（团队成员）
+
+```bash
+# 克隆仓库
+git clone https://github.com/BallCard/dy-creator-hackathon-2026.git
+cd dy-creator-hackathon-2026
+
+# 切换到开发分支
+git checkout dev
+
+# 创建自己的功能分支
+git checkout -b feature/你的功能名
+
+# 开发完成后合并到 dev
+git checkout dev
+git pull origin dev
+git merge feature/你的功能名
+git push origin dev
+```
+
 ## 25小时极限开发协作策略
 
 ### 核心原则
