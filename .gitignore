@@ -36,3 +36,14 @@ logs/
 # 临时文件
 *.tmp
 .cache/
+
+# Playwright / 调试截图
+.playwright-cli/
+home.png
+edit.png
+preview.png
+export.png
+test-office.png
+
+# 原始素材压缩包（解压后已进 src/frontend）
+摸鱼御史.zip

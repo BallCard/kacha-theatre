@@ -51,7 +51,7 @@ if [ -f "src/frontend/package.json" ]; then
     FRONTEND_PID=$!
     cd ../..
     echo "✅ 前端服务已启动 (PID: $FRONTEND_PID)"
-    echo "   访问: http://localhost:5173"
+    echo "   访问: http://localhost:3000"
 fi
 
 echo ""
@@ -59,7 +59,7 @@ echo "🎉 开发环境启动完成！"
 echo ""
 echo "📋 服务列表："
 [ ! -z "$BACKEND_PID" ] && echo "  - 后端: http://localhost:8000 (PID: $BACKEND_PID)"
-[ ! -z "$FRONTEND_PID" ] && echo "  - 前端: http://localhost:5173 (PID: $FRONTEND_PID)"
+[ ! -z "$FRONTEND_PID" ] && echo "  - 前端: http://localhost:3000 (PID: $FRONTEND_PID)"
 echo ""
 echo "⏹️  停止服务: Ctrl+C 或运行 scripts/stop.sh"
 echo ""
