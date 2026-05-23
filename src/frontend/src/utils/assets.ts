@@ -252,6 +252,37 @@ export const STICKERS = [
         <text x="75" y="98" font-family="'STKaiti', 'Kaiti', serif" font-size="22" font-weight="900" fill="#ffffff" text-anchor="middle">封印</text>
       </svg>
     `
+  },
+  {
+    id: "bubble_zzz",
+    name: "ZZZ 神游气泡",
+    category: "special" as const,
+    svg: `
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 100" width="150" height="100">
+        <rect x="6" y="6" width="138" height="62" rx="30" fill="#ffffff" stroke="#1a1a1a" stroke-width="4" />
+        <path d="M 50 66 L 38 92 L 78 66 Z" fill="#ffffff" stroke="#1a1a1a" stroke-width="4" stroke-linejoin="round" />
+        <path d="M 50 64 L 39 89 L 76 64" fill="#ffffff" />
+        <text x="75" y="50" font-family="'Impact','Arial Black',sans-serif" font-weight="900" font-size="36" fill="#1a1a1a" text-anchor="middle" letter-spacing="3">ZZZ</text>
+      </svg>
+    `
+  },
+  {
+    id: "armband_taofu",
+    name: "在朕这逃不掉袖标",
+    category: "special" as const,
+    svg: `
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 70" width="220" height="70">
+        <defs>
+          <linearGradient id="armbandbg" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#e8d8b0"/>
+            <stop offset="100%" stop-color="#c9b58c"/>
+          </linearGradient>
+        </defs>
+        <rect x="4" y="4" width="212" height="62" rx="6" fill="url(#armbandbg)" stroke="#8a5a20" stroke-width="2" />
+        <rect x="10" y="10" width="200" height="50" rx="3" fill="none" stroke="#8a5a20" stroke-width="0.8" stroke-dasharray="3 2" />
+        <text x="110" y="46" font-family="'STKaiti','Kaiti',serif" font-size="28" font-weight="900" fill="#7a3318" text-anchor="middle" letter-spacing="2">在朕这逃不掉</text>
+      </svg>
+    `
   }
 ];
 
@@ -326,4 +357,73 @@ export function getTierSealUrl(key: string): string {
   const svg = TIER_SEALS[key];
   if (!svg) return "";
   return getRawSvgUrl(svg);
+}
+
+// === 大段位印章（参考海报右上角朱红双框印） ===
+// 每个 tier 名拆 2/剩余 两行，红色双框 + 留白纹理
+const BIG_TIER_STAMP_SPLITS: Record<string, [string, string]> = {
+  "打工新丁": ["打工", "新丁"],
+  "划水学徒": ["划水", "学徒"],
+  "摸鱼修士": ["摸鱼", "修士"],
+  "划水侍郎": ["划水", "侍郎"],
+  "摸鱼大将军": ["摸鱼", "大将军"],
+  "假寐天尊": ["假寐", "天尊"],
+};
+
+export function getBigTierStampSvg(tier: string): string {
+  const [top, bot] = BIG_TIER_STAMP_SPLITS[tier] || ["御史", "判官"];
+  const botSize = bot.length >= 3 ? 50 : 64;
+  // 朱红色统一，保留 weathered 感
+  return `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 220" width="220" height="220">
+      <defs>
+        <filter id="stampNoise" x="0" y="0" width="100%" height="100%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="3" />
+          <feColorMatrix values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.18 0" />
+          <feComposite in2="SourceGraphic" operator="in" />
+        </filter>
+      </defs>
+      <rect x="14" y="14" width="192" height="192" fill="none" stroke="#a31a20" stroke-width="9" />
+      <rect x="26" y="26" width="168" height="168" fill="none" stroke="#a31a20" stroke-width="2.5" stroke-dasharray="5 3" />
+      <rect x="32" y="32" width="156" height="156" fill="none" stroke="#a31a20" stroke-width="1" opacity="0.5" />
+      <text x="110" y="92" font-family="'STKaiti','Kaiti','STSong',serif" font-size="68" font-weight="900" fill="#a31a20" text-anchor="middle" letter-spacing="6">${top}</text>
+      <text x="110" y="172" font-family="'STKaiti','Kaiti','STSong',serif" font-size="${botSize}" font-weight="900" fill="#a31a20" text-anchor="middle" letter-spacing="4">${bot}</text>
+      <rect x="14" y="14" width="192" height="192" fill="#a31a20" filter="url(#stampNoise)" opacity="0.55" />
+    </svg>
+  `;
+}
+
+export function getBigTierStampUrl(tier: string): string {
+  return getRawSvgUrl(getBigTierStampSvg(tier));
+}
+
+// === 摸鱼+N 金牌票据（参考海报左下角丝带牌） ===
+export function getScoreTicketSvg(score: number): string {
+  const delta = Math.max(1, Math.min(99, score)); // 显示用，避免 0/负数
+  return `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 110" width="240" height="110">
+      <defs>
+        <linearGradient id="goldgrad${delta}" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#ffe892"/>
+          <stop offset="45%" stop-color="#f0c44a"/>
+          <stop offset="100%" stop-color="#a87a20"/>
+        </linearGradient>
+      </defs>
+      <!-- 票据外影 -->
+      <path d="M10,35 L208,35 L222,55 L222,75 L208,95 L10,95 L24,75 L24,55 Z" fill="rgba(0,0,0,0.18)" transform="translate(3,4)" />
+      <!-- 票据主体 -->
+      <path d="M10,30 L208,30 L222,50 L222,70 L208,90 L10,90 L24,70 L24,50 Z" fill="url(#goldgrad${delta})" stroke="#6a3a10" stroke-width="3" />
+      <!-- 内描边 -->
+      <path d="M18,38 L200,38 L210,55 L210,65 L200,82 L18,82 L32,65 L32,55 Z" fill="none" stroke="#fff8c8" stroke-width="1.2" stroke-dasharray="3 2" opacity="0.8" />
+      <!-- 两侧星 -->
+      <text x="36" y="68" font-family="serif" font-size="16" fill="#fff8c8" font-weight="900">✦</text>
+      <text x="195" y="68" font-family="serif" font-size="16" fill="#fff8c8" font-weight="900">✦</text>
+      <!-- 主文字 -->
+      <text x="120" y="72" font-family="'Impact','Arial Black','STHeiti',sans-serif" font-size="36" font-weight="900" fill="#5a2a08" text-anchor="middle" letter-spacing="2">摸鱼+${delta}</text>
+    </svg>
+  `;
+}
+
+export function getScoreTicketUrl(score: number): string {
+  return getRawSvgUrl(getScoreTicketSvg(score));
 }

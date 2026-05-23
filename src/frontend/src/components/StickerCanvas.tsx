@@ -206,6 +206,22 @@ export function StickerCanvas({
   const scaleX = canvasSize.width / LOGICAL_WIDTH;
   const scaleY = canvasSize.height / LOGICAL_HEIGHT;
 
+  // 背景图 cover 数学：按图原始比例缩放至填满逻辑画布，居中，溢出由 stage 画布天然裁剪
+  let bgDrawW = LOGICAL_WIDTH;
+  let bgDrawH = LOGICAL_HEIGHT;
+  let bgOffsetX = 0;
+  let bgOffsetY = 0;
+  if (bgImage && bgImage.width > 0 && bgImage.height > 0) {
+    const coverScale = Math.max(
+      LOGICAL_WIDTH / bgImage.width,
+      LOGICAL_HEIGHT / bgImage.height
+    );
+    bgDrawW = bgImage.width * coverScale;
+    bgDrawH = bgImage.height * coverScale;
+    bgOffsetX = (LOGICAL_WIDTH - bgDrawW) / 2;
+    bgOffsetY = (LOGICAL_HEIGHT - bgDrawH) / 2;
+  }
+
   return (
     <div id="canvas-container-root" className="w-full flex flex-col items-center">
       {/* Canvas bounding card */}
@@ -224,15 +240,15 @@ export function StickerCanvas({
           scaleY={scaleY}
         >
           <Layer>
-            {/* Background User Image Layer */}
+            {/* Background User Image Layer — cover 数学，不变形 */}
             {bgImage && (
               <KonvaImage
                 name="background-img"
                 image={bgImage}
-                x={0}
-                y={0}
-                width={LOGICAL_WIDTH}
-                height={LOGICAL_HEIGHT}
+                x={bgOffsetX}
+                y={bgOffsetY}
+                width={bgDrawW}
+                height={bgDrawH}
                 onTap={handleStageClick}
                 onClick={handleStageClick}
               />
