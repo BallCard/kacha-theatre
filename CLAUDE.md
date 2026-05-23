@@ -231,6 +231,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - 日常的 Git 提交（commit message 已足够）
 - 简单的 bug 修复（除非是关键 bug）
 
+## Git 协作
+
+- **远程仓库**: https://github.com/BallCard/dy-creator-hackathon-2026（私有仓库）
+- **主要分支**:
+  - `main` — 稳定可演示版本，队长负责合并
+  - `dev` — 日常集成开发分支
+  - `feature/*` — 个人功能分支
+- **分支约定**: feature/功能名 或 fix/问题描述
+- **提交格式**: `[模块] 简短描述`
+- **协作流程**: 个人在 feature 分支开发 → PR 或直接合并到 dev → 稳定后合入 main
+
 ## 参考资源
 
 - 选手手册：https://zju-ailab.feishu.cn/wiki/HfoPwgixviDWYCkE0NYcvdqZnAg
