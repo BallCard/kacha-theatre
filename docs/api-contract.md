@@ -1,423 +1,204 @@
 # API 接口契约
 
-> **重要**：这是前后端开发的"宪法"，所有接口必须先在这里定义，再开发。  
+> **重要**：前后端开发的"宪法"，所有接口必须先在这里定义，再开发。
 > **更新规则**：任何接口变更必须先更新本文档，并通知相关开发者。
+> **设计依据**：[设计文档 §3](./superpowers/specs/2026-05-23-摸鱼御史-design.md#§3-模块拆分)
 
 ## 基础信息
 
-**Base URL**：`http://localhost:8000/api` (开发环境)
+| 项 | 值 |
+|---|---|
+| Base URL（dev） | `http://localhost:3000` |
+| Base URL（prod） | `https://moyu.run`（或 Vercel 二级域名） |
+| 协议 | HTTPS |
+| 编码 | UTF-8 JSON |
 
-**通用响应格式**：
-```json
-{
-  "success": true,
-  "data": { ... },
-  "error": null
-}
-```
+## 接口清单（MVP v2）
 
-**错误响应格式**：
-```json
-{
-  "success": false,
-  "data": null,
-  "error": {
-    "code": "ERROR_CODE",
-    "message": "错误描述"
-  }
-}
-```
+### 1. POST /analyze — VLM 审阅图片（核心接口）
 
-## 接口列表
-
-### 1. 健康检查
-
-**端点**：`GET /health`
-
-**用途**：检查服务是否正常运行
-
-**请求**：无
-
-**响应**：
-```json
-{
-  "status": "ok",
-  "timestamp": "2026-05-23T10:00:00Z"
-}
-```
-
----
-
-## 核心功能接口（待定义）
-
-> **说明**：以下接口根据赛道选择和创意确定后填写
-
-### 赛道二：内容重构相关接口
-
-#### 2.1 视频上传与解析
-
-**端点**：`POST /video/upload`
-
-**用途**：上传视频并触发内容解析
+**用途**：把用户上传的图片送给 VLM 审阅，返回结构化"御史奏折"。
 
 **请求**：
-- Content-Type: `multipart/form-data`
-- Body:
-  ```
-  video: File (max 100MB)
-  options: JSON string (可选)
-  ```
 
-**响应**：
-```json
+```
+POST /analyze
+Content-Type: application/json
+
 {
-  "success": true,
-  "data": {
-    "taskId": "uuid-string",
-    "status": "processing",
-    "estimatedTime": 30
-  }
+  "image": "data:image/jpeg;base64,/9j/4AAQ...",
+  "provider": "doubao"   // 可选，默认 doubao；备选 "gpt4o"
 }
 ```
 
-**Mock数据**：`data/mock/video-upload.json`
+约束：
+- `image`：base64 编码，原图压缩到短边 ≤ 1024px 再 base64（前端 Capture 模块完成）
+- 单图 base64 大小 ≤ 2MB
 
----
+**成功响应**（HTTP 200）：
 
-#### 2.2 获取解析结果
-
-**端点**：`GET /video/result/:taskId`
-
-**用途**：获取视频解析结果
-
-**请求**：
-- Path: `taskId` (string)
-
-**响应**：
 ```json
 {
-  "success": true,
-  "data": {
-    "taskId": "uuid-string",
-    "status": "completed",
-    "result": {
-      "summary": "视频内容摘要",
-      "keyPoints": ["要点1", "要点2"],
-      "actionItems": ["可执行步骤1", "可执行步骤2"],
-      "timestamp": "2026-05-23T10:05:00Z"
-    }
-  }
-}
-```
-
-**状态值**：
-- `processing`: 处理中
-- `completed`: 完成
-- `failed`: 失败
-
-**Mock数据**：`data/mock/video-result.json`
-
----
-
-### 赛道四：视觉搜索相关接口
-
-#### 3.1 图片上传与识别
-
-**端点**：`POST /image/recognize`
-
-**用途**：上传图片并识别内容
-
-**请求**：
-- Content-Type: `multipart/form-data`
-- Body:
-  ```
-  image: File (max 10MB)
-  query: string (可选，用户的语音/文字查询)
-  ```
-
-**响应**：
-```json
-{
-  "success": true,
-  "data": {
-    "imageId": "uuid-string",
-    "recognition": {
-      "objects": ["物体1", "物体2"],
-      "scene": "场景描述",
-      "text": "识别到的文字",
-      "confidence": 0.95
-    }
-  }
-}
-```
-
-**Mock数据**：`data/mock/image-recognize.json`
-
----
-
-#### 3.2 视觉搜索
-
-**端点**：`POST /search/visual`
-
-**用途**：基于图片和查询进行搜索
-
-**请求**：
-```json
-{
-  "imageId": "uuid-string",
-  "query": "用户查询文本",
-  "filters": {
-    "category": "string",
-    "limit": 10
-  }
-}
-```
-
-**响应**：
-```json
-{
-  "success": true,
-  "data": {
-    "results": [
-      {
-        "id": "result-1",
-        "title": "结果标题",
-        "description": "结果描述",
-        "imageUrl": "https://...",
-        "relevance": 0.92
-      }
-    ],
-    "total": 50
-  }
-}
-```
-
-**Mock数据**：`data/mock/search-results.json`
-
----
-
-## AI 能力接口（内部）
-
-> **说明**：这些接口由 AI 模块提供给后端调用，不直接暴露给前端
-
-### 4.1 视频内容分析
-
-**函数签名**（Python）：
-```python
-def analyze_video(
-    video_path: str,
-    analysis_type: str = "full"
-) -> dict:
-    """
-    分析视频内容
-    
-    Args:
-        video_path: 视频文件路径
-        analysis_type: 分析类型 ("full", "summary", "keyframes")
-    
-    Returns:
-        {
-            "summary": str,
-            "keyPoints": list[str],
-            "actionItems": list[str],
-            "metadata": dict
-        }
-    """
-```
-
----
-
-### 4.2 图片识别
-
-**函数签名**（Python）：
-```python
-def recognize_image(
-    image_path: str,
-    include_text: bool = True
-) -> dict:
-    """
-    识别图片内容
-    
-    Args:
-        image_path: 图片文件路径
-        include_text: 是否包含OCR文字识别
-    
-    Returns:
-        {
-            "objects": list[str],
-            "scene": str,
-            "text": str,
-            "confidence": float
-        }
-    """
-```
-
----
-
-## 前端 API 调用封装
-
-**文件位置**：`src/frontend/src/services/api.js`
-
-**示例代码**：
-```javascript
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
-
-export const api = {
-  // 健康检查
-  health: async () => {
-    const response = await fetch(`${API_BASE_URL}/health`);
-    return response.json();
+  "pose_type": "趴桌型",
+  "desk_objects": ["半杯冷美式", "青轴键盘", "黑屏显示器"],
+  "moyu_score": 87,
+  "level_tier": "摸鱼大将军",
+  "title_candidates": ["划水大将军", "假寐侍郎", "摸鱼世家"],
+  "report": {
+    "paragraph": "紫微星偏移3度，案上美式已凉……",
+    "yi": ["摸鱼", "划水", "假装思考"],
+    "ji": ["开会", "改PPT", "接电话"]
   },
+  "face_boxes": [
+    { "x": 0.32, "y": 0.18, "w": 0.24, "h": 0.28 }
+  ]
+}
+```
 
-  // 视频上传
-  uploadVideo: async (file, options = {}) => {
-    const formData = new FormData();
-    formData.append('video', file);
-    if (options) {
-      formData.append('options', JSON.stringify(options));
-    }
+**字段约束**（后端用 ajv 校验，不通过即 retry 1 次或走兜底）：
 
-    const response = await fetch(`${API_BASE_URL}/video/upload`, {
-      method: 'POST',
-      body: formData,
-    });
-    return response.json();
-  },
+| 字段 | 类型 | 约束 |
+|---|---|---|
+| `pose_type` | enum | 7 种姿态之一（详见 [§6.3 schema](./superpowers/specs/2026-05-23-摸鱼御史-design.md)） |
+| `desk_objects` | string[] | 0-5 项 |
+| `moyu_score` | int | 0-100 |
+| `level_tier` | enum | 6 档之一，必须与 score 一致（不一致后端按 score 强制覆盖） |
+| `title_candidates` | string[] | 严格 3 项，每项 3-8 字 |
+| `report.paragraph` | string | 30-120 字 |
+| `report.yi` | string[] | 严格 3 项 |
+| `report.ji` | string[] | 严格 3 项 |
+| `face_boxes` | object[] | 归一化坐标 [0,1]，可空数组 |
 
-  // 获取视频结果
-  getVideoResult: async (taskId) => {
-    const response = await fetch(`${API_BASE_URL}/video/result/${taskId}`);
-    return response.json();
-  },
+**score → tier 映射规则**：
 
-  // 图片识别
-  recognizeImage: async (file, query = '') => {
-    const formData = new FormData();
-    formData.append('image', file);
-    if (query) {
-      formData.append('query', query);
-    }
+| score | tier |
+|---|---|
+| 0-20 | 打工新丁 |
+| 21-40 | 划水学徒 |
+| 41-60 | 摸鱼修士 |
+| 61-80 | 划水侍郎 |
+| 81-95 | 摸鱼大将军 |
+| 96-100 | 假寐天尊 |
 
-    const response = await fetch(`${API_BASE_URL}/image/recognize`, {
-      method: 'POST',
-      body: formData,
-    });
-    return response.json();
-  },
+**失败响应**（HTTP 200，body 仍返回兜底数据，前端不需要处理 5xx 业务错）：
+
+后端 VLM 全挂时返回 [§6.5 兜底模板](./superpowers/specs/2026-05-23-摸鱼御史-design.md#65-兜底模板vlm-全挂的最后一道)，前端无感知。
+
+**异常响应**（HTTP 5xx，仅在请求格式错时返回）：
+
+```json
+{
+  "error": "INVALID_IMAGE",
+  "message": "image base64 解析失败 / 图像超过 2MB"
+}
+```
+
+错误码清单：
+
+| code | HTTP | 含义 |
+|---|---|---|
+| `INVALID_IMAGE` | 400 | base64 解析失败或超尺寸 |
+| `MISSING_IMAGE` | 400 | 缺 image 字段 |
+| `INTERNAL_ERROR` | 500 | 后端意外错误（不应该出现，兜底模板应吸收 VLM 错误） |
+
+---
+
+### 2. GET /health — 健康检查
+
+**用途**：现场演示前确认后端服务在线。
+
+```
+GET /health → 200 { "status": "ok", "ts": 1716480000 }
+```
+
+---
+
+## 不做的接口（P1+ 路线）
+
+以下接口在 MVP 范围之外，移至 P1（如时间富余可加）或 P2：
+
+- `POST /board/submit` — 摸鱼榜上榜
+- `GET /board/today` — 当日榜单
+- `POST /board/like` — 点赞
+- `POST /board/report` — 举报下架
+- `POST /scroll/save` — 卷宗持久化（连载叙事专用）
+
+详见 [设计文档 §15 P1+ 路线](./superpowers/specs/2026-05-23-摸鱼御史-design.md#§15-p1-路线-mvp-跑通后再做-本设计文档不再展开)。
+
+---
+
+## 前端调用封装
+
+**文件位置**：`src/services/api.ts`（Gemini 产出工程后由前端 A 负责）
+
+```typescript
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3000';
+
+export type AnalyzeResult = {
+  pose_type: string;
+  desk_objects: string[];
+  moyu_score: number;
+  level_tier: '打工新丁' | '划水学徒' | '摸鱼修士' | '划水侍郎' | '摸鱼大将军' | '假寐天尊';
+  title_candidates: [string, string, string];
+  report: {
+    paragraph: string;
+    yi: [string, string, string];
+    ji: [string, string, string];
+  };
+  face_boxes: { x: number; y: number; w: number; h: number }[];
 };
-```
 
----
+export async function analyze(imageBase64: string): Promise<AnalyzeResult> {
+  // offline 模式走预录 JSON
+  if (new URLSearchParams(location.search).has('offline')) {
+    const { mockAnalyze } = await import('@/mock/analyzeResults');
+    return mockAnalyze();
+  }
 
-## Mock 数据开发
-
-### 前端 Mock Server 配置
-
-**工具**：使用 `json-server` 或 `MSW`
-
-**配置文件**：`src/frontend/mock-server.js`
-
-```javascript
-import { createServer } from 'miragejs';
-
-export function makeServer() {
-  return createServer({
-    routes() {
-      this.namespace = 'api';
-
-      this.get('/health', () => ({
-        status: 'ok',
-        timestamp: new Date().toISOString(),
-      }));
-
-      this.post('/video/upload', () => ({
-        success: true,
-        data: {
-          taskId: 'mock-task-123',
-          status: 'processing',
-          estimatedTime: 30,
-        },
-      }));
-
-      this.get('/video/result/:taskId', () => ({
-        success: true,
-        data: {
-          taskId: 'mock-task-123',
-          status: 'completed',
-          result: {
-            summary: '这是一个关于烹饪的视频，展示了如何制作意大利面。',
-            keyPoints: [
-              '准备食材：面条、番茄、大蒜、橄榄油',
-              '煮面条8-10分钟',
-              '制作番茄酱',
-              '混合并装盘',
-            ],
-            actionItems: [
-              '购买食材清单',
-              '准备厨具：锅、平底锅、漏勺',
-              '按步骤操作',
-            ],
-            timestamp: new Date().toISOString(),
-          },
-        },
-      }));
-    },
+  const r = await fetch(`${API_BASE}/analyze`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ image: imageBase64 }),
+    signal: AbortSignal.timeout(15000),
   });
+  if (!r.ok) throw new Error(`analyze failed: ${r.status}`);
+  return r.json();
 }
 ```
 
 ---
 
-## 接口开发检查清单
+## Mock 数据
 
-### 后端开发者
-- [ ] 接口实现符合本文档定义
-- [ ] 返回格式统一（success/data/error）
-- [ ] 错误处理完善（400/500等）
-- [ ] 添加请求日志
-- [ ] 测试接口可用性（Postman/curl）
-
-### 前端开发者
-- [ ] API调用封装在 `services/api.js`
-- [ ] 错误处理统一
-- [ ] Loading状态处理
-- [ ] 使用Mock数据开发（后端未就绪时）
-- [ ] 切换到真实API测试
-
-### AI集成者
-- [ ] 函数签名符合约定
-- [ ] 返回格式统一
-- [ ] 异常处理完善
-- [ ] 提供测试数据和示例
+开发期前端不依赖后端，URL 加 `?mock=1` 或 `?offline=1` 即可走前端 mock。Mock 数据规范见 [frontend-gemini-prompt.md 第四节](../design/frontend-gemini-prompt.md#四mock-数据用于-analyze-假返回)，3 条样本覆盖高/中/低分数段。
 
 ---
 
 ## 接口变更流程
 
-1. **提出变更**：在微信群/飞书文档说明变更原因
-2. **更新文档**：修改本文档对应接口定义
-3. **通知相关人**：@前端/@后端/@AI 确认变更
-4. **实施变更**：各自更新代码
-5. **联调测试**：确认变更生效
+1. **提出变更**：群里说明原因 + 影响面
+2. **更新本文档**：先文档后代码
+3. **通知**：@前端 / @后端 确认
+4. **实施 + 联调**
 
 ---
 
-## 常见问题
+## 检查清单
 
-**Q: 接口还没开发好，前端怎么办？**
-A: 使用 Mock Server，按照本文档定义的响应格式返回假数据。
+### 后端
+- [ ] /analyze 接口实现 + ajv schema 校验
+- [ ] VLM 调用封装（豆包 vision-pro 主，GPT-4o 备）
+- [ ] retry 1 次 + 兜底模板逻辑
+- [ ] score / tier 一致性强制覆盖
+- [ ] /health 接口
+- [ ] CORS 配置（允许前端域名）
 
-**Q: 接口需要临时调整怎么办？**
-A: 小调整（字段改名）直接改代码，大调整（结构变化）必须先更新本文档。
-
-**Q: 接口报错怎么排查？**
-A: 
-1. 检查请求格式是否符合文档
-2. 查看后端日志
-3. 使用 Postman 单独测试接口
-4. 找对应的开发者一起看
+### 前端
+- [ ] `src/services/api.ts` 封装
+- [ ] `?offline=1` 走 mock 的兜底逻辑
+- [ ] 15s 超时 + 重试 UI
+- [ ] TypeScript 类型与本文档对齐
 
 ---
 
-**最后更新**：2026-05-22（初始化）  
-**下次更新**：2026-05-23 10:30（赛道确定后）
+**最后更新**：2026-05-23（MVP v2 定稿）
