@@ -115,7 +115,7 @@ export function PosterPreview({
       style={{ boxShadow: "0 12px 40px rgba(0,0,0,0.25)" }}
     >
       {/* ============ 顶部：照片满铺（含 canvas 贴纸合成） ============ */}
-      <div className="relative w-full aspect-[3/4] bg-[#1a1a1a] overflow-hidden">
+      <div className="relative w-full aspect-square bg-[#1a1a1a] overflow-hidden">
         {compiledCanvasUrl ? (
           <img
             referrerPolicy="no-referrer"

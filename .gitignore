@@ -40,9 +40,10 @@ logs/
 # Playwright / 调试截图
 .playwright-cli/
 home.png
-edit.png
-preview.png
-export.png
+edit*.png
+preview*.png
+export*.png
+poster*.png
 test-office.png
 
 # 原始素材压缩包（解压后已进 src/frontend）
