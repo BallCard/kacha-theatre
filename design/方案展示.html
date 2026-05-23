@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>羽你一起 · 方案展示</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body { font-family: 'PingFang SC', 'Microsoft YaHei', -apple-system, sans-serif; }
+  .grad-hero { background: linear-gradient(135deg, #84cc16 0%, #facc15 100%); }
+  .grad-card { background: linear-gradient(135deg, #ecfccb 0%, #fef9c3 100%); }
+  .chat-bubble {
+    background: #fff;
+    border-radius: 18px;
+    padding: 12px 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    max-width: 260px;
+    display: inline-block;
+  }
+  .chat-bubble::before {
+    content: '';
+    position: absolute;
+    left: -6px; top: 14px;
+    width: 0; height: 0;
+    border-right: 8px solid #fff;
+    border-top: 6px solid transparent;
+    border-bottom: 6px solid transparent;
+  }
+  .step-num {
+    width: 36px; height: 36px;
+    background: #84cc16; color: white;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: bold; font-size: 18px;
+    flex-shrink: 0;
+  }
+  .tag {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .section-title {
+    border-left: 5px solid #84cc16;
+    padding-left: 14px;
+  }
+  table { border-collapse: collapse; }
+  th, td { padding: 8px 12px; text-align: left; border-bottom: 1px solid #e5e7eb; }
+  th { background: #f0fdf4; font-weight: 600; }
+  tr:hover td { background: #fefce8; }
+</style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+<!-- HERO -->
+<section class="grad-hero text-white py-16 px-8">
+  <div class="max-w-5xl mx-auto">
+    <div class="flex items-center gap-3 mb-4">
+      <span class="text-5xl">🏸</span>
+      <span class="tag bg-white/20 backdrop-blur">抖音 AI 创变者计划 2026 · 杭州站</span>
+    </div>
+    <h1 class="text-6xl font-black mb-4 tracking-tight">羽你一起</h1>
+    <p class="text-2xl font-light mb-2">谐音「与你一起」· AI 羽毛球搭子</p>
+    <p class="text-lg opacity-90 max-w-3xl leading-relaxed">
+      打完球，发给小羽看看。<br>
+      他不教你怎么打，但他真的会夸你。
+    </p>
+    <div class="mt-8 flex gap-3 flex-wrap">
+      <span class="tag bg-white/20">赛道二 · 内容重构</span>
+      <span class="tag bg-white/20">多模态视觉理解</span>
+      <span class="tag bg-white/20">AI 搭子 · 非教练</span>
+      <span class="tag bg-white/20">聊天复盘 · 战报卡片</span>
+    </div>
+  </div>
+</section>
+
+<!-- 一句话定位 -->
+<section class="py-12 px-8 bg-white">
+  <div class="max-w-5xl mx-auto">
+    <h2 class="text-3xl font-bold section-title mb-6">一句话产品定位</h2>
+    <div class="grad-card rounded-2xl p-8">
+      <p class="text-xl leading-loose text-slate-700">
+        业余羽毛球玩家打完一场球，常常没人陪复盘 —— 教练太贵、朋友太忙、自己看回放又懒。
+        我们做了一个 AI 搭子，你把视频甩给它，它会像微信里的朋友一样跟你聊：
+        先夸你那个杀球太帅了 ↓（附截图），告诉你今天打了 5 个杀球 3 个放网，
+        调侃一句「你今天是稳健派」，再贴心给你一张可发朋友圈的战报卡片。
+        <br><br>
+        <strong class="text-emerald-700">它不是教练，是个嘴甜、懂球、会聊天的搭子。</strong>
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- 差异化卖点 -->
+<section class="py-12 px-8 bg-slate-50">
+  <div class="max-w-5xl mx-auto">
+    <h2 class="text-3xl font-bold section-title mb-6">三大差异化卖点</h2>
+    <div class="grid md:grid-cols-3 gap-6">
+      <div class="bg-white rounded-2xl p-6 border-l-4 border-emerald-500">
+        <div class="text-3xl mb-2">🤗</div>
+        <h3 class="font-bold text-lg mb-2">搭子，而非教练</h3>
+        <p class="text-slate-600 text-sm leading-relaxed">
+          AI 产品普遍想做专业工具，我们反过来做情感陪伴 —— 避开了「AI 准不准」的死亡问题。
+        </p>
+      </div>
+      <div class="bg-white rounded-2xl p-6 border-l-4 border-yellow-500">
+        <div class="text-3xl mb-2">💬</div>
+        <h3 class="font-bold text-lg mb-2">聊天，而非报告</h3>
+        <p class="text-slate-600 text-sm leading-relaxed">
+          把「看复盘报告」重构成「和朋友聊天复盘」，是新的内容消费形态。
+        </p>
+      </div>
+      <div class="bg-white rounded-2xl p-6 border-l-4 border-pink-500">
+        <div class="text-3xl mb-2">📱</div>
+        <h3 class="font-bold text-lg mb-2">抖音原生</h3>
+        <p class="text-slate-600 text-sm leading-relaxed">
+          战报卡片为社交分享而生 —— 闭环天然适配平台，可直接发抖音 / 朋友圈。
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 评审对照 -->
+<section class="py-12 px-8 bg-white">
+  <div class="max-w-5xl mx-auto">
+    <h2 class="text-3xl font-bold section-title mb-6">赛道二评审 · 我们怎么打分</h2>
+    <table class="w-full text-sm">
+      <thead>
+        <tr><th>评审维度</th><th>权重</th><th>我们的对应</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>场景与问题洞察</td><td>15%</td><td>业余玩家「打完没人聊」是真实痛点，目标用户极清晰</td></tr>
+        <tr><td>AI 能力与产品结合</td><td>20%</td><td>多模态视频理解 + 智能抽帧，AI 直接驱动核心体验</td></tr>
+        <tr><td>体验完整性</td><td>15%</td><td>上传 → 对话复盘 → 战报分享，完整闭环</td></tr>
+        <tr class="bg-yellow-50"><td class="font-bold">用户价值感</td><td class="font-bold text-orange-600">30%</td><td class="font-bold">情绪价值（被夸）+ 社交资本（战报）+ 轻量认知（数据）</td></tr>
+        <tr><td>创新性与延展潜力</td><td>20%</td><td>「视频 → 聊天复盘」是新内容消费形态；任何运动均可扩展</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- 用户旅程 -->
+<section class="py-12 px-8 bg-slate-50">
+  <div class="max-w-5xl mx-auto">
+    <h2 class="text-3xl font-bold section-title mb-6">用户旅程 · 6 步闭环</h2>
+    <div class="space-y-4">
+      <div class="bg-white rounded-xl p-5 flex gap-4 items-start">
+        <div class="step-num">1</div>
+        <div><strong>打开 H5 / 网页</strong><p class="text-sm text-slate-600 mt-1">无需注册，直接体验</p></div>
+      </div>
+      <div class="bg-white rounded-xl p-5 flex gap-4 items-start">
+        <div class="step-num">2</div>
+        <div><strong>首屏：小羽打招呼 + 上传按钮 + 4 个精选案例</strong><p class="text-sm text-slate-600 mt-1">演示兜底 / 首次引导双重作用</p></div>
+      </div>
+      <div class="bg-white rounded-xl p-5 flex gap-4 items-start">
+        <div class="step-num">3</div>
+        <div><strong>上传视频 或 点选精选案例</strong><p class="text-sm text-slate-600 mt-1">限制 &lt; 3 分钟、&lt; 50MB</p></div>
+      </div>
+      <div class="bg-white rounded-xl p-5 flex gap-4 items-start">
+        <div class="step-num">4</div>
+        <div><strong>加载页：小羽边等边聊</strong><p class="text-sm text-slate-600 mt-1">「我先看看哈…」配合羽毛球动画，把等待变体验</p></div>
+      </div>
+      <div class="bg-white rounded-xl p-5 flex gap-4 items-start">
+        <div class="step-num">5</div>
+        <div><strong>聊天复盘 · 5-8 条流式消息</strong><p class="text-sm text-slate-600 mt-1">开场夸 → 高光截图 → 数据 → 风格标签 → 玩梗 → 战报卡片</p></div>
+      </div>
+      <div class="bg-white rounded-xl p-5 flex gap-4 items-start">
+        <div class="step-num">6</div>
+        <div><strong>保存战报 / 一键分享 / 继续追问</strong><p class="text-sm text-slate-600 mt-1">「我怎么进步」「这球哪里好」自由问答兜底</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 聊天界面 mockup -->
+<section class="py-12 px-8 bg-white">
+  <div class="max-w-5xl mx-auto">
+    <h2 class="text-3xl font-bold section-title mb-6">核心界面 · 聊天复盘</h2>
+    <div class="grid md:grid-cols-2 gap-8 items-center">
+      <div class="bg-slate-100 rounded-2xl p-6 max-w-sm mx-auto">
+        <div class="bg-emerald-600 text-white p-3 rounded-t-xl flex items-center gap-2 -mx-6 -mt-6 mb-4">
+          <span class="text-xl">←</span>
+          <span class="text-2xl">🏸</span>
+          <span class="font-bold">小羽</span>
+        </div>
+        <div class="space-y-3">
+          <div class="flex gap-2 items-start">
+            <div class="w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center text-sm">🏸</div>
+            <div class="chat-bubble text-sm">卧槽刚看完，先夸一句你这球真不是白打的 👏</div>
+          </div>
+          <div class="flex gap-2 items-start">
+            <div class="w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center text-sm">🏸</div>
+            <div class="chat-bubble text-sm">
+              看这个杀球！1:23 ↓
+              <div class="mt-2 bg-gradient-to-br from-emerald-200 to-yellow-200 h-24 rounded-lg flex items-center justify-center text-3xl">🏸💨</div>
+            </div>
+          </div>
+          <div class="flex gap-2 items-start">
+            <div class="w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center text-sm">🏸</div>
+            <div class="chat-bubble text-sm">
+              数据汇报 📊<br>
+              杀球 ×5　放网 ×3<br>
+              救球 ×2　长球 ×8
+            </div>
+          </div>
+          <div class="flex gap-2 items-start">
+            <div class="w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center text-sm">🏸</div>
+            <div class="chat-bubble text-sm">
+              给你贴个标签 🏷️<br>
+              <strong class="text-emerald-700">稳健防守型</strong>
+            </div>
+          </div>
+          <div class="flex gap-2 items-start">
+            <div class="w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center text-sm">🏸</div>
+            <div class="chat-bubble text-sm">
+              你这放网，跟羽毛球场上的徐志摩似的 🌸
+            </div>
+          </div>
+          <div class="flex gap-2 items-start">
+            <div class="w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center text-sm">🏸</div>
+            <div class="chat-bubble text-sm">
+              战报送上 ↓
+              <div class="mt-2 bg-gradient-to-br from-emerald-400 to-yellow-400 h-32 rounded-lg flex items-center justify-center text-white text-xs text-center p-2">
+                [战报卡片]<br>可保存 / 分享朋友圈
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h3 class="font-bold text-lg mb-3">设计细节</h3>
+        <ul class="space-y-2 text-slate-700 text-sm">
+          <li>✅ <strong>流式吐字</strong>：消息一条条蹦出，模拟「正在打字」，掩盖后端处理时间</li>
+          <li>✅ <strong>仿微信气泡</strong>：用户熟悉的视觉语言，0 学习成本</li>
+          <li>✅ <strong>消息类型丰富</strong>：纯文 / 截图 / 数据卡 / 标签 / 战报</li>
+          <li>✅ <strong>追问入口</strong>：底部聊天框始终可用，用户可深入探索</li>
+        </ul>
+        <h3 class="font-bold text-lg mb-3 mt-6">视觉风格</h3>
+        <div class="flex gap-2 flex-wrap">
+          <span class="tag bg-emerald-500 text-white">草绿主色</span>
+          <span class="tag bg-yellow-400 text-slate-800">羽毛球黄</span>
+          <span class="tag bg-pink-300">圆润手写体</span>
+          <span class="tag bg-blue-200">微信好友气质</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AI 流水线 -->
+<section class="py-12 px-8 bg-slate-50">
+  <div class="max-w-5xl mx-auto">
+    <h2 class="text-3xl font-bold section-title mb-6">AI 分析流水线（技术核心）</h2>
+
+    <div class="bg-white rounded-2xl p-6 mb-6 border-2 border-emerald-200">
+      <h3 class="font-bold text-lg mb-3 text-emerald-700">⭐ 创新点：运动检测驱动的智能抽帧</h3>
+      <p class="text-slate-700 leading-relaxed text-sm">
+        直接把整段视频喂给多模态模型 → token 爆炸、慢、贵。<br>
+        我们的做法：用帧间像素差 / 光流检测「激烈运动瞬间」，只抽 <strong>8-15 帧精华</strong>给 LLM。
+      </p>
+      <div class="grid grid-cols-3 gap-3 mt-4 text-center">
+        <div class="bg-emerald-50 rounded-lg p-3">
+          <div class="text-2xl font-bold text-emerald-600">-80%</div>
+          <div class="text-xs text-slate-600">Token 节省</div>
+        </div>
+        <div class="bg-yellow-50 rounded-lg p-3">
+          <div class="text-2xl font-bold text-yellow-600">5×</div>
+          <div class="text-xs text-slate-600">速度提升</div>
+        </div>
+        <div class="bg-pink-50 rounded-lg p-3">
+          <div class="text-2xl font-bold text-pink-600">12 帧</div>
+          <div class="text-xs text-slate-600">代替 1800 帧</div>
+        </div>
+      </div>
+      <p class="mt-4 text-sm text-slate-600 italic">
+        路演话术：「我们没让 AI 看 1800 帧，我们让它看了 12 张『最该看』的帧。」
+      </p>
+    </div>
+
+    <div class="bg-white rounded-2xl p-6">
+      <h3 class="font-bold text-lg mb-4">流水线 5 步</h3>
+      <div class="space-y-3 text-sm">
+        <div class="flex gap-3"><span class="font-bold text-emerald-600">①</span><div><strong>视频预处理</strong>：ffmpeg 拆帧 → 运动检测 → 抽 8-15 张关键帧</div></div>
+        <div class="flex gap-3"><span class="font-bold text-emerald-600">②</span><div><strong>一次性多模态 LLM 调用</strong>：12 张图 → JSON（5 维输出一次拿全）</div></div>
+        <div class="flex gap-3"><span class="font-bold text-emerald-600">③</span><div><strong>关键帧截图</strong>：按 LLM 给的时间戳 ffmpeg 截高清图 → OSS</div></div>
+        <div class="flex gap-3"><span class="font-bold text-emerald-600">④</span><div><strong>消息编排</strong>：JSON 拆成 5-8 条聊天消息（文 / 图 / 卡 / 标签）</div></div>
+        <div class="flex gap-3"><span class="font-bold text-emerald-600">⑤</span><div><strong>SSE 流式推送</strong>：消息间停 0.5-1.5s，模拟打字感</div></div>
+      </div>
+
+      <h3 class="font-bold text-lg mb-3 mt-6">AI 输出 5 维（一次拿全）</h3>
+      <div class="bg-slate-900 text-emerald-300 rounded-lg p-4 text-xs font-mono leading-relaxed overflow-x-auto">
+<pre>{
+  "highlights": [{"timestamp": "1:23", "type": "杀球", "comment": "这球太行了"}],
+  "stats": {"杀球": 5, "放网": 3, "救球": 2, "长球": 8},
+  "vibe": "你今天明显放开打了，前面有点紧后面打开了",
+  "style_tag": "稳健防守型",
+  "punchlines": ["你这放网，跟羽毛球场上的徐志摩似的", "今天 MVP 是你"]
+}</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 系统架构 -->
+<section class="py-12 px-8 bg-white">
+  <div class="max-w-5xl mx-auto">
+    <h2 class="text-3xl font-bold section-title mb-6">系统架构 · 模块拆分</h2>
+    <div class="grid md:grid-cols-2 gap-6">
+      <div class="bg-emerald-50 rounded-2xl p-6">
+        <h3 class="font-bold text-emerald-700 mb-3">🎨 前端 (H5)</h3>
+        <pre class="text-xs text-slate-700 leading-relaxed">frontend/
+├── pages/
+│   ├── Home.tsx         # 首屏 + 案例
+│   └── Chat.tsx         # 聊天复盘
+├── components/
+│   ├── MessageBubble    # 聊天气泡
+│   ├── StatsCard        # 数据卡
+│   ├── ReportCard       # 战报卡片
+│   ├── Xiaoyu           # 小羽 IP
+│   └── UploadButton
+├── hooks/
+│   └── useSSEMessages   # 流式订阅
+└── assets/</pre>
+        <p class="text-xs text-slate-500 mt-3">栈：Vite + React + TS + Tailwind</p>
+      </div>
+      <div class="bg-yellow-50 rounded-2xl p-6">
+        <h3 class="font-bold text-yellow-700 mb-3">⚙️ 后端 (FastAPI)</h3>
+        <pre class="text-xs text-slate-700 leading-relaxed">backend/
+├── main.py              # FastAPI + SSE
+├── pipeline/
+│   ├── video_preprocess # 抽帧+运动检测
+│   ├── llm_client       # 多模态调用
+│   ├── frame_extractor  # 高光截图
+│   └── message_composer # 消息编排
+├── prompts/
+│   ├── xiaoyu_system.txt
+│   └── few_shots.json
+├── data/
+│   ├── presets/         # 预制视频+JSON
+│   └── outputs/
+└── config.py</pre>
+        <p class="text-xs text-slate-500 mt-3">栈：Python + FastAPI + ffmpeg</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 团队分工 + 时间节奏 -->
+<section class="py-12 px-8 bg-slate-50">
+  <div class="max-w-5xl mx-auto">
+    <h2 class="text-3xl font-bold section-title mb-6">团队 4 人分工 · 25h 极限</h2>
+    <table class="w-full text-sm bg-white rounded-xl overflow-hidden">
+      <thead>
+        <tr>
+          <th>成员</th><th>主战场</th><th>5.23 上午</th><th>5.23 下午-晚上</th><th>5.24 上午</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="font-bold">队长</td>
+          <td>AI 流水线 + 协调</td>
+          <td>后端骨架 + prompt</td>
+          <td>端到端跑通</td>
+          <td>兜底问答 + 性能</td>
+        </tr>
+        <tr>
+          <td class="font-bold">后端搭档</td>
+          <td>视频处理 + 部署</td>
+          <td>ffmpeg + 运动检测</td>
+          <td>LLM 集成 + SSE</td>
+          <td>容错 + 缓存</td>
+        </tr>
+        <tr>
+          <td class="font-bold">前端</td>
+          <td>聊天 UI + 战报</td>
+          <td>首屏 + 聊天骨架</td>
+          <td>流式渲染 + 战报导出</td>
+          <td>动效打磨</td>
+        </tr>
+        <tr>
+          <td class="font-bold">设计/产品</td>
+          <td>视觉 + 演示物料</td>
+          <td>小羽 IP + 4 个预制视频</td>
+          <td>战报设计 + 海报</td>
+          <td>路演 PPT + 脚本</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3 class="font-bold text-xl mt-8 mb-4">集成里程碑</h3>
+    <div class="space-y-2 text-sm">
+      <div class="bg-white rounded-lg p-3 flex justify-between"><span><strong>5.23 14:00</strong> 后端本地跑通</span><span class="text-slate-500">终端打印 JSON</span></div>
+      <div class="bg-white rounded-lg p-3 flex justify-between"><span><strong>5.23 17:00</strong> 前后端首次联调</span><span class="text-slate-500">上传 → 渲染气泡</span></div>
+      <div class="bg-white rounded-lg p-3 flex justify-between"><span><strong>5.23 21:00</strong> 端到端首版</span><span class="text-slate-500">完整聊天复盘走完</span></div>
+      <div class="bg-red-100 rounded-lg p-3 flex justify-between font-bold"><span>🚨 5.23 22:30 海报死线</span><span></span></div>
+      <div class="bg-white rounded-lg p-3 flex justify-between"><span><strong>5.24 02:00</strong> 战报卡片 + 分享</span><span class="text-slate-500">导出图片可用</span></div>
+      <div class="bg-white rounded-lg p-3 flex justify-between"><span><strong>5.24 08:00</strong> 兜底问答 + 优化</span><span class="text-slate-500">追问可回答</span></div>
+      <div class="bg-white rounded-lg p-3 flex justify-between"><span><strong>5.24 10:00</strong> 演示彩排 × 3</span><span class="text-slate-500">不卡为标准</span></div>
+      <div class="bg-red-100 rounded-lg p-3 flex justify-between font-bold"><span>🚨 5.24 12:00 作品提交死线</span><span></span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 风险 -->
+<section class="py-12 px-8 bg-white">
+  <div class="max-w-5xl mx-auto">
+    <h2 class="text-3xl font-bold section-title mb-6">风险与兜底</h2>
+    <table class="w-full text-sm">
+      <thead><tr><th>风险</th><th>概率</th><th>应对</th></tr></thead>
+      <tbody>
+        <tr><td>LLM API 抽风 / 限流</td><td>中</td><td>预制案例缓存 JSON 直接读，演示跳过实时调用</td></tr>
+        <tr><td>视频处理慢 / 超时</td><td>中</td><td>限制 &lt; 3 分钟；预制视频读缓存</td></tr>
+        <tr><td>前后端联调延迟</td><td>高</td><td>14:00 开始首次集成，不等都写完</td></tr>
+        <tr><td>游园会现场断网</td><td>中</td><td>本地部署一份，断网走本机</td></tr>
+        <tr><td>模型对羽毛球效果差</td><td>中</td><td>prompt 多轮调教 + few-shot；硬编模板兜底</td></tr>
+        <tr><td>评委要技术细节</td><td>高</td><td>准备「智能抽帧」一页 PPT，随时甩出</td></tr>
+      </tbody>
+    </table>
+
+    <h3 class="font-bold text-xl mt-8 mb-4">范围控制 · 按砍优先级</h3>
+    <div class="grid md:grid-cols-2 gap-4">
+      <div class="bg-red-50 border-l-4 border-red-400 rounded-lg p-4">
+        <h4 class="font-bold text-red-700 mb-2">⚠️ 可砍（按顺序）</h4>
+        <ol class="text-sm space-y-1 list-decimal list-inside text-slate-700">
+          <li>兜底问答</li>
+          <li>实时上传（只留精选案例）</li>
+          <li>战报卡片导出（只展示）</li>
+        </ol>
+      </div>
+      <div class="bg-emerald-50 border-l-4 border-emerald-500 rounded-lg p-4">
+        <h4 class="font-bold text-emerald-700 mb-2">✅ 不可砍</h4>
+        <ul class="text-sm space-y-1 list-disc list-inside text-slate-700">
+          <li>聊天界面流式渲染（产品魂）</li>
+          <li>4 个预制案例（演示命）</li>
+          <li>小羽 IP 形象（搭子味）</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="grad-hero text-white py-12 px-8 text-center">
+  <div class="max-w-3xl mx-auto">
+    <p class="text-3xl font-bold mb-3">🏸 羽你一起</p>
+    <p class="text-lg opacity-90">让 AI 视觉理解，第一次有了温度</p>
+    <p class="text-sm opacity-75 mt-6">抖音 AI 创变者计划 2026 · 杭州站 · 赛道二 · 内容重构</p>
+  </div>
+</footer>
+
+</body>
+</html>
