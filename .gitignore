@@ -47,3 +47,8 @@ test-office.png
 
 # 原始素材压缩包（解压后已进 src/frontend）
 摸鱼御史.zip
+
+# 本地密钥与素材（勿入库）
+API.txt
+ChatGPT Image*.png
+示例图片.jpg

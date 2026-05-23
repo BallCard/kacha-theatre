@@ -1,28 +1,30 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { mockAnalyze } from "./mock/analyzeResults";
-import { CanvasItem, AnalyzeResult } from "./types";
+import { CanvasItem, AnalyzeResult, StoryContext } from "./types";
 import { StickerCanvas } from "./components/StickerCanvas";
 import { ToolBar } from "./components/ToolBar";
 import { PosterPreview } from "./components/PosterPreview";
+import { StoryScreen } from "./screens/StoryScreen";
+import { adaptMoyuYushi } from "./services/storyAdapter";
 import { getStickerUrl } from "./utils/assets";
-import { 
-  Camera, 
-  Image as ImageIcon, 
-  HelpCircle, 
-  Sparkles, 
-  ChevronLeft, 
-  Check, 
-  Copy, 
-  Download, 
+import {
+  Camera,
+  Image as ImageIcon,
+  HelpCircle,
+  Sparkles,
+  ChevronLeft,
+  Check,
+  Copy,
+  Download,
   RefreshCw,
   Loader2,
-  X
+  Wand2
 } from "lucide-react";
 import * as htmlToImage from "html-to-image";
 
 export default function App() {
-  // Screens navigation routing: 'home' | 'loading' | 'edit' | 'preview'
-  const [screen, setScreen] = useState<'home' | 'loading' | 'edit' | 'preview'>('home');
+  // Screens navigation routing: 'home' | 'loading' | 'edit' | 'preview' | 'story'
+  const [screen, setScreen] = useState<'home' | 'loading' | 'edit' | 'preview' | 'story'>('home');
 
   // Core visual data states
   const [imageSrc, setImageSrc] = useState<string | null>(null);
@@ -40,8 +42,16 @@ export default function App() {
 
   // Modal overlays
   const [modalMessage, setModalMessage] = useState<string | null>(null);
-  const [savedImageUrl, setSavedImageUrl] = useState<string | null>(null);
   const [isExporting, setIsExporting] = useState<boolean>(false);
+
+  // 剧情游戏：StoryScreen 重玩通过 key 强制重挂载触发
+  const [storyKey, setStoryKey] = useState(0);
+
+  // 当进入 story 屏时，把当前 analyzeResult + 原图 + selectedTitle 适配成 StoryContext
+  const storyContext = useMemo<StoryContext | null>(() => {
+    if (!analyzeResult || !imageSrc) return null;
+    return adaptMoyuYushi(analyzeResult, imageSrc, selectedTitle || analyzeResult.title_candidates[0] || '摸鱼判官');
+  }, [analyzeResult, imageSrc, selectedTitle]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -221,26 +231,33 @@ export default function App() {
     }, 400);
   };
 
-  // Export full post long-height graphic
+  // Export full post long-height graphic — 直接触发浏览器下载，不再弹长按
   const handleExportPoster = async () => {
     const posterNode = document.getElementById("printable-poster-area");
     if (!posterNode) return;
-    
+
     setIsExporting(true);
     setModalMessage("诏书摹本御制中...");
 
     try {
-      // High-DPI capture for super fine text sharpness
       const dataUrl = await htmlToImage.toPng(posterNode, {
         quality: 1.0,
         pixelRatio: 2.5,
-        backgroundColor: "#f5efe1"
+        backgroundColor: "#f5efe1",
+        cacheBust: true,
       });
-      setSavedImageUrl(dataUrl);
+      // 点 a[download] 直接下载到本地
+      const a = document.createElement("a");
+      a.href = dataUrl;
+      a.download = `摸鱼御史_${selectedTitle || '诏书'}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
       setIsExporting(false);
+      setModalMessage("电子诏书已下载到本地 📥");
     } catch (err) {
       setIsExporting(false);
-      setModalMessage("生成失败，请长按截图或重试");
+      setModalMessage("生成失败，请稍后重试");
     }
   };
 
@@ -269,16 +286,16 @@ export default function App() {
       />
 
       {/* Main Single Page Frame container (Simulated mobile 375x812 responsive ratio with bold phone frame) */}
-      <div 
-        id="phone-device-frame" 
-        className="w-full max-w-[430px] min-h-screen md:min-h-[820px] md:max-h-[900px] bg-[#f6f6f6] flex flex-col justify-between shadow-none md:shadow-2xl md:rounded-[44px] overflow-hidden relative md:border-[10px] md:border-[#222129]"
+      <div
+        id="phone-device-frame"
+        className="w-full max-w-[430px] h-[100dvh] md:h-[900px] md:min-h-[820px] bg-[#f6f6f6] flex flex-col justify-between shadow-none md:shadow-2xl md:rounded-[44px] overflow-hidden relative md:border-[10px] md:border-[#222129]"
       >
         
         {/* =======================================================
             SCREEN 1: HOME PAGE
            ======================================================= */}
         {screen === "home" && (
-          <div id="screen-home" className="flex-1 flex flex-col justify-between p-5 pb-8 animate-fade-in bg-[#f6f6f6]">
+          <div id="screen-home" className="flex-1 min-h-0 overflow-y-auto flex flex-col justify-between p-5 pb-8 animate-fade-in bg-[#f6f6f6]">
             
             {/* Top Miniprogram styled Navigation Bar */}
             <header className="h-11 flex items-center justify-center text-center mt-2 pb-2">
@@ -431,7 +448,7 @@ export default function App() {
             SCREEN 3: CANVAS二创 EDITING PAGE
            ======================================================= */}
         {screen === "edit" && analyzeResult && (
-          <div id="screen-edit" className="flex-1 flex flex-col justify-between animate-fade-in bg-[#f6f6f6]">
+          <div id="screen-edit" className="flex-1 min-h-0 flex flex-col justify-between animate-fade-in bg-[#f6f6f6]">
             
             {/* Top Navigation Control bar (44px) */}
             <header className="h-11 border-b border-gray-200/80 bg-white flex items-center justify-between px-3 shrink-0">
@@ -464,7 +481,7 @@ export default function App() {
             </header>
 
             {/* Scroll Panel containing active edit Canvas context */}
-            <main className="flex-1 overflow-y-auto px-4 py-3 flex flex-col gap-4">
+            <main className="flex-1 min-h-0 overflow-y-auto px-4 py-3 flex flex-col gap-4">
               
               {/* Target layout title descriptor stamp label */}
               <div className="bg-[#fcfaf2] border border-[#e8dfc7] p-2.5 rounded-xl flex items-center justify-between gap-1.5 shrink-0 shadow-2xs">
@@ -526,7 +543,7 @@ export default function App() {
             SCREEN 4: PREVIEW AND CAPTURING PAGE
            ======================================================= */}
         {screen === "preview" && analyzeResult && (
-          <div id="screen-preview" className="flex-1 flex flex-col justify-between animate-fade-in bg-[#f6f6f6]">
+          <div id="screen-preview" className="flex-1 min-h-0 flex flex-col justify-between animate-fade-in bg-[#f6f6f6]">
             
             {/* Top Navigation Bar */}
             <header className="h-11 border-b border-gray-200 bg-white flex items-center justify-between px-3 shrink-0">
@@ -546,7 +563,7 @@ export default function App() {
             </header>
 
             {/* Scrollable Printable elements area wrapper */}
-            <main className="flex-1 overflow-y-auto p-4 flex flex-col gap-4">
+            <main className="flex-1 min-h-0 overflow-y-auto p-4 flex flex-col gap-4">
               
               {/* The high definition vector poster ready to scan */}
               <div className="w-full transform transition-all duration-300">
@@ -563,7 +580,7 @@ export default function App() {
               <div className="bg-[#f0ecd8] p-3 rounded-xl border border-[#dfd9bf] flex gap-2 text-[11px] leading-relaxed text-[#8a7243] text-left">
                 <HelpCircle size={15} className="shrink-0 mt-0.5 text-[#d4222b]" />
                 <p className="font-serif" style={{ fontFamily: "'STKaiti', 'Kaiti', serif" }}>
-                  御批：若下方立即点击保存不成功，点击生成按键后长按画面正中唤起手机相册保存亦可！
+                  御批：点击下方"生成长图"，电子诏书会直接下载到本地相册或下载目录。
                 </p>
               </div>
 
@@ -571,7 +588,21 @@ export default function App() {
 
             {/* Fixed action columns bottom trigger buttons */}
             <footer className="p-4 bg-white border-t border-gray-200/80 flex flex-col gap-2.5 shrink-0">
-              
+
+              {/* 0. 开启互动剧情（新功能入口） */}
+              <button
+                id="btn-open-story"
+                onClick={() => {
+                  setStoryKey((k) => k + 1);
+                  setScreen('story');
+                }}
+                className="w-full py-3.5 bg-gradient-to-r from-[#2a2520] to-[#3a2f24] text-[#f0c869] border border-[#f0c869]/70 hover:from-[#3a2f24] hover:border-[#f0c869] rounded-full font-bold text-sm tracking-widest flex items-center justify-center gap-2.5 transition-all shadow-md active:scale-95"
+                style={{ fontFamily: "'STKaiti', 'Kaiti', serif" }}
+              >
+                <Wand2 size={16} />
+                <span>✒ 开启互动剧情·御史外传</span>
+              </button>
+
               {/* 1. Generate PNG stream overlay */}
               <button
                 id="btn-export-poster"
@@ -616,6 +647,24 @@ export default function App() {
           </div>
         )}
 
+        {/* =======================================================
+            SCREEN 5: INTERACTIVE STORY GAME (御史外传)
+           ======================================================= */}
+        {screen === "story" && storyContext && (
+          <StoryScreen
+            key={storyKey}
+            context={storyContext}
+            onExit={() => setScreen('preview')}
+            onBackHome={() => {
+              setImageSrc(null);
+              setAnalyzeResult(null);
+              setCanvasItems([]);
+              setScreen('home');
+            }}
+            onRestart={() => setStoryKey((k) => k + 1)}
+          />
+        )}
+
       </div>
 
       {/* Modern floating toast popups */}
@@ -627,53 +676,6 @@ export default function App() {
         >
           <Sparkles size={11} className="text-[#f0c869] shrink-0" />
           <span>{modalMessage}</span>
-        </div>
-      )}
-
-      {/* High-definition rendered modal overlays - Long Press save fallback for mobile safari safety! */}
-      {savedImageUrl && (
-        <div 
-          id="saved-modal-backdrop" 
-          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[99999] flex flex-col justify-center items-center p-4 animate-fade-in"
-        >
-          {/* Close trigger anchor */}
-          <button
-            onClick={() => setSavedImageUrl(null)}
-            className="absolute top-4 right-4 text-white bg-white/10 p-2 rounded-full hover:bg-white/20 active:scale-90 transition-all"
-          >
-            <X size={20} />
-          </button>
-
-          <div id="saved-modal-dialog" className="max-w-[350px] w-full flex flex-col justify-center items-center gap-4">
-            
-            {/* Captured image display wrapper */}
-            <div className="w-full bg-[#f5efe1] p-1 rounded-2xl shadow-2xl border border-[#d2bf94] overflow-hidden">
-              <img 
-                referrerPolicy="no-referrer"
-                src={savedImageUrl} 
-                className="w-full object-contain max-h-[70vh] rounded-xl" 
-                alt="Imperial decree long-press" 
-              />
-            </div>
-
-            <div className="text-center text-white space-y-1">
-              <h4 className="font-serif text-sm font-bold text-[#f0c869]">🎉 电子诏书成功摹制</h4>
-              <p className="text-[11px] text-gray-300">
-                手机设备用户请{' '}
-                <span className="text-[#d4222b] bg-white text-[10px] font-black px-1.5 py-0.5 rounded-md">长按上方长图</span>
-                {' '}保存到本地相册
-              </p>
-            </div>
-
-            <button
-              onClick={() => setSavedImageUrl(null)}
-              className="px-6 py-2 bg-[#d4222b] text-white rounded-full font-bold text-xs active:scale-95 transition-all mt-1"
-            >
-              继续编辑
-            </button>
-
-          </div>
-
         </div>
       )}
 
