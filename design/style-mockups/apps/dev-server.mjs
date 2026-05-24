@@ -74,7 +74,7 @@ async function serveStatic(req, res) {
 }
 
 const server = http.createServer((req, res) => {
-  if (req.url && req.url.startsWith('/api/')) return proxy(req, res);
+  if (req.url && (req.url.startsWith('/api/') || req.url.startsWith('/cache/'))) return proxy(req, res);
   return serveStatic(req, res);
 });
 

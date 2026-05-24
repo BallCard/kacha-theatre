@@ -3,22 +3,24 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=375,initial-scale=1,maximum-scale=1,user-scalable=no" />
-<title>咔嚓剧场 · bugatti · 移动端</title>
+<title>咔嚓剧场 · 奏折批阅 · 移动端</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=JetBrains+Mono:wght@400&family=Noto+Serif+SC:wght@300;400;500&family=ZCOOL+QingKe+HuangYou&display=swap" rel="stylesheet">
 <style>
 :root{
-  --canvas:#000;--soft:#0d0d0d;--card:#141414;--elev:#1f1f1f;
-  --hairline:#262626;--hairline-strong:#3a3a3a;
-  --ink:#fff;--body:#cccccc;--strong:#e6e6e6;--muted:#999;
+  /* 宣纸米白 + 墨黑 + 朱砂点睛 */
+  --canvas:#f4ecd8;--soft:#ece2c4;--card:#e6dbb9;--elev:#dccfa8;
+  --hairline:#d4c4a0;--hairline-strong:#a8916a;
+  --ink:#1a1410;--body:#5a4d3a;--strong:#2a2118;--muted:#8a7d68;
+  --accent:#b8252a;--accent-deep:#8c1a1f;
   --display:"Cormorant Garamond","Noto Serif SC",serif;
   --display-cn:"ZCOOL QingKe HuangYou","Noto Serif SC",serif;
   --serif:"Noto Serif SC",serif;
   --mono:"JetBrains Mono",ui-monospace,monospace;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{background:#1a1a1a;font-family:var(--serif)}
+html,body{background:#2a2418;font-family:var(--serif)}
 body{display:flex;justify-content:center;padding:24px 0}
 .phone{width:375px;background:var(--canvas);color:var(--ink);min-height:812px;border-radius:36px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.6);position:relative}
 
@@ -33,23 +35,26 @@ body{display:flex;justify-content:center;padding:24px 0}
 .meta-row{font-family:var(--mono);font-size:9px;font-weight:400;letter-spacing:2px;text-transform:uppercase;color:var(--muted);text-align:center;margin-bottom:32px;line-height:1.6}
 .meta-row .sep{margin:0 8px;opacity:.4}
 
-.headline{font-family:var(--display-cn);font-size:80px;font-weight:400;line-height:.95;letter-spacing:6px;text-align:center;margin-bottom:16px}
+.headline{font-family:var(--display-cn);font-size:80px;font-weight:400;line-height:.95;letter-spacing:6px;text-align:center;margin-bottom:16px;color:var(--ink)}
+.headline em{font-style:normal;color:var(--accent);text-shadow:none}
 .sub{font-family:var(--display);font-size:13px;font-weight:300;letter-spacing:3px;text-transform:uppercase;text-align:center;color:var(--muted);margin-bottom:48px}
 
 .divider{display:flex;align-items:center;justify-content:center;gap:14px;margin:48px 0 32px}
 .divider .line{flex:1;height:1px;background:var(--hairline-strong)}
 .divider .glyph{font-family:var(--mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
 
-.verdict-card{background:var(--soft);border:1px solid var(--hairline);padding:28px 22px;margin-bottom:32px}
-.verdict-eyebrow{font-family:var(--mono);font-size:9px;letter-spacing:1.8px;text-transform:uppercase;color:var(--muted);margin-bottom:16px}
+.verdict-card{background:var(--soft);border:1px solid var(--hairline);padding:28px 22px;margin-bottom:32px;position:relative}
+.verdict-card::before{content:"";position:absolute;left:0;top:0;width:2px;height:48px;background:var(--accent)}
+.verdict-eyebrow{font-family:var(--mono);font-size:9px;letter-spacing:1.8px;text-transform:uppercase;color:var(--accent);margin-bottom:16px}
 .verdict-paragraph{font-family:var(--serif);font-size:15px;font-weight:300;line-height:1.75;color:var(--strong);text-align:justify;text-indent:2em}
-.verdict-paragraph::first-letter{font-family:var(--display-cn);font-size:48px;float:left;line-height:.85;margin:4px 10px 0 0;color:var(--ink)}
+.verdict-paragraph::first-letter{font-family:var(--display-cn);font-size:48px;float:left;line-height:.85;margin:4px 10px 0 0;color:var(--accent)}
 
 .stats{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline);margin-bottom:32px}
 .stat{padding:24px 8px;border-right:1px solid var(--hairline);text-align:center}
 .stat:last-child{border-right:0}
 .stat .label{font-family:var(--mono);font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
 .stat .val{font-family:var(--display);font-size:42px;font-weight:300;line-height:1;letter-spacing:1px;color:var(--ink);margin-bottom:4px}
+.stat:first-child .val{color:var(--accent)}
 .stat .unit{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}
 
 .ledger{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--hairline);margin-bottom:32px}
@@ -57,6 +62,8 @@ body{display:flex;justify-content:center;padding:24px 0}
 .ledger-col:last-child{border:0}
 .ledger-col .label{font-family:var(--mono);font-size:8px;letter-spacing:1.8px;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
 .ledger-col .head{font-family:var(--display-cn);font-size:32px;line-height:1;letter-spacing:4px;color:var(--ink);margin-bottom:16px}
+.ledger-col:first-child .head{color:var(--ink)}
+.ledger-col:last-child .head{color:var(--accent)}
 .ledger-col ul{list-style:none}
 .ledger-col li{font-family:var(--serif);font-size:13px;font-weight:300;color:var(--body);padding:7px 0;border-bottom:1px solid var(--hairline);display:flex;justify-content:space-between;align-items:center}
 .ledger-col li:last-child{border:0}
@@ -64,13 +71,13 @@ body{display:flex;justify-content:center;padding:24px 0}
 
 .award{text-align:center;padding:40px 0 16px}
 .award .label{font-family:var(--mono);font-size:9px;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);margin-bottom:20px}
-.award .seal{display:inline-block;border:1px solid var(--ink);padding:24px 40px}
-.award .seal .title{font-family:var(--display-cn);font-size:36px;letter-spacing:6px;line-height:1;color:var(--ink)}
+.award .seal{display:inline-block;border:1.5px solid var(--accent);padding:24px 40px;background:rgba(184,37,42,.04)}
+.award .seal .title{font-family:var(--display-cn);font-size:36px;letter-spacing:6px;line-height:1;color:var(--accent)}
 .award .meta{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-top:18px}
 
 .bottom-bar{position:absolute;left:0;right:0;bottom:0;background:var(--canvas);border-top:1px solid var(--hairline);padding:12px 16px 28px;display:flex;gap:10px}
-.btn{flex:1;font-family:var(--mono);font-size:11px;font-weight:400;letter-spacing:2px;text-transform:uppercase;height:44px;border-radius:9999px;background:transparent;color:var(--ink);border:1px solid var(--ink)}
-.btn.fill{background:var(--ink);color:#000}
+.btn{flex:1;font-family:var(--mono);font-size:11px;font-weight:400;letter-spacing:2px;text-transform:uppercase;height:44px;border-radius:9999px;background:transparent;color:var(--ink);border:1px solid var(--hairline-strong)}
+.btn.fill{background:var(--accent);color:var(--canvas);border-color:var(--accent)}
 </style>
 </head>
 <body>
@@ -80,58 +87,58 @@ body{display:flex;justify-content:center;padding:24px 0}
     <span style="font-family:var(--mono);font-size:11px">●●●●● 5G</span>
   </div>
   <div class="topbar">
-    <div class="brand">MOYU · 御史房</div>
+    <div class="brand">咔嚓剧场 · KACHA THEATRE</div>
     <div class="icon-btn">×</div>
   </div>
 
   <div class="content">
     <div class="meta-row">
-      <span>SCROLL 0023</span><span class="sep">/</span>
-      <span>VERDICT</span><span class="sep">/</span>
-      <span>2026.05.23</span>
+      <span>奏折 NO.0023</span><span class="sep">/</span>
+      <span>御史房批阅</span><span class="sep">/</span>
+      <span>2026.05.24</span>
     </div>
 
-    <h1 class="headline">天降<br/>祥瑞</h1>
-    <div class="sub">A FORTUNE BESTOWED</div>
+    <h1 class="headline">摸鱼<br/><em>修士</em></h1>
+    <div class="sub">A FORTUNE OF THE LOAFING</div>
 
     <div class="divider"><div class="line"></div><div class="glyph">御史宣判</div><div class="line"></div></div>
 
     <div class="verdict-card">
-      <div class="verdict-eyebrow">第 0023 号 · 终章裁决书</div>
-      <p class="verdict-paragraph">卿今日紫微入命，案上冷美式竟得同事新斟之热咖。开会时机巧避三回，PPT 改稿之劫已破，连甲方一句"再改一版"也化作空言。封号"祥瑞天尊"，准卿明日继续假寐。</p>
+      <div class="verdict-eyebrow">第 0023 号 · 终章批文</div>
+      <p class="verdict-paragraph">卿今日紫微入命，案上冷美式竟得同事新斟之热咖。开会时机巧避三回，PPT 改稿之劫已破，连甲方一句"再改一版"也化作空言。准卿明日继续假寐，特此批复。</p>
     </div>
 
     <div class="stats">
       <div class="stat">
-        <div class="label">SCORE</div>
+        <div class="label">摸鱼指数</div>
         <div class="val">87</div>
         <div class="unit">/ 100</div>
       </div>
       <div class="stat">
-        <div class="label">YI · 宜</div>
-        <div class="val">04</div>
-        <div class="unit">/ 05</div>
+        <div class="label">签型</div>
+        <div class="val">上</div>
+        <div class="unit">UPPER SIGN</div>
       </div>
       <div class="stat">
-        <div class="label">JI · 忌</div>
-        <div class="val">00</div>
-        <div class="unit">/ 05</div>
+        <div class="label">命中</div>
+        <div class="val">04</div>
+        <div class="unit">宜 / 忌 00</div>
       </div>
     </div>
 
     <div class="ledger">
       <div class="ledger-col">
-        <div class="label">YI · MATCHED</div>
+        <div class="label">宜 · MATCHED</div>
         <div class="head">宜</div>
         <ul>
-          <li><span>查文档</span><span class="hits">N1</span></li>
-          <li><span>假装思考</span><span class="hits">N2</span></li>
-          <li><span>看注释</span><span class="hits">N3</span></li>
-          <li><span>划水</span><span class="hits">N5</span></li>
+          <li><span>查文档</span><span class="hits">命中</span></li>
+          <li><span>假装思考</span><span class="hits">命中</span></li>
+          <li><span>看注释</span><span class="hits">命中</span></li>
+          <li><span>划水</span><span class="hits">命中</span></li>
         </ul>
       </div>
       <div class="ledger-col">
-        <div class="label">JI · MATCHED</div>
+        <div class="label">忌 · MATCHED</div>
         <div class="head">忌</div>
         <ul>
           <li><span>开会</span><span class="hits">—</span></li>
@@ -144,15 +151,15 @@ body{display:flex;justify-content:center;padding:24px 0}
     <div class="award">
       <div class="label">封号 · TITLE AWARDED</div>
       <div class="seal">
-        <div class="title">祥瑞<br/>天尊</div>
+        <div class="title">摸鱼<br/>修士</div>
       </div>
       <div class="meta">SEALED IN VERMILION</div>
     </div>
   </div>
 
   <div class="bottom-bar">
-    <button class="btn">SHARE</button>
-    <button class="btn fill">DOWNLOAD</button>
+    <button class="btn">复制链接</button>
+    <button class="btn fill">生成长图</button>
   </div>
 </div>
 </body>
