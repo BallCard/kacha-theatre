@@ -18,7 +18,7 @@
 - [x] MVP v2 范围锁定（Part 1 运势卡片）
 - [x] **MVP v2.1 范围扩展（Part 2 互动剧情增量）**
 - [x] 对标新需求文档（[ADR-005](./docs/decisions/005-咔嚓剧场对标新需求文档.md)）
-- [x] 技术栈选择 → React 19 + Konva.js / Vercel Functions BFF / OpenAI 兼容中转(主 gemini-2.5-flash-nothinking,兜底 gpt-4.1-mini) + gpt-image-2 链
+- [x] 技术栈选择 → **Part 1 主线古风原型 HTML** (guofeng.html) + **Part 2 走 React** + 本地 Node 服务器 (主 `gemini-2.5-flash-nothinking`，兜底 `gpt-4.1-mini`) + 局域网展示，弃 Vercel
 - [x] Part 1 设计文档定稿（[part1-design.md](./docs/superpowers/specs/2026-05-23-kacha-juchang-part1-design.md)）
 - [x] Part 2 设计文档定稿（[part2-design.md](./docs/superpowers/specs/2026-05-23-kacha-juchang-part2-design.md)）
 - [x] 素材生图 prompt 就绪（[sticker-prompts.md](./design/sticker-prompts.md)）
@@ -78,14 +78,15 @@
 
 | 层 | 选型 | 理由 |
 |---|---|---|
-| 前端框架 | React 19 + Vite + TypeScript | 开发快、Gemini 生成代码 React 更稳 |
-| 样式 | TailwindCSS（不用 UI 库） | 小程序简洁风、零包袱 |
-| Canvas | Konva.js | 拖拽 / 缩放 / 旋转手势封装好 |
+| **Part 1 主线前端** | 古风原型 `design/style-mockups/apps/guofeng.html`（原生 HTML + JS + 小型 sticker-engine） | 视觉真"古代批阅"——卷轴杆 + 朱红印章 + 紫禁城水印 + 楷体批文（[ADR-006](./docs/decisions/006-古风原型转主线前端.md)） |
+| **Part 2 前端** | React 19 + Vite + TypeScript（`src/frontend/`） | 5 节点剧情 + 配图 + 长图导出已在 React 版实现，不切 |
+| 样式 | TailwindCSS（Part 2）/ 原生 CSS（Part 1 guofeng） | 简洁风、零包袱 |
+| Canvas | Konva.js（Part 2）/ 自研 sticker-engine（Part 1） | 拖拽 / 缩放 / 旋转手势 |
 | 导出 | html-to-image | 转 PNG 长图 |
-| 后端 | Node.js BFF（Express / Vercel Serverless） | 只做 /analyze 代理 |
+| 后端 | 本地 Node HTTP 服务器 `server/local-server.ts`（`npm run dev`，端口 :3001） | 已弃 Vercel，本地跑 + 局域网展示 |
 | VLM | OpenAI 兼容中转 · 主 `gemini-2.5-flash-nothinking` · 兜底 `gpt-4.1-mini` | 中转网关统一接入,模型可热切,JSON 稳定 |
-| 部署 | Vercel | push 即部署 |
-| 兜底 | `?offline=1` 走纯前端预录 JSON | 现场断网 / VLM 抽风保命 |
+| 部署 | 本地 + 局域网（展示时直接放局域网 URL） | 不依赖云部署，赛场断网也能演 |
+| 兜底 | `?mock=1` / `?offline=1` 走纯前端预录 JSON | 现场断网 / VLM 抽风保命 |
 
 ## 关键时间节点
 

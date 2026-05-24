@@ -7,6 +7,7 @@ import { PosterPreview } from "./components/PosterPreview";
 import { StoryScreen } from "./screens/StoryScreen";
 import { adaptMoyuYushi } from "./services/storyAdapter";
 import { getStickerUrl, getBigTierStampUrl, getScoreTicketUrl } from "./utils/assets";
+import { autoPickStickers } from "./utils/autoPickStickers";
 import {
   Camera,
   Image as ImageIcon,
@@ -120,6 +121,9 @@ export default function App() {
               rotation: (i - 0.5) * 8,
             });
           });
+
+          // 4. AI 自动按奏折 yi/ji/分数/姿态再贴 2-3 个气泡/便利贴/朱红小印（避开已有硬占位 + 人脸框）
+          initialCanvasItems.push(...autoPickStickers(result));
 
           setCanvasItems(initialCanvasItems);
           setHistoryStack([initialCanvasItems]); // initialize history
