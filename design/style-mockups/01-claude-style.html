@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<title>摸鱼御史 · claude 风格 · 奏折页</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;700&family=Noto+Sans+SC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:#cc785c; --primary-active:#a9583e;
+  --ink:#141413; --body:#3d3d3a; --muted:#6c6a64;
+  --hairline:#e6dfd8; --hairline-soft:#ebe6df;
+  --canvas:#faf9f5; --surface-soft:#f5f0e8; --surface-card:#efe9de;
+  --surface-dark:#181715;
+  --accent-teal:#5db8a6; --accent-amber:#e8a55a;
+  --serif:"Noto Serif SC","Copernicus","Tiempos Headline",serif;
+  --sans:"Noto Sans SC","StyreneB","Inter",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--canvas);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+body{padding:48px 24px 96px;display:flex;justify-content:center}
+.page{max-width:880px;width:100%}
+.topnav{display:flex;align-items:center;justify-content:space-between;height:64px;border-bottom:1px solid var(--hairline);margin-bottom:48px}
+.brand{display:flex;align-items:center;gap:12px;font-family:var(--serif);font-size:22px;font-weight:500;letter-spacing:-0.3px}
+.brand .mark{width:14px;height:14px;background:var(--ink);border-radius:50%;position:relative}
+.brand .mark::before,.brand .mark::after{content:"";position:absolute;background:var(--ink);left:50%;top:50%;transform:translate(-50%,-50%)}
+.brand .mark::before{width:2px;height:22px}
+.brand .mark::after{width:22px;height:2px}
+.nav-links{display:flex;gap:32px;font-size:14px;font-weight:500;color:var(--body)}
+.nav-links a{color:inherit;text-decoration:none}
+
+.eyebrow{font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:24px}
+h1.display{font-family:var(--serif);font-size:64px;font-weight:400;line-height:1.05;letter-spacing:-1.5px;color:var(--ink);margin-bottom:16px}
+.subtitle{font-size:18px;color:var(--body);line-height:1.55;max-width:620px;margin-bottom:48px}
+
+.report-grid{display:grid;grid-template-columns:1fr 320px;gap:32px;margin-bottom:48px}
+.report-main{background:var(--surface-soft);border-radius:16px;padding:48px;border:1px solid var(--hairline-soft)}
+.report-side{display:flex;flex-direction:column;gap:16px}
+.score-card{background:var(--surface-dark);color:#faf9f5;border-radius:16px;padding:32px;text-align:center}
+.score-tier-mono{font-family:var(--mono);font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:#a09d96;margin-bottom:16px}
+.score-num{font-family:var(--serif);font-size:96px;font-weight:400;line-height:1;letter-spacing:-2px;margin-bottom:8px}
+.score-num small{font-size:32px;color:#a09d96;letter-spacing:0}
+.score-label{font-family:var(--serif);font-size:24px;color:var(--accent-amber)}
+
+.tier-card{background:var(--canvas);border:1px solid var(--hairline);border-radius:12px;padding:20px}
+.tier-card .label{font-family:var(--mono);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.tier-card .val{font-family:var(--serif);font-size:20px;color:var(--ink)}
+
+.section-h{font-family:var(--serif);font-size:28px;font-weight:400;line-height:1.2;letter-spacing:-0.3px;margin-bottom:8px;color:var(--ink)}
+.section-kicker{font-family:var(--mono);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--primary);margin-bottom:8px}
+
+.paragraph{font-family:var(--serif);font-size:22px;line-height:1.55;color:var(--body-strong,#252523);font-weight:400;margin-bottom:32px;text-indent:2em}
+
+.yiji{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:32px}
+.yiji-card{background:var(--canvas);border:1px solid var(--hairline);border-radius:12px;padding:24px}
+.yiji-card.yi{border-left:3px solid var(--accent-teal)}
+.yiji-card.ji{border-left:3px solid var(--primary)}
+.yiji-card .head{font-family:var(--serif);font-size:32px;font-weight:400;line-height:1;margin-bottom:16px;color:var(--ink)}
+.yiji-card.yi .head{color:var(--accent-teal)}
+.yiji-card.ji .head{color:var(--primary)}
+.yiji-card ul{list-style:none}
+.yiji-card li{font-family:var(--serif);font-size:18px;color:var(--body);padding:8px 0;border-bottom:1px solid var(--hairline-soft)}
+.yiji-card li:last-child{border:0}
+
+.titles{display:flex;gap:12px;flex-wrap:wrap}
+.title-pill{font-family:var(--serif);font-size:16px;padding:10px 18px;border-radius:9999px;border:1px solid var(--hairline);background:var(--canvas);color:var(--ink);cursor:pointer;transition:all .18s}
+.title-pill.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.title-pill:hover:not(.active){border-color:var(--primary);color:var(--primary)}
+
+.objects{margin-top:24px;display:flex;gap:8px;flex-wrap:wrap}
+.obj-tag{font-family:var(--mono);font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);padding:4px 10px;border:1px solid var(--hairline);border-radius:9999px}
+
+.cta-row{display:flex;gap:12px;margin-top:48px}
+.btn{font-family:var(--sans);font-size:14px;font-weight:500;height:40px;padding:0 20px;border-radius:8px;border:0;cursor:pointer;display:inline-flex;align-items:center;gap:8px}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover{background:var(--primary-active)}
+.btn-secondary{background:var(--canvas);color:var(--ink);border:1px solid var(--hairline)}
+
+.foot{margin-top:64px;padding-top:24px;border-top:1px solid var(--hairline);font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:1.2px;text-transform:uppercase;display:flex;justify-content:space-between}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <nav class="topnav">
+    <div class="brand">
+      <span class="mark"></span>
+      <span>摸鱼御史</span>
+    </div>
+    <div class="nav-links">
+      <a>奏折</a><a>剧情</a><a>御史房</a><a>关于</a>
+    </div>
+  </nav>
+
+  <div class="eyebrow">奏折 No.0023 · 辰时入呈</div>
+  <h1 class="display">案上美式已凉，<br/>紫微星偏三度。</h1>
+  <p class="subtitle">朕今晨循例巡视尔之工位，依《摸鱼律》第七条，结合案前器物、坐姿、面色三要，特出此奏折，以兹劝慰。</p>
+
+  <div class="report-grid">
+    <div class="report-main">
+      <div class="section-kicker">御史奏曰</div>
+      <h2 class="section-h">趴桌型 · 中正姿态</h2>
+      <p class="paragraph">紫微星偏移3度，案上美式已凉，键盘青轴尚温，显示器墨黑如夜。卿之神色介乎入定与出神之间，分明是修为已臻"假寐"，却仍背负"打工"之命。今日宜顺应天命，勿与开会、改PPT为敌。</p>
+
+      <div class="yiji">
+        <div class="yiji-card yi">
+          <div class="head">宜</div>
+          <ul>
+            <li>摸鱼</li>
+            <li>划水</li>
+            <li>假装思考</li>
+          </ul>
+        </div>
+        <div class="yiji-card ji">
+          <div class="head">忌</div>
+          <ul>
+            <li>开会</li>
+            <li>改 PPT</li>
+            <li>接电话</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="section-kicker">封号候选</div>
+      <h2 class="section-h" style="margin-bottom:20px">三选其一以镌于奏折之尾</h2>
+      <div class="titles">
+        <span class="title-pill active">划水大将军</span>
+        <span class="title-pill">假寐侍郎</span>
+        <span class="title-pill">摸鱼世家</span>
+      </div>
+
+      <div class="objects">
+        <span class="obj-tag">案上之物</span>
+        <span class="obj-tag">半杯冷美式</span>
+        <span class="obj-tag">青轴键盘</span>
+        <span class="obj-tag">黑屏显示器</span>
+      </div>
+
+      <div class="cta-row">
+        <button class="btn btn-primary">进入剧情 · 五节定命</button>
+        <button class="btn btn-secondary">导出奏折海报</button>
+      </div>
+    </div>
+
+    <aside class="report-side">
+      <div class="score-card">
+        <div class="score-tier-mono">摸鱼指数</div>
+        <div class="score-num">87<small>/100</small></div>
+        <div class="score-label">摸鱼大将军</div>
+      </div>
+      <div class="tier-card">
+        <div class="label">姿态判定</div>
+        <div class="val">趴桌型</div>
+      </div>
+      <div class="tier-card">
+        <div class="label">奏报时辰</div>
+        <div class="val">辰时 · 巳初</div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="foot">
+    <span>摸鱼御史房 · 奏折流水编号 0023</span>
+    <span>VLM 审阅 · 豆包 vision-pro</span>
+  </div>
+
+</div>
+</body>
+</html>

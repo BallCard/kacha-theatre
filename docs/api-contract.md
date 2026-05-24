@@ -31,7 +31,7 @@ Content-Type: application/json
 
 {
   "image": "data:image/jpeg;base64,/9j/4AAQ...",
-  "provider": "doubao"   // 可选，默认 doubao；备选 "gpt4o"
+  "provider": "gemini-2.5-flash-nothinking"   // 可选,直接当模型名传给中转网关;不传则用 PRIMARY_MODEL 环境变量
 }
 ```
 
@@ -326,7 +326,7 @@ export async function analyze(imageBase64: string): Promise<AnalyzeResult> {
 
 ### 后端
 - [ ] /analyze 接口实现 + ajv schema 校验
-- [ ] VLM 调用封装（豆包 vision-pro 主，GPT-4o 备）
+- [x] VLM 调用封装(OpenAI 兼容中转 · 主 `gemini-2.5-flash-nothinking` · 兜底 `gpt-4.1-mini`)
 - [ ] retry 1 次 + 兜底模板逻辑
 - [ ] score / tier 一致性强制覆盖
 - [ ] /health 接口

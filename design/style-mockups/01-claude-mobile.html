@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=375,initial-scale=1,maximum-scale=1,user-scalable=no" />
+<title>摸鱼御史 · claude · 移动端</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;700&family=Noto+Sans+SC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:#cc785c;--primary-active:#a9583e;
+  --ink:#141413;--body:#3d3d3a;--strong:#252523;--muted:#6c6a64;
+  --hairline:#e6dfd8;--hairline-soft:#ebe6df;
+  --canvas:#faf9f5;--surface-soft:#f5f0e8;--surface-card:#efe9de;
+  --surface-dark:#181715;
+  --accent-teal:#5db8a6;--accent-amber:#e8a55a;
+  --serif:"Noto Serif SC",serif;
+  --sans:"Noto Sans SC","Inter",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{background:#1a1a1a;font-family:var(--sans)}
+body{display:flex;justify-content:center;padding:24px 0}
+.phone{width:375px;background:var(--canvas);color:var(--ink);min-height:812px;border-radius:36px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.5);position:relative}
+
+.statusbar{height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;font-family:var(--mono);font-size:13px;font-weight:600;color:var(--ink)}
+.statusbar .dots{display:flex;gap:4px;align-items:center}
+.statusbar .dots span{width:14px;height:8px;background:var(--ink);border-radius:1px;display:inline-block}
+.statusbar .dots .battery{width:22px;height:10px;border:1px solid var(--ink);border-radius:2px;background:transparent;position:relative}
+.statusbar .dots .battery::after{content:"";position:absolute;left:1px;top:1px;bottom:1px;width:70%;background:var(--ink);border-radius:1px}
+
+.topbar{padding:8px 20px 16px;display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:8px;font-family:var(--serif);font-size:18px;font-weight:500}
+.brand .mark{width:10px;height:10px;background:var(--ink);border-radius:50%;position:relative}
+.brand .mark::before,.brand .mark::after{content:"";position:absolute;left:50%;top:50%;background:var(--ink);transform:translate(-50%,-50%)}
+.brand .mark::before{width:1.5px;height:16px}
+.brand .mark::after{width:16px;height:1.5px}
+.icon-btn{width:36px;height:36px;background:var(--canvas);border:1px solid var(--hairline);border-radius:50%;display:grid;place-items:center;font-size:14px;color:var(--ink)}
+
+.content{padding:8px 20px 100px}
+
+.eyebrow{font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+h1.display{font-family:var(--serif);font-size:34px;font-weight:400;line-height:1.1;letter-spacing:-0.5px;margin-bottom:8px}
+.subtitle{font-size:13px;color:var(--body);line-height:1.55;margin-bottom:20px}
+
+/* score card */
+.score-card{background:var(--surface-dark);color:#faf9f5;border-radius:20px;padding:24px;margin-bottom:14px;position:relative;overflow:hidden}
+.score-card::before{content:"奏";position:absolute;right:-10px;top:-20px;font-family:var(--serif);font-size:160px;color:rgba(255,255,255,.04);font-weight:400}
+.score-card .label{font-family:var(--mono);font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:#a09d96;margin-bottom:8px;position:relative}
+.score-card .num{font-family:var(--serif);font-size:72px;font-weight:400;line-height:.9;letter-spacing:-1.5px;margin-bottom:4px;position:relative}
+.score-card .num small{font-size:24px;color:#a09d96}
+.score-card .tier{font-family:var(--serif);font-size:18px;color:var(--accent-amber);position:relative}
+.score-card .pose{position:absolute;right:20px;bottom:20px;font-family:var(--mono);font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#a09d96}
+.score-card .pose b{display:block;font-family:var(--serif);font-size:16px;font-weight:400;color:#faf9f5;margin-top:4px;letter-spacing:0;text-transform:none}
+
+/* report */
+.report{background:var(--surface-soft);border:1px solid var(--hairline-soft);border-radius:20px;padding:20px 18px;margin-bottom:14px}
+.kicker{font-family:var(--mono);font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:var(--primary);margin-bottom:6px}
+.section-h{font-family:var(--serif);font-size:20px;font-weight:400;line-height:1.25;margin-bottom:12px}
+.paragraph{font-family:var(--serif);font-size:15px;line-height:1.65;color:var(--strong);text-indent:2em;margin-bottom:4px}
+
+/* yiji */
+.yiji{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.yiji-card{background:var(--canvas);border:1px solid var(--hairline);border-radius:16px;padding:16px}
+.yiji-card.yi{border-left:3px solid var(--accent-teal)}
+.yiji-card.ji{border-left:3px solid var(--primary)}
+.yiji-card .head{font-family:var(--serif);font-size:24px;line-height:1;margin-bottom:10px}
+.yiji-card.yi .head{color:var(--accent-teal)}
+.yiji-card.ji .head{color:var(--primary)}
+.yiji-card ul{list-style:none}
+.yiji-card li{font-family:var(--serif);font-size:14px;color:var(--body);padding:5px 0;border-bottom:1px solid var(--hairline-soft)}
+.yiji-card li:last-child{border:0}
+
+/* titles */
+.titles-wrap{margin-bottom:14px}
+.titles{display:flex;gap:8px;flex-wrap:wrap}
+.title-pill{font-family:var(--serif);font-size:13px;padding:8px 14px;border-radius:9999px;border:1px solid var(--hairline);background:var(--canvas);color:var(--ink)}
+.title-pill.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+
+/* objects */
+.objects{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px}
+.obj-tag{font-family:var(--mono);font-size:10px;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);padding:4px 10px;border:1px solid var(--hairline);border-radius:9999px;background:var(--canvas)}
+
+/* fixed CTA */
+.bottom-bar{position:absolute;left:0;right:0;bottom:0;background:var(--canvas);border-top:1px solid var(--hairline);padding:14px 20px 28px;display:flex;gap:10px}
+.btn{flex:1;font-family:var(--sans);font-size:14px;font-weight:500;height:44px;border-radius:12px;border:0}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-secondary{background:var(--canvas);color:var(--ink);border:1px solid var(--hairline)}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="statusbar">
+    <span>9:41</span>
+    <div class="dots"><span></span><span style="width:10px"></span><span class="battery"></span></div>
+  </div>
+  <div class="topbar">
+    <div class="brand"><span class="mark"></span>摸鱼御史</div>
+    <div style="display:flex;gap:8px">
+      <div class="icon-btn">↑</div>
+      <div class="icon-btn">⋯</div>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="eyebrow">奏折 NO.0023 · 辰时入呈</div>
+    <h1 class="display">案上美式已凉，<br/>紫微星偏三度。</h1>
+    <p class="subtitle">依《摸鱼律》第七条，结合案前器物、坐姿、面色三要，特出此奏折。</p>
+
+    <div class="score-card">
+      <div class="label">摸鱼指数</div>
+      <div class="num">87<small>/100</small></div>
+      <div class="tier">摸鱼大将军</div>
+      <div class="pose">姿态<b>趴桌型</b></div>
+    </div>
+
+    <div class="report">
+      <div class="kicker">御史奏曰</div>
+      <h2 class="section-h">趴桌型 · 中正姿态</h2>
+      <p class="paragraph">紫微星偏移3度，案上美式已凉，键盘青轴尚温，显示器墨黑如夜。卿之神色介乎入定与出神之间，分明是修为已臻"假寐"，却仍背负"打工"之命。</p>
+      <div class="objects">
+        <span class="obj-tag">半杯冷美式</span>
+        <span class="obj-tag">青轴键盘</span>
+        <span class="obj-tag">黑屏显示器</span>
+      </div>
+    </div>
+
+    <div class="yiji">
+      <div class="yiji-card yi">
+        <div class="head">宜</div>
+        <ul><li>摸鱼</li><li>划水</li><li>假装思考</li></ul>
+      </div>
+      <div class="yiji-card ji">
+        <div class="head">忌</div>
+        <ul><li>开会</li><li>改 PPT</li><li>接电话</li></ul>
+      </div>
+    </div>
+
+    <div class="report titles-wrap">
+      <div class="kicker">封号候选</div>
+      <h2 class="section-h" style="margin-bottom:14px">三选其一以镌于奏折之尾</h2>
+      <div class="titles">
+        <span class="title-pill active">划水大将军</span>
+        <span class="title-pill">假寐侍郎</span>
+        <span class="title-pill">摸鱼世家</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-bar">
+    <button class="btn btn-secondary">导出海报</button>
+    <button class="btn btn-primary">进入剧情 →</button>
+  </div>
+</div>
+</body>
+</html>

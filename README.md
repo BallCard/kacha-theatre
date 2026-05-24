@@ -17,7 +17,7 @@
 - [x] 创意确定 → **摸鱼御史**
 - [x] MVP v2 范围锁定（Part 1 单图体验）
 - [x] **MVP v2.1 范围扩展（Part 2 互动剧情增量）**
-- [x] 技术栈选择 → Vue 3 + Konva.js / Node BFF / 豆包 vision-pro + 文本 LLM
+- [x] 技术栈选择 → React 19 + Konva.js / Vercel Functions BFF / OpenAI 兼容中转(主 gemini-2.5-flash-nothinking,兜底 gpt-4.1-mini)
 - [x] Part 1 设计文档定稿（[摸鱼御史-design.md](./docs/superpowers/specs/2026-05-23-摸鱼御史-design.md)）
 - [x] Part 2 设计文档定稿（[摸鱼御史-part2-剧情游戏.md](./docs/superpowers/specs/2026-05-23-摸鱼御史-part2-剧情游戏.md)）
 - [x] 素材生图 prompt 就绪（[sticker-prompts.md](./design/sticker-prompts.md)）
@@ -75,12 +75,12 @@
 
 | 层 | 选型 | 理由 |
 |---|---|---|
-| 前端框架 | Vue 3 + Vite + TypeScript | 开发快、组件清晰 |
+| 前端框架 | React 19 + Vite + TypeScript | 开发快、Gemini 生成代码 React 更稳 |
 | 样式 | TailwindCSS（不用 UI 库） | 小程序简洁风、零包袱 |
 | Canvas | Konva.js | 拖拽 / 缩放 / 旋转手势封装好 |
 | 导出 | html-to-image | 转 PNG 长图 |
 | 后端 | Node.js BFF（Express / Vercel Serverless） | 只做 /analyze 代理 |
-| VLM | 豆包 vision-pro（备选 GPT-4o） | 中文调性 + 字节生态 + JSON 稳定 |
+| VLM | OpenAI 兼容中转 · 主 `gemini-2.5-flash-nothinking` · 兜底 `gpt-4.1-mini` | 中转网关统一接入,模型可热切,JSON 稳定 |
 | 部署 | Vercel | push 即部署 |
 | 兜底 | `?offline=1` 走纯前端预录 JSON | 现场断网 / VLM 抽风保命 |
 

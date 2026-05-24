@@ -1,0 +1,805 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+<title>摸鱼御史 · claude · App</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;700&family=Noto+Sans+SC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:#cc785c;--primary-active:#a9583e;
+  --ink:#141413;--body:#3d3d3a;--strong:#252523;--muted:#6c6a64;
+  --hairline:#e6dfd8;--hairline-soft:#ebe6df;
+  --canvas:#faf9f5;--surface-soft:#f5f0e8;--surface-card:#efe9de;
+  --surface-dark:#181715;
+  --accent-teal:#5db8a6;--accent-amber:#e8a55a;
+  --serif:"Noto Serif SC",serif;
+  --sans:"Noto Sans SC","Inter",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{background:#1a1a1a;font-family:var(--sans);color:var(--ink);min-height:100vh}
+body{display:flex;justify-content:center;align-items:flex-start}
+.phone{
+  width:375px;background:var(--canvas);color:var(--ink);
+  min-height:812px;height:812px;position:relative;overflow:hidden;
+  border-radius:36px;box-shadow:0 30px 80px rgba(0,0,0,.5);margin:24px 0;
+}
+@media (max-width:480px){
+  html,body{background:var(--canvas)}
+  body{padding:0}
+  .phone{width:100vw;height:100vh;min-height:100vh;border-radius:0;box-shadow:none;margin:0}
+}
+
+/* status bar */
+.statusbar{height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;font-family:var(--mono);font-size:13px;font-weight:600;color:var(--ink);flex-shrink:0}
+.statusbar .dots{display:flex;gap:4px;align-items:center}
+.statusbar .dots span{width:14px;height:8px;background:var(--ink);border-radius:1px;display:inline-block}
+.statusbar .dots .battery{width:22px;height:10px;border:1px solid var(--ink);border-radius:2px;background:transparent;position:relative}
+.statusbar .dots .battery::after{content:"";position:absolute;left:1px;top:1px;bottom:1px;width:70%;background:var(--ink);border-radius:1px}
+
+/* topbar */
+.topbar{padding:8px 20px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.brand{display:flex;align-items:center;gap:8px;font-family:var(--serif);font-size:18px;font-weight:500}
+.brand .mark{width:10px;height:10px;background:var(--ink);border-radius:50%;position:relative}
+.brand .mark::before,.brand .mark::after{content:"";position:absolute;left:50%;top:50%;background:var(--ink);transform:translate(-50%,-50%)}
+.brand .mark::before{width:1.5px;height:16px}
+.brand .mark::after{width:16px;height:1.5px}
+.icon-btn{width:36px;height:36px;background:var(--canvas);border:1px solid var(--hairline);border-radius:50%;display:grid;place-items:center;font-size:16px;color:var(--ink);cursor:pointer}
+
+/* screen frame */
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;background:var(--canvas);opacity:0;pointer-events:none;transition:opacity .25s ease}
+.screen.active{opacity:1;pointer-events:auto}
+.scroll{flex:1;overflow-y:auto;padding:0 20px 120px;-webkit-overflow-scrolling:touch}
+
+/* common */
+.eyebrow{font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+.kicker{font-family:var(--mono);font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:var(--primary);margin-bottom:6px}
+.section-h{font-family:var(--serif);font-size:20px;font-weight:400;line-height:1.25;margin-bottom:12px}
+h1.display{font-family:var(--serif);font-size:34px;font-weight:400;line-height:1.1;letter-spacing:-0.5px;margin-bottom:10px;color:var(--ink)}
+.subtitle{font-size:13px;color:var(--body);line-height:1.6;margin-bottom:22px}
+
+/* ============ HOME ============ */
+.hero{padding-top:8px;padding-bottom:20px}
+.hero .eyebrow{margin-bottom:14px}
+.bento{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+.bento .cell{background:var(--surface-soft);border:1px solid var(--hairline-soft);border-radius:18px;padding:16px;min-height:104px;display:flex;flex-direction:column;justify-content:space-between}
+.bento .cell.wide{grid-column:span 2}
+.bento .cell .tag{font-family:var(--mono);font-size:9.5px;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
+.bento .cell .t{font-family:var(--serif);font-size:18px;line-height:1.25;color:var(--ink)}
+.bento .cell .d{font-size:12px;color:var(--body);line-height:1.5}
+.bento .cell.dark{background:var(--surface-dark);color:#faf9f5;border-color:transparent}
+.bento .cell.dark .t{color:#faf9f5}
+.bento .cell.dark .tag{color:#a09d96}
+.bento .cell.dark .d{color:#bdbab2}
+
+.cta-stack{display:flex;flex-direction:column;gap:10px;margin-top:6px}
+.cta{height:52px;border-radius:14px;border:0;font-family:var(--sans);font-size:15px;font-weight:500;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer}
+.cta.primary{background:var(--primary);color:#fff}
+.cta.primary:active{background:var(--primary-active)}
+.cta.ghost{background:var(--canvas);color:var(--ink);border:1px solid var(--hairline)}
+.cta.subtle{background:var(--surface-card);color:var(--strong)}
+
+.footnote{margin-top:18px;font-family:var(--mono);font-size:10px;letter-spacing:.8px;color:var(--muted);text-transform:uppercase;text-align:center}
+
+/* ============ LOADING ============ */
+.load-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 32px;text-align:center}
+.scroll-stage{width:280px;height:140px;position:relative;margin-bottom:36px;display:flex;align-items:center;justify-content:center}
+.scroll-paper{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:0;height:96px;background:var(--surface-soft);border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline);animation:unroll 2.4s ease-in-out infinite}
+.scroll-rod{position:absolute;top:50%;transform:translateY(-50%);width:14px;height:120px;background:linear-gradient(180deg,#3a2a1d,#5a4030,#3a2a1d);border-radius:7px;box-shadow:0 4px 12px rgba(0,0,0,.25)}
+.scroll-rod.l{animation:rodL 2.4s ease-in-out infinite}
+.scroll-rod.r{animation:rodR 2.4s ease-in-out infinite}
+.scroll-rod::before,.scroll-rod::after{content:"";position:absolute;left:-3px;right:-3px;height:6px;background:var(--primary);border-radius:3px}
+.scroll-rod::before{top:-2px}
+.scroll-rod::after{bottom:-2px}
+.ink-mark{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:var(--serif);font-size:36px;color:var(--primary);opacity:0;animation:inkfade 2.4s ease-in-out infinite}
+@keyframes unroll{0%{width:0}40%,60%{width:220px}100%{width:0}}
+@keyframes rodL{0%{left:50%;margin-left:-7px}40%,60%{left:50%;margin-left:-117px}100%{left:50%;margin-left:-7px}}
+@keyframes rodR{0%{left:50%;margin-left:-7px}40%,60%{left:50%;margin-left:103px}100%{left:50%;margin-left:-7px}}
+@keyframes inkfade{0%,30%{opacity:0;transform:translate(-50%,-50%) scale(.6)}50%{opacity:1;transform:translate(-50%,-50%) scale(1)}70%,100%{opacity:0;transform:translate(-50%,-50%) scale(1.1)}}
+.load-title{font-family:var(--serif);font-size:24px;color:var(--ink);margin-bottom:10px}
+.load-sub{font-size:13px;color:var(--body);line-height:1.6;max-width:260px}
+.load-dots{margin-top:18px;font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:2px}
+.load-dots::after{content:"";display:inline-block;animation:dots 1.5s steps(4) infinite}
+@keyframes dots{0%{content:""}25%{content:"."}50%{content:".."}75%{content:"..."}}
+
+/* ============ REPORT TOP ============ */
+.report-top{padding:0 20px 8px;display:flex;align-items:center;gap:12px;flex-shrink:0}
+.back-btn{width:36px;height:36px;border-radius:50%;border:1px solid var(--hairline);background:var(--canvas);display:grid;place-items:center;cursor:pointer;font-size:16px;color:var(--ink)}
+.report-top .title{font-family:var(--serif);font-size:16px;font-weight:500;color:var(--ink)}
+.report-top .sub{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+
+/* ============ EDIT ============ */
+.edit-summary{margin:0 20px 10px;padding:12px 14px;background:var(--surface-dark);color:#faf9f5;border-radius:14px;display:flex;align-items:center;gap:12px}
+.edit-summary .num{font-family:var(--serif);font-size:30px;line-height:1;letter-spacing:-1px}
+.edit-summary .num small{font-size:13px;color:#a09d96;margin-left:2px}
+.edit-summary .meta{flex:1;display:flex;flex-direction:column;gap:2px}
+.edit-summary .meta .tier{font-family:var(--serif);font-size:14px;color:var(--accent-amber)}
+.edit-summary .meta .pose{font-family:var(--mono);font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#a09d96}
+.edit-summary .badge{font-family:var(--serif);font-size:11px;background:var(--primary);color:#fff;padding:4px 10px;border-radius:9999px}
+
+.edit-hint{margin:0 20px 8px;font-family:var(--mono);font-size:10px;letter-spacing:1px;color:var(--muted);text-align:center}
+
+.stage-wrap{margin:0 20px;border-radius:18px;overflow:hidden;background:var(--surface-soft);border:1px solid var(--hairline-soft);box-shadow:0 4px 14px rgba(0,0,0,.06)}
+#stage{display:block;margin:0 auto;background:#000}
+
+/* edit toolbar */
+.edit-toolbar{position:absolute;left:0;right:0;bottom:0;background:var(--canvas);border-top:1px solid var(--hairline);padding-bottom:env(safe-area-inset-bottom,0)}
+.edit-tools-row{display:flex;align-items:center;gap:8px;padding:10px 16px 14px;justify-content:space-between}
+.tool-btn{flex:1;height:46px;border-radius:12px;border:1px solid var(--hairline);background:var(--canvas);color:var(--ink);font-family:var(--sans);font-size:13px;font-weight:500;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer}
+.tool-btn.active{background:var(--surface-card);border-color:var(--primary);color:var(--primary)}
+.tool-btn.warn{color:var(--muted)}
+.tool-btn.warn[disabled]{opacity:.4;cursor:not-allowed}
+.tool-btn.done{background:var(--primary);color:#fff;border-color:var(--primary);font-weight:600}
+.tool-btn.done:active{background:var(--primary-active)}
+
+/* drawer */
+.drawer-backdrop{position:absolute;inset:0;background:rgba(20,23,21,.35);opacity:0;pointer-events:none;transition:opacity .2s;z-index:30}
+.drawer-backdrop.show{opacity:1;pointer-events:auto}
+.drawer{position:absolute;left:0;right:0;bottom:0;background:var(--canvas);border-radius:18px 18px 0 0;box-shadow:0 -10px 30px rgba(0,0,0,.15);padding:14px 18px 22px;transform:translateY(110%);transition:transform .25s ease;z-index:40;max-height:60%;overflow-y:auto}
+.drawer.show{transform:translateY(0)}
+.drawer .drawer-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.drawer .drawer-head h3{font-family:var(--serif);font-size:18px;font-weight:500}
+.drawer .drawer-head .close{width:30px;height:30px;border-radius:50%;background:var(--surface-soft);border:0;font-size:18px;cursor:pointer;color:var(--muted)}
+
+/* sticker grid */
+.sticker-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.sticker-grid .item{aspect-ratio:1;background:var(--surface-soft);border:1px solid var(--hairline);border-radius:12px;display:grid;place-items:center;cursor:pointer;padding:6px}
+.sticker-grid .item:active{transform:scale(.96)}
+.sticker-grid .item svg{width:100%;height:100%}
+
+/* text editor */
+.text-row{display:flex;flex-direction:column;gap:12px}
+.text-row input{height:44px;border-radius:12px;border:1px solid var(--hairline);padding:0 14px;font-family:var(--serif);font-size:15px;background:var(--canvas);color:var(--ink)}
+.text-row .chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{padding:8px 14px;border-radius:9999px;border:1px solid var(--hairline);background:var(--canvas);font-family:var(--serif);font-size:13px;cursor:pointer;color:var(--ink)}
+.chip.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.color-chip{width:30px;height:30px;border-radius:50%;border:2px solid transparent;cursor:pointer;display:inline-block}
+.color-chip.active{border-color:var(--ink)}
+.text-row .label{font-family:var(--mono);font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
+.text-add-btn{height:44px;border-radius:12px;background:var(--primary);color:#fff;border:0;font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer}
+
+/* titles drawer */
+.titles{display:flex;gap:8px;flex-wrap:wrap}
+.title-pill{font-family:var(--serif);font-size:14px;padding:11px 16px;border-radius:9999px;border:1px solid var(--hairline);background:var(--canvas);color:var(--ink);cursor:pointer;transition:all .15s}
+.title-pill.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+
+/* ============ POSTER ============ */
+.poster-scroll{flex:1;overflow-y:auto;padding:8px 20px 120px}
+.poster{
+  width:100%;background:var(--surface-soft);
+  border:1px solid var(--hairline);border-radius:14px;
+  position:relative;overflow:hidden;padding-bottom:24px;
+  background-image:
+    radial-gradient(circle at 20% 30%,rgba(204,120,92,.05),transparent 40%),
+    radial-gradient(circle at 80% 70%,rgba(232,165,90,.06),transparent 40%);
+}
+.poster .pheader{padding:18px 20px 10px;display:flex;justify-content:space-between;align-items:flex-end;border-bottom:1px solid var(--hairline)}
+.poster .pheader .ptitle{font-family:var(--serif);font-size:22px;letter-spacing:6px;color:var(--ink)}
+.poster .pheader .psub{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-top:4px}
+.poster .pscore-row{text-align:right}
+.poster .pscore-row .lab{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}
+.poster .pscore-row .n{font-family:var(--serif);font-size:48px;line-height:.9;color:var(--ink);letter-spacing:-1px}
+.poster .pscore-row .n small{font-size:14px;color:var(--muted)}
+.poster .pscore-row .ti{font-family:var(--serif);font-size:13px;color:var(--primary);margin-top:2px}
+
+.poster .pcaptured{width:100%;display:block;background:#000}
+.poster .pcaptured-placeholder{width:100%;aspect-ratio:335/420;background:linear-gradient(135deg,var(--surface-card),var(--surface-soft));display:grid;place-items:center;color:var(--muted);font-family:var(--serif);font-size:14px}
+
+.poster .pbody{padding:18px 20px 6px;font-family:var(--serif);font-size:13.5px;line-height:1.85;color:var(--strong);text-indent:2em}
+
+.poster .pyiji{padding:0 20px 14px;display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
+.poster .pyiji .pcol{background:var(--canvas);border:1px solid var(--hairline);border-radius:12px;padding:12px 14px}
+.poster .pyiji .pcol .ph{font-family:var(--serif);font-size:20px;margin-bottom:8px}
+.poster .pyiji .pcol.yi .ph{color:var(--accent-teal)}
+.poster .pyiji .pcol.ji .ph{color:var(--primary)}
+.poster .pyiji .pcol .pl{font-family:var(--serif);font-size:13px;color:var(--body);line-height:1.8}
+
+.poster .pfooter{padding:6px 20px 4px;display:flex;justify-content:space-between;align-items:center}
+.poster .pfooter .pno{font-family:var(--mono);font-size:10px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase}
+.poster .pstamp{width:78px;height:78px;border:2px solid var(--primary);border-radius:6px;display:grid;place-items:center;color:var(--primary);font-family:var(--serif);font-weight:700;font-size:15px;line-height:1.15;text-align:center;transform:rotate(-6deg);background:rgba(204,120,92,.04);margin-right:6px}
+.poster .pstamp small{display:block;font-family:var(--mono);font-size:8px;font-weight:500;letter-spacing:1px;margin-top:4px;color:var(--primary)}
+
+.poster-hint{margin-top:14px;text-align:center;font-size:12px;color:var(--muted);line-height:1.6}
+
+/* bottom bar */
+.bottom-bar{position:absolute;left:0;right:0;bottom:0;background:var(--canvas);border-top:1px solid var(--hairline);padding:14px 16px 28px;display:flex;gap:8px;z-index:10}
+.btn{flex:1;font-family:var(--sans);font-size:13px;font-weight:500;height:46px;border-radius:12px;border:0;cursor:pointer;white-space:nowrap}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:active{background:var(--primary-active)}
+.btn-secondary{background:var(--canvas);color:var(--ink);border:1px solid var(--hairline)}
+
+/* exporting overlay */
+.exporting{position:fixed;inset:0;background:rgba(20,23,21,.7);backdrop-filter:blur(4px);z-index:100000;display:none;align-items:center;justify-content:center;flex-direction:column;gap:18px}
+.exporting.show{display:flex}
+.spinner{width:48px;height:48px;border:3px solid rgba(255,255,255,.2);border-top-color:var(--accent-amber);border-radius:50%;animation:spin 1s linear infinite}
+.exporting .lbl{font-family:var(--serif);color:#faf9f5;font-size:16px;letter-spacing:2px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.file-input{display:none}
+</style>
+</head>
+<body>
+<div class="phone" id="phone">
+
+  <!-- =================== HOME =================== -->
+  <div class="screen" id="screen-home">
+    <div class="statusbar">
+      <span>9:41</span>
+      <div class="dots"><span></span><span style="width:10px"></span><span class="battery"></span></div>
+    </div>
+    <div class="topbar">
+      <div class="brand"><span class="mark"></span>摸鱼御史</div>
+      <div style="display:flex;gap:8px">
+        <div class="icon-btn" title="历史">⌛</div>
+        <div class="icon-btn" title="更多">⋯</div>
+      </div>
+    </div>
+    <div class="scroll">
+      <div class="hero">
+        <div class="eyebrow">CLAUDE · MOYU IMPERIAL CENSORATE</div>
+        <h1 class="display">案前一照，<br/>御史替你写奏折。</h1>
+        <p class="subtitle">AI 看一眼你的工位，按《摸鱼律》出一份带评分、宜忌、封号的"奏折"，可二创盖章生成长图分享。</p>
+      </div>
+
+      <div class="bento">
+        <div class="cell">
+          <div class="tag">01 · AI 评分</div>
+          <div class="t">摸鱼指数 0–100</div>
+          <div class="d">姿态 + 桌面器物 + 神色</div>
+        </div>
+        <div class="cell dark">
+          <div class="tag">02 · 二创</div>
+          <div class="t">朱批 / 封号</div>
+          <div class="d">拖朱印盖封号，落于奏折之尾</div>
+        </div>
+        <div class="cell wide">
+          <div class="tag">03 · 导出</div>
+          <div class="t">一键奏折长图</div>
+          <div class="d">米黄底 · 朱印 · 流水号，方便发到群里互相弹劾</div>
+        </div>
+      </div>
+
+      <div class="cta-stack">
+        <button class="cta primary" id="btn-camera">📸  拍一张审审</button>
+        <button class="cta ghost" id="btn-album">🖼️  从相册选</button>
+        <button class="cta subtle" id="btn-demo">用 demo 图试一下</button>
+      </div>
+
+      <div class="footnote">v0.2 · CLAUDE 风原型 · 仅供演示</div>
+    </div>
+    <input type="file" accept="image/*" capture="environment" id="file-camera" class="file-input">
+    <input type="file" accept="image/*" id="file-album" class="file-input">
+  </div>
+
+  <!-- =================== LOADING =================== -->
+  <div class="screen" id="screen-loading">
+    <div class="statusbar">
+      <span>9:41</span>
+      <div class="dots"><span></span><span style="width:10px"></span><span class="battery"></span></div>
+    </div>
+    <div class="topbar">
+      <div class="brand"><span class="mark"></span>摸鱼御史</div>
+      <div></div>
+    </div>
+    <div class="load-wrap">
+      <div class="scroll-stage">
+        <div class="scroll-paper"></div>
+        <div class="ink-mark">奏</div>
+        <div class="scroll-rod l"></div>
+        <div class="scroll-rod r"></div>
+      </div>
+      <div class="load-title">御史批阅奏折中</div>
+      <div class="load-sub">正在比对《摸鱼律》七十二条<br/>勘察案前器物 · 推算紫微星位</div>
+      <div class="load-dots">PROCESSING</div>
+    </div>
+  </div>
+
+  <!-- =================== EDIT (二创神游御笔) =================== -->
+  <div class="screen" id="screen-edit">
+    <div class="statusbar">
+      <span>9:41</span>
+      <div class="dots"><span></span><span style="width:10px"></span><span class="battery"></span></div>
+    </div>
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="back-btn" id="btn-edit-back">←</div>
+        <div>
+          <div class="title" style="font-family:var(--serif);font-size:16px">二创神游御笔</div>
+          <div class="sub" id="edit-sub" style="font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase">EDIT · STAMP · TITLE</div>
+        </div>
+      </div>
+      <div class="icon-btn" id="edit-tier-badge" style="width:auto;height:30px;border-radius:9999px;padding:0 12px;background:var(--surface-card);font-family:var(--serif);font-size:12px;border:0;color:var(--primary)">—</div>
+    </div>
+
+    <div class="edit-summary" id="edit-summary">
+      <div class="num">—<small>/100</small></div>
+      <div class="meta">
+        <div class="tier">—</div>
+        <div class="pose">—</div>
+      </div>
+      <div class="badge">封号 —</div>
+    </div>
+
+    <div class="edit-hint">👇 拖动贴纸调位置，右下角控制点拉伸+旋转</div>
+
+    <div class="stage-wrap">
+      <div id="stage"></div>
+    </div>
+
+    <div class="drawer-backdrop" id="edit-drawer-backdrop"></div>
+
+    <div class="drawer" id="drawer-stickers">
+      <div class="drawer-head"><h3>🏷️ 朱印贴纸库</h3><button class="close" data-close>×</button></div>
+      <div class="sticker-grid" id="sticker-grid"></div>
+    </div>
+    <div class="drawer" id="drawer-text">
+      <div class="drawer-head"><h3>✍️ 文字御批</h3><button class="close" data-close>×</button></div>
+      <div class="text-row">
+        <input id="text-input" placeholder="写一句御批…例如 朕已阅" maxlength="20" value="朕已阅"/>
+        <div class="label">字体</div>
+        <div class="chips" id="font-chips">
+          <span class="chip active" data-font="Noto Serif SC" data-name="楷">楷体</span>
+          <span class="chip" data-font="Noto Sans SC" data-name="宋">宋体</span>
+          <span class="chip" data-font="Noto Serif SC,cursive" data-name="滑">滑稽体</span>
+        </div>
+        <div class="label">颜色</div>
+        <div class="chips" id="color-chips">
+          <span class="color-chip active" style="background:#cc785c" data-color="#cc785c"></span>
+          <span class="color-chip" style="background:#e8a55a" data-color="#e8a55a"></span>
+          <span class="color-chip" style="background:#141413" data-color="#141413"></span>
+          <span class="color-chip" style="background:#faf9f5;border:1px solid #ccc" data-color="#faf9f5"></span>
+          <span class="color-chip" style="background:#5db8a6" data-color="#5db8a6"></span>
+        </div>
+        <button class="text-add-btn" id="text-add-btn">加到画布</button>
+      </div>
+    </div>
+    <div class="drawer" id="drawer-titles">
+      <div class="drawer-head"><h3>👑 封号候选</h3><button class="close" data-close>×</button></div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:14px">选其一镌于奏折之尾（仅影响海报右下角朱印）</p>
+      <div class="titles" id="titles-pills"></div>
+    </div>
+
+    <div class="edit-toolbar">
+      <div class="edit-tools-row">
+        <button class="tool-btn" data-drawer="stickers">🏷️ 贴纸</button>
+        <button class="tool-btn" data-drawer="text">✍️ 文字</button>
+        <button class="tool-btn" data-drawer="titles">👑 封号</button>
+        <button class="tool-btn warn" id="btn-undo" disabled>↶ 撤销</button>
+        <button class="tool-btn done" id="btn-finish">完成 →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =================== POSTER =================== -->
+  <div class="screen" id="screen-poster">
+    <div class="statusbar">
+      <span>9:41</span>
+      <div class="dots"><span></span><span style="width:10px"></span><span class="battery"></span></div>
+    </div>
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="back-btn" id="btn-back-edit">←</div>
+        <div class="brand" style="font-size:16px">奏折长图</div>
+      </div>
+      <div></div>
+    </div>
+    <div class="poster-scroll" id="poster-scroll">
+      <!-- poster rendered by JS -->
+    </div>
+    <div class="bottom-bar">
+      <button class="btn btn-secondary" id="btn-reshoot">重审一张</button>
+      <button class="btn btn-secondary" id="btn-share">复制链接</button>
+      <button class="btn btn-primary" id="btn-export-poster">生成长图</button>
+    </div>
+  </div>
+
+  <div class="exporting" id="exporting">
+    <div class="spinner"></div>
+    <div class="lbl">御笔著墨中…</div>
+  </div>
+</div>
+
+<script type="module">
+import { analyzeImage, makeDemoImageDataURL } from './_shared/api.js';
+import { createStage } from './_shared/sticker-engine.js';
+import { exportNodeToPNG, showSaveModal, copyShareLink } from './_shared/export.js';
+import { toast } from './_shared/toast.js';
+
+const TOAST_THEME = { bg:'rgba(24,23,21,.92)', color:'#faf9f5', accent:'#e8a55a' };
+const t = (msg) => toast(msg, TOAST_THEME);
+
+const STAGE_W = 335, STAGE_H = 420;
+
+const state = {
+  screen: 'home',
+  result: null,
+  reportId: '00000000',
+  activeTitleIdx: 0,
+  bgDataURL: null,
+  stage: null,
+  capturedURL: null,
+  textFont: 'Noto Serif SC',
+  textColor: '#cc785c',
+};
+
+const screens = {
+  home: document.getElementById('screen-home'),
+  loading: document.getElementById('screen-loading'),
+  edit: document.getElementById('screen-edit'),
+  poster: document.getElementById('screen-poster'),
+};
+function go(name){
+  state.screen = name;
+  for (const k in screens) screens[k].classList.toggle('active', k===name);
+}
+
+function hash8(s){
+  let h=2166136261>>>0;
+  for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)>>>0;}
+  return ('0000000'+h.toString(16)).slice(-8).toUpperCase();
+}
+function fileToDataURL(file){
+  return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file);});
+}
+function showExporting(show){
+  document.getElementById('exporting').classList.toggle('show', !!show);
+}
+
+// ============ Claude-style 朱印 SVG 集合 ============
+function stampSquare(txt, opt={}){
+  const stroke = opt.stroke || '#cc785c';
+  const fill = opt.fill || '#faf9f5';
+  const txtColor = opt.color || '#cc785c';
+  const fontSize = txt.length<=2 ? 56 : txt.length===3 ? 40 : 32;
+  // arrange 4 chars in 2x2 grid
+  let inner = '';
+  if (txt.length===4){
+    const fs = 36;
+    inner = `
+      <text x="35" y="55" font-family="Noto Serif SC" font-weight="700" font-size="${fs}" fill="${txtColor}" text-anchor="middle" dominant-baseline="middle">${txt[0]}</text>
+      <text x="85" y="55" font-family="Noto Serif SC" font-weight="700" font-size="${fs}" fill="${txtColor}" text-anchor="middle" dominant-baseline="middle">${txt[1]}</text>
+      <text x="35" y="105" font-family="Noto Serif SC" font-weight="700" font-size="${fs}" fill="${txtColor}" text-anchor="middle" dominant-baseline="middle">${txt[2]}</text>
+      <text x="85" y="105" font-family="Noto Serif SC" font-weight="700" font-size="${fs}" fill="${txtColor}" text-anchor="middle" dominant-baseline="middle">${txt[3]}</text>`;
+  } else if (txt.length<=2){
+    inner = `<text x="60" y="60" font-family="Noto Serif SC" font-weight="700" font-size="${fontSize}" fill="${txtColor}" text-anchor="middle" dominant-baseline="central" letter-spacing="2">${txt}</text>`;
+  } else {
+    // 3 chars vertical
+    inner = txt.split('').map((c,i)=>`<text x="60" y="${30 + i*30}" font-family="Noto Serif SC" font-weight="700" font-size="30" fill="${txtColor}" text-anchor="middle" dominant-baseline="middle">${c}</text>`).join('');
+  }
+  return `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+    <rect x="6" y="6" width="108" height="108" rx="8" ry="8" fill="${fill}" stroke="${stroke}" stroke-width="4"/>
+    <rect x="12" y="12" width="96" height="96" rx="4" ry="4" fill="none" stroke="${stroke}" stroke-width="1.5" opacity=".55"/>
+    ${inner}
+  </svg>`;
+}
+function stampCircle(txt, opt={}){
+  const stroke = opt.stroke || '#cc785c';
+  const fill = opt.fill || '#faf9f5';
+  const txtColor = opt.color || '#cc785c';
+  // arrange around circle for 4+ chars
+  if (txt.length>=4){
+    const chars = txt.split('');
+    const n = chars.length;
+    const R = 38;
+    const ring = chars.map((c,i)=>{
+      const a = -Math.PI/2 + i*(Math.PI*2/n);
+      const x = 60 + R*Math.cos(a);
+      const y = 60 + R*Math.sin(a);
+      const rot = (a*180/Math.PI)+90;
+      return `<text x="${x}" y="${y}" font-family="Noto Serif SC" font-weight="700" font-size="20" fill="${txtColor}" text-anchor="middle" dominant-baseline="central" transform="rotate(${rot} ${x} ${y})">${c}</text>`;
+    }).join('');
+    return `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="60" cy="60" r="55" fill="${fill}" stroke="${stroke}" stroke-width="4"/>
+      <circle cx="60" cy="60" r="14" fill="${stroke}"/>
+      <text x="60" y="60" font-family="Noto Serif SC" font-weight="700" font-size="14" fill="${fill}" text-anchor="middle" dominant-baseline="central">印</text>
+      ${ring}
+    </svg>`;
+  }
+  return `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="60" cy="60" r="55" fill="${fill}" stroke="${stroke}" stroke-width="4"/>
+    <circle cx="60" cy="60" r="48" fill="none" stroke="${stroke}" stroke-width="1.5" opacity=".5"/>
+    <text x="60" y="60" font-family="Noto Serif SC" font-weight="700" font-size="${txt.length<=2?44:30}" fill="${txtColor}" text-anchor="middle" dominant-baseline="central">${txt}</text>
+  </svg>`;
+}
+function stampRound(txt, opt={}){
+  const stroke = opt.stroke || '#cc785c';
+  const fill = opt.fill || '#faf9f5';
+  const txtColor = opt.color || '#cc785c';
+  return `<svg viewBox="0 0 160 80" xmlns="http://www.w3.org/2000/svg">
+    <rect x="6" y="6" width="148" height="68" rx="34" ry="34" fill="${fill}" stroke="${stroke}" stroke-width="3.5"/>
+    <text x="80" y="40" font-family="Noto Serif SC" font-weight="700" font-size="26" fill="${txtColor}" text-anchor="middle" dominant-baseline="central" letter-spacing="3">${txt}</text>
+  </svg>`;
+}
+// 票据
+function scoreReceipt(score){
+  return `<svg viewBox="0 0 160 60" xmlns="http://www.w3.org/2000/svg">
+    <rect x="3" y="3" width="154" height="54" rx="4" ry="4" fill="#faf9f5" stroke="#e8a55a" stroke-width="3"/>
+    <rect x="8" y="8" width="144" height="44" rx="2" ry="2" fill="none" stroke="#e8a55a" stroke-width="1" opacity=".5" stroke-dasharray="2 2"/>
+    <text x="14" y="34" font-family="JetBrains Mono" font-weight="500" font-size="11" fill="#a9583e" letter-spacing="1.5">MOYU SCORE</text>
+    <text x="146" y="38" font-family="Noto Serif SC" font-weight="700" font-size="26" fill="#cc785c" text-anchor="end" dominant-baseline="central">+${score}</text>
+  </svg>`;
+}
+// 人脸封印
+function faceSeal(){
+  return `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <pattern id="stripes" patternUnits="userSpaceOnUse" width="10" height="10" patternTransform="rotate(45)">
+        <line x1="0" y1="0" x2="0" y2="10" stroke="rgba(204,120,92,.18)" stroke-width="4"/>
+      </pattern>
+    </defs>
+    <circle cx="60" cy="60" r="56" fill="url(#stripes)" />
+    <circle cx="60" cy="60" r="56" fill="rgba(250,249,245,.4)" stroke="#cc785c" stroke-width="3.5"/>
+    <circle cx="60" cy="60" r="48" fill="none" stroke="#cc785c" stroke-width="1.2" opacity=".5"/>
+    <text x="60" y="46" font-family="Noto Serif SC" font-weight="700" font-size="18" fill="#cc785c" text-anchor="middle">御史</text>
+    <text x="60" y="72" font-family="Noto Serif SC" font-weight="700" font-size="18" fill="#cc785c" text-anchor="middle">封脸</text>
+    <text x="60" y="94" font-family="JetBrains Mono" font-size="9" fill="#cc785c" text-anchor="middle" letter-spacing="2">SEAL</text>
+  </svg>`;
+}
+
+const STICKER_LIBRARY = [
+  { name:'准奏', svg: stampSquare('准奏'), shape:'sq' },
+  { name:'驳回', svg: stampCircle('驳回'), shape:'ci' },
+  { name:'神游太虚', svg: stampSquare('神游太虚'), shape:'sq' },
+  { name:'大吉', svg: stampCircle('大吉'), shape:'ci' },
+  { name:'摸鱼有理', svg: stampRound('摸鱼有理'), shape:'rd' },
+  { name:'奉天承运', svg: stampSquare('奉天承运'), shape:'sq' },
+];
+
+// ============ run flow ============
+async function runAnalyze(dataUrl){
+  go('loading');
+  state.bgDataURL = dataUrl;
+  state.reportId = hash8(dataUrl.slice(0,200) + Date.now());
+  try{
+    const result = await analyzeImage(dataUrl);
+    state.result = result;
+    state.activeTitleIdx = 0;
+    state.capturedURL = null;
+    enterEdit();
+  }catch(err){
+    console.error(err);
+    t('御史走神了，请稍后重试');
+    go('home');
+  }
+}
+
+function enterEdit(){
+  const r = state.result;
+  if(!r) return;
+  // summary
+  const sumEl = document.getElementById('edit-summary');
+  sumEl.querySelector('.num').innerHTML = `${r.moyu_score}<small>/100</small>`;
+  sumEl.querySelector('.tier').textContent = r.level_tier;
+  sumEl.querySelector('.pose').textContent = `${r.pose_type} · NO.${state.reportId.slice(0,6)}`;
+  sumEl.querySelector('.badge').textContent = `封号 · ${(r.title_candidates||[])[state.activeTitleIdx]||'—'}`;
+  document.getElementById('edit-tier-badge').textContent = r.level_tier;
+
+  // stage
+  const stageEl = document.getElementById('stage');
+  stageEl.innerHTML = '';
+  state.stage = createStage(stageEl, {
+    width: STAGE_W, height: STAGE_H,
+    bgImageDataURL: state.bgDataURL,
+    handleStyle: { stroke:'#cc785c', bg:'#fff', delBg:'#cc785c', outline:'rgba(204,120,92,.6)' }
+  });
+  state.stage.setOnChange(()=>{
+    document.getElementById('btn-undo').disabled = !state.stage.canUndo() || state.stage.getItems().length===0;
+  });
+
+  // 1. 段位印章
+  state.stage.addSticker({
+    type:'svg', svg: stampSquare(r.level_tier.slice(0,4)),
+    x: STAGE_W-65, y: 80, w:120, h:120, rotation:-12,
+  });
+  // 2. 分数票据
+  state.stage.addSticker({
+    type:'svg', svg: scoreReceipt(r.moyu_score),
+    x: 90, y: STAGE_H-60, w:160, h:60, rotation:-4,
+  });
+  // 3. 人脸封印
+  (r.face_boxes||[]).forEach(box=>{
+    const cx = (box.x + box.w/2)*STAGE_W;
+    const cy = (box.y + box.h/2)*STAGE_H;
+    const size = Math.max(60, box.w*STAGE_W*1.4);
+    state.stage.addSticker({ type:'svg', svg: faceSeal(), x:cx, y:cy, w:size, h:size, rotation:0 });
+  });
+
+  // sticker library grid
+  const grid = document.getElementById('sticker-grid');
+  grid.innerHTML = STICKER_LIBRARY.map((s,i)=>
+    `<div class="item" data-i="${i}" title="${s.name}">${s.svg}</div>`
+  ).join('');
+  grid.onclick = (e)=>{
+    const it = e.target.closest('.item'); if(!it) return;
+    const s = STICKER_LIBRARY[+it.dataset.i];
+    const w = s.shape==='rd'?160:100;
+    const h = s.shape==='rd'?60:100;
+    state.stage.addSticker({ type:'svg', svg:s.svg, x:STAGE_W/2, y:STAGE_H/2, w, h, rotation:0 });
+    t(`已添加「${s.name}」`);
+    closeDrawer();
+  };
+
+  // titles
+  renderTitlesPills();
+
+  // reset drawer state
+  closeDrawer();
+  go('edit');
+}
+
+function renderTitlesPills(){
+  const r = state.result;
+  const pills = (r.title_candidates||[]).map((tt,i)=>
+    `<span class="title-pill ${i===state.activeTitleIdx?'active':''}" data-idx="${i}">${tt}</span>`
+  ).join('');
+  document.getElementById('titles-pills').innerHTML = pills;
+  document.getElementById('titles-pills').onclick = (e)=>{
+    const p = e.target.closest('.title-pill'); if(!p) return;
+    state.activeTitleIdx = +p.dataset.idx;
+    document.querySelectorAll('#titles-pills .title-pill').forEach((el,i)=>el.classList.toggle('active', i===state.activeTitleIdx));
+    document.querySelector('#edit-summary .badge').textContent = `封号 · ${r.title_candidates[state.activeTitleIdx]}`;
+    t(`封号已切换为「${r.title_candidates[state.activeTitleIdx]}」`);
+  };
+}
+
+// drawer ctl
+function openDrawer(name){
+  const map = { stickers:'drawer-stickers', text:'drawer-text', titles:'drawer-titles' };
+  Object.values(map).forEach(id=>document.getElementById(id).classList.remove('show'));
+  document.getElementById('edit-drawer-backdrop').classList.add('show');
+  document.getElementById(map[name]).classList.add('show');
+  document.querySelectorAll('.tool-btn[data-drawer]').forEach(b=>b.classList.toggle('active', b.dataset.drawer===name));
+}
+function closeDrawer(){
+  ['drawer-stickers','drawer-text','drawer-titles'].forEach(id=>document.getElementById(id).classList.remove('show'));
+  document.getElementById('edit-drawer-backdrop').classList.remove('show');
+  document.querySelectorAll('.tool-btn[data-drawer]').forEach(b=>b.classList.remove('active'));
+}
+
+// ============ poster ============
+function renderPoster(){
+  const r = state.result;
+  if(!r) return;
+  const title = (r.title_candidates||[])[state.activeTitleIdx] || (r.title_candidates||[])[0] || '';
+  const yi = (r.report?.yi||[]).map(x=>`<div class="pl">· ${x}</div>`).join('');
+  const ji = (r.report?.ji||[]).map(x=>`<div class="pl">· ${x}</div>`).join('');
+  const cap = state.capturedURL
+    ? `<img class="pcaptured" src="${state.capturedURL}" alt="奏折画像" />`
+    : `<div class="pcaptured-placeholder">（画像生成中…）</div>`;
+
+  document.getElementById('poster-scroll').innerHTML = `
+    <div class="poster" id="poster-node">
+      <div class="pheader">
+        <div>
+          <div class="ptitle">奏 折</div>
+          <div class="psub">MOYU IMPERIAL CENSORATE</div>
+        </div>
+        <div class="pscore-row">
+          <div class="lab">摸鱼指数</div>
+          <div class="n">${r.moyu_score}<small>/100</small></div>
+          <div class="ti">${r.level_tier}</div>
+        </div>
+      </div>
+      ${cap}
+      <div class="pbody">${r.report?.paragraph||''}</div>
+      <div class="pyiji">
+        <div class="pcol yi"><div class="ph">宜</div>${yi}</div>
+        <div class="pcol ji"><div class="ph">忌</div>${ji}</div>
+      </div>
+      <div class="pfooter">
+        <div class="pno">奏折 NO.${state.reportId} · ${r.pose_type}</div>
+        <div class="pstamp">${title}<small>NO.${state.reportId.slice(0,6)}</small></div>
+      </div>
+    </div>
+    <div class="poster-hint">点下方「生成长图」即可弹出大图并保存<br/>或复制链接，分享至群聊弹劾你的同事</div>
+  `;
+}
+
+async function enterPoster(){
+  // 截图当前 stage
+  showExporting(true);
+  try{
+    state.stage.clearSelection();
+    await new Promise(r=>requestAnimationFrame(r));
+    state.capturedURL = await exportNodeToPNG(state.stage.el, { pixelRatio:2, backgroundColor:'#000' });
+  }catch(err){
+    console.error(err);
+    t('画像生成失败，仍可继续');
+  }finally{
+    showExporting(false);
+  }
+  renderPoster();
+  go('poster');
+}
+
+async function exportPoster(){
+  const node = document.getElementById('poster-node');
+  if(!node){ t('海报节点缺失'); return; }
+  showExporting(true);
+  try{
+    const dataUrl = await exportNodeToPNG(node, { pixelRatio:2.5, backgroundColor:'#faf9f5' });
+    showSaveModal(dataUrl, {
+      theme: { bg:'rgba(24,23,21,.92)', accent:'#e8a55a', btnBg:'#cc785c', btnText:'#fff' },
+      title: '诏书成功摹制',
+      hint: '手机请<b style="background:#fff;color:#141413;padding:1px 6px;border-radius:3px">长按图片</b>保存到相册'
+    });
+  }catch(err){
+    console.error(err);
+    t('御笔卡墨，请重试');
+  }finally{
+    showExporting(false);
+  }
+}
+
+// ============ events ============
+document.getElementById('btn-camera').addEventListener('click', ()=> document.getElementById('file-camera').click());
+document.getElementById('btn-album').addEventListener('click', ()=> document.getElementById('file-album').click());
+document.getElementById('btn-demo').addEventListener('click', ()=> runAnalyze(makeDemoImageDataURL()));
+['file-camera','file-album'].forEach(id=>{
+  document.getElementById(id).addEventListener('change', async (e)=>{
+    const f = e.target.files?.[0]; if(!f) return;
+    try{ runAnalyze(await fileToDataURL(f)); }
+    catch{ t('读取图片失败'); }
+    finally{ e.target.value=''; }
+  });
+});
+
+// edit toolbar
+document.querySelectorAll('.tool-btn[data-drawer]').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    const cur = b.classList.contains('active');
+    if(cur) closeDrawer(); else openDrawer(b.dataset.drawer);
+  });
+});
+document.querySelectorAll('.drawer .close').forEach(b=> b.addEventListener('click', closeDrawer));
+document.getElementById('edit-drawer-backdrop').addEventListener('click', closeDrawer);
+document.getElementById('btn-undo').addEventListener('click', ()=>{
+  if(state.stage?.undo()){ t('已撤销'); }
+});
+document.getElementById('btn-finish').addEventListener('click', enterPoster);
+document.getElementById('btn-edit-back').addEventListener('click', ()=>{
+  if(confirm('确定要返回吗？画布上的二创会清空。')) go('home');
+});
+
+// text drawer
+document.getElementById('font-chips').addEventListener('click', (e)=>{
+  const c = e.target.closest('.chip'); if(!c) return;
+  document.querySelectorAll('#font-chips .chip').forEach(el=>el.classList.remove('active'));
+  c.classList.add('active');
+  state.textFont = c.dataset.font;
+});
+document.getElementById('color-chips').addEventListener('click', (e)=>{
+  const c = e.target.closest('.color-chip'); if(!c) return;
+  document.querySelectorAll('#color-chips .color-chip').forEach(el=>el.classList.remove('active'));
+  c.classList.add('active');
+  state.textColor = c.dataset.color;
+});
+document.getElementById('text-add-btn').addEventListener('click', ()=>{
+  const txt = document.getElementById('text-input').value.trim();
+  if(!txt){ t('请先写内容'); return; }
+  state.stage.addSticker({
+    type:'text', text: txt, fontFamily: state.textFont, color: state.textColor,
+    fontSize: 32, x: STAGE_W/2, y: STAGE_H/2, w: Math.max(120, txt.length*36), h: 60, rotation:-2
+  });
+  t('已加文字御批');
+  closeDrawer();
+});
+
+// poster events
+document.getElementById('btn-back-edit').addEventListener('click', ()=> go('edit'));
+document.getElementById('btn-reshoot').addEventListener('click', ()=>{
+  if(confirm('重新审一张？当前奏折将丢弃。')) go('home');
+});
+document.getElementById('btn-share').addEventListener('click', async ()=>{
+  const ok = await copyShareLink();
+  t(ok ? '链接已复制' : '请手动复制 URL');
+});
+document.getElementById('btn-export-poster').addEventListener('click', exportPoster);
+
+go('home');
+</script>
+</body>
+</html>

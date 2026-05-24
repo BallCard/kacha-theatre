@@ -1,0 +1,839 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+<title>摸鱼御史 · Bugatti</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=JetBrains+Mono:wght@400&family=Noto+Serif+SC:wght@300;400;500&family=ZCOOL+QingKe+HuangYou&display=swap" rel="stylesheet">
+<style>
+:root{
+  --canvas:#000;--soft:#0d0d0d;--card:#141414;--elev:#1f1f1f;
+  --hairline:#262626;--hairline-strong:#3a3a3a;
+  --ink:#fff;--body:#cccccc;--strong:#e6e6e6;--muted:#999;
+  --display:"Cormorant Garamond","Noto Serif SC",serif;
+  --display-cn:"ZCOOL QingKe HuangYou","Noto Serif SC",serif;
+  --serif:"Noto Serif SC",serif;
+  --mono:"JetBrains Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{background:#1a1a1a;font-family:var(--serif);color:var(--ink)}
+body{min-height:100vh;display:flex;justify-content:center;align-items:flex-start}
+
+.shell{width:100%;max-width:375px;background:var(--canvas);min-height:100vh;position:relative;overflow:hidden}
+@media(min-width:600px){
+  body{padding:24px 0}
+  .shell{min-height:812px;height:812px;border-radius:36px;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+}
+
+.statusbar{height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;font-family:var(--mono);font-size:13px;color:var(--ink);flex-shrink:0}
+.statusbar .net{font-size:11px;letter-spacing:1px}
+
+.screen{display:none;flex-direction:column;position:absolute;inset:0;background:var(--canvas)}
+.screen.active{display:flex}
+
+.topbar{padding:0 20px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--hairline);flex-shrink:0}
+.brand{font-family:var(--display);font-size:11px;font-weight:400;letter-spacing:4px;text-transform:uppercase}
+.icon-btn{width:32px;height:32px;border:1px solid var(--hairline-strong);border-radius:50%;display:grid;place-items:center;font-size:13px;color:var(--ink);background:transparent;cursor:pointer;font-family:var(--mono)}
+
+.scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+
+/* ===== HOME ===== */
+#home .body{flex:1;display:flex;flex-direction:column;padding:0 24px}
+.home-meta{font-family:var(--mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);text-align:center;padding:40px 0 24px;line-height:1.7}
+.home-meta .sep{margin:0 8px;opacity:.4}
+.home-hero{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:20px 0}
+.home-hero .display-en{font-family:var(--display);font-size:64px;font-weight:300;line-height:.95;letter-spacing:4px;text-transform:uppercase;margin-bottom:24px}
+.home-hero .display-cn{font-family:var(--display-cn);font-size:22px;letter-spacing:6px;color:var(--body);margin-bottom:48px}
+.home-hero .line-rule{width:48px;height:1px;background:var(--hairline-strong);margin-bottom:48px}
+.home-hero .intro{font-family:var(--mono);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);line-height:2;max-width:280px}
+.home-actions{padding:24px 24px 36px;display:flex;flex-direction:column;gap:12px;border-top:1px solid var(--hairline)}
+.pill{font-family:var(--mono);font-size:11px;font-weight:400;letter-spacing:2px;text-transform:uppercase;height:48px;border-radius:9999px;background:transparent;color:var(--ink);border:1px solid var(--ink);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;width:100%}
+.pill.fill{background:var(--ink);color:#000}
+.pill.ghost{border-color:var(--hairline-strong);color:var(--body)}
+
+/* ===== LOADING ===== */
+#loading{align-items:center;justify-content:center}
+.load-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:48px;padding:40px}
+.load-ring{width:88px;height:88px;border:1px solid var(--hairline-strong);border-top-color:var(--ink);border-radius:50%;animation:spin 1.4s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.load-text{font-family:var(--mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--body);text-align:center;line-height:1.8}
+.load-text .cn{font-family:var(--display-cn);font-size:14px;letter-spacing:6px;color:var(--ink);display:block;margin-top:14px;text-transform:none}
+.load-bottom{font-family:var(--mono);font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);padding-bottom:36px}
+
+/* ===== REPORT ===== */
+#report .content{padding:32px 20px 120px}
+.meta-row{font-family:var(--mono);font-size:9px;font-weight:400;letter-spacing:2px;text-transform:uppercase;color:var(--muted);text-align:center;margin-bottom:32px;line-height:1.6}
+.meta-row .sep{margin:0 8px;opacity:.4}
+.headline{font-family:var(--display-cn);font-size:80px;font-weight:400;line-height:.95;letter-spacing:6px;text-align:center;margin-bottom:18px}
+.sub{font-family:var(--display);font-size:13px;font-weight:300;letter-spacing:3px;text-transform:uppercase;text-align:center;color:var(--muted);margin-bottom:32px}
+.divider{display:flex;align-items:center;justify-content:center;gap:14px;margin:40px 0 28px}
+.divider .line{flex:1;height:1px;background:var(--hairline-strong)}
+.divider .glyph{font-family:var(--mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
+
+.verdict-card{background:var(--soft);border:1px solid var(--hairline);padding:28px 22px;margin-bottom:32px}
+.verdict-eyebrow{font-family:var(--mono);font-size:9px;letter-spacing:1.8px;text-transform:uppercase;color:var(--muted);margin-bottom:16px}
+.verdict-paragraph{font-family:var(--serif);font-size:15px;font-weight:300;line-height:1.78;color:var(--strong);text-align:justify;text-indent:2em}
+.verdict-paragraph::first-letter{font-family:var(--display-cn);font-size:52px;float:left;line-height:.85;margin:4px 12px 0 0;color:var(--ink);text-indent:0}
+
+.stats{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline);margin-bottom:32px}
+.stat{padding:24px 6px;border-right:1px solid var(--hairline);text-align:center}
+.stat:last-child{border-right:0}
+.stat .label{font-family:var(--mono);font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.stat .val{font-family:var(--display);font-size:42px;font-weight:300;line-height:1;letter-spacing:1px;color:var(--ink);margin-bottom:4px}
+.stat .unit{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}
+
+.ledger{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--hairline);margin-bottom:32px}
+.ledger-col{padding:22px 18px;border-right:1px solid var(--hairline)}
+.ledger-col:last-child{border:0}
+.ledger-col .label{font-family:var(--mono);font-size:8px;letter-spacing:1.8px;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+.ledger-col .head{font-family:var(--display-cn);font-size:32px;line-height:1;letter-spacing:4px;color:var(--ink);margin-bottom:16px}
+.ledger-col ul{list-style:none}
+.ledger-col li{font-family:var(--serif);font-size:13px;font-weight:300;color:var(--body);padding:8px 0;border-bottom:1px solid var(--hairline);display:flex;justify-content:space-between;align-items:center}
+.ledger-col li:last-child{border:0}
+.ledger-col li .hits{font-family:var(--mono);font-size:9px;letter-spacing:1px;color:var(--muted)}
+
+.award{text-align:center;padding:24px 0 16px}
+.award .label{font-family:var(--mono);font-size:9px;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);margin-bottom:20px}
+.award .seal{display:inline-block;border:1px solid var(--ink);padding:24px 40px}
+.award .seal .title{font-family:var(--display-cn);font-size:38px;letter-spacing:6px;line-height:1.05;color:var(--ink)}
+.award .meta{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-top:18px}
+
+.bottom-bar{position:absolute;left:0;right:0;bottom:0;background:var(--canvas);border-top:1px solid var(--hairline);padding:12px 16px 28px;display:flex;gap:10px}
+
+/* ===== EDIT ===== */
+#edit{background:var(--canvas)}
+#edit .e-top{padding:0 20px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--hairline);flex-shrink:0;gap:10px}
+#edit .e-top .e-title{font-family:var(--display);font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--ink)}
+#edit .e-top .e-tag{font-family:var(--mono);font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);max-width:120px;text-align:right;line-height:1.5}
+#edit .e-hint{font-family:var(--mono);font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);text-align:center;padding:10px 12px 6px;line-height:1.6}
+#edit .e-stage-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:6px 12px 12px}
+#stage{border:1px solid var(--hairline-strong);background:#111}
+#edit .e-bar{position:absolute;left:0;right:0;bottom:0;background:var(--canvas);border-top:1px solid var(--hairline);padding-bottom:24px}
+#edit .e-tabs{display:flex;border-bottom:1px solid var(--hairline)}
+#edit .e-tab{flex:1;padding:14px 0;font-family:var(--mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);background:transparent;border:0;border-right:1px solid var(--hairline);cursor:pointer}
+#edit .e-tab:last-child{border-right:0}
+#edit .e-tab.active{color:var(--ink);background:var(--soft)}
+#edit .e-tab .ico{display:block;font-size:14px;margin-bottom:4px}
+#edit .e-actions{display:flex;gap:10px;padding:12px 16px 0}
+#edit .e-actions .pill{height:42px;font-size:10px}
+#edit .e-actions .pill[disabled]{opacity:.3;cursor:not-allowed}
+
+.drawer{position:absolute;left:0;right:0;bottom:0;background:var(--canvas);border-top:1px solid var(--hairline);padding:18px 16px 28px;transform:translateY(100%);transition:transform .25s ease;z-index:10;max-height:60%;overflow-y:auto}
+.drawer.open{transform:translateY(0)}
+.drawer .d-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.drawer .d-title{font-family:var(--mono);font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--ink)}
+.drawer .d-close{background:transparent;border:1px solid var(--hairline-strong);color:var(--ink);width:28px;height:28px;border-radius:50%;font-family:var(--mono);font-size:12px;cursor:pointer}
+
+.stamp-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.stamp-cell{aspect-ratio:1;background:var(--soft);border:1px solid var(--hairline);display:grid;place-items:center;cursor:pointer;padding:6px}
+.stamp-cell:hover{border-color:var(--ink)}
+.stamp-cell svg{width:100%;height:100%}
+
+.inscribe-row{display:flex;flex-direction:column;gap:10px}
+.inscribe-row input{background:var(--soft);border:1px solid var(--hairline-strong);color:var(--ink);font-family:var(--serif);font-size:14px;padding:12px;border-radius:0;outline:none}
+.inscribe-row input:focus{border-color:var(--ink)}
+.chip-row{display:flex;gap:8px;flex-wrap:wrap}
+.chip{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;background:transparent;border:1px solid var(--hairline-strong);color:var(--body);padding:8px 12px;cursor:pointer}
+.chip.active{border-color:var(--ink);color:var(--ink)}
+.color-chip{width:28px;height:28px;border:1px solid var(--hairline-strong);cursor:pointer;display:inline-block;padding:0}
+.color-chip.active{outline:1px solid var(--ink);outline-offset:2px}
+.inscribe-row .d-label{font-family:var(--mono);font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-top:6px}
+.inscribe-row .pill{margin-top:14px}
+
+.title-list{display:flex;flex-direction:column;gap:10px}
+.title-row{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border:1px solid var(--hairline-strong);cursor:pointer}
+.title-row.active{border-color:var(--ink);background:var(--soft)}
+.title-row .t-cn{font-family:var(--display-cn);font-size:18px;letter-spacing:4px;color:var(--ink)}
+.title-row .t-tag{font-family:var(--mono);font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}
+
+/* ===== POSTER ===== */
+#poster .content{padding:24px 20px 140px;display:flex;flex-direction:column;align-items:center}
+.poster-eyebrow{font-family:var(--mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+.poster{width:100%;max-width:335px;background:var(--canvas);border:1px solid var(--hairline);padding:22px 22px 26px;display:flex;flex-direction:column;color:var(--ink)}
+.poster .p-photo{width:100%;aspect-ratio:335/420;border:1px solid var(--hairline-strong);background:#111;margin-bottom:18px;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.poster .p-photo img{width:100%;height:100%;object-fit:cover;display:block}
+.poster .p-photo .ph-placeholder{font-family:var(--mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
+.poster .p-top{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--hairline);padding-bottom:12px;margin-bottom:14px}
+.poster .p-brand{font-family:var(--display);font-size:9px;letter-spacing:3px;text-transform:uppercase}
+.poster .p-no{font-family:var(--mono);font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}
+.poster .p-mid{display:flex;flex-direction:column;align-items:center;text-align:center;padding:8px 0 18px}
+.poster .p-en{font-family:var(--display);font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.poster .p-cn{font-family:var(--display-cn);font-size:52px;letter-spacing:6px;line-height:.95;margin-bottom:14px}
+.poster .p-score{font-family:var(--display);font-size:64px;font-weight:300;line-height:.9;letter-spacing:2px}
+.poster .p-score-unit{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-top:2px}
+.poster .p-rule{width:36px;height:1px;background:var(--hairline-strong);margin:14px 0}
+.poster .p-title-label{font-family:var(--mono);font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.poster .p-title{font-family:var(--display-cn);font-size:22px;letter-spacing:5px;border:1px solid var(--ink);padding:10px 18px}
+.poster .p-stats{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline);margin-bottom:14px}
+.poster .p-stat{padding:12px 4px;border-right:1px solid var(--hairline);text-align:center}
+.poster .p-stat:last-child{border-right:0}
+.poster .p-stat .v{font-family:var(--display);font-size:22px;line-height:1;color:var(--ink)}
+.poster .p-stat .l{font-family:var(--mono);font-size:7px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-top:4px}
+.poster .p-bottom{display:flex;justify-content:space-between;align-items:center}
+.poster .p-flow{font-family:var(--mono);font-size:7px;letter-spacing:1.8px;text-transform:uppercase;color:var(--muted)}
+.poster .p-seal{font-family:var(--mono);font-size:8px;letter-spacing:2px;text-transform:uppercase;border:1px solid var(--ink);padding:4px 10px;background:var(--ink);color:#000}
+#poster .bottom-bar{flex-direction:column;gap:10px}
+#poster .bottom-bar .pill{height:44px;font-size:10px}
+
+/* exporting overlay */
+.exporting{position:absolute;inset:0;background:#000;z-index:200;display:none;flex-direction:column;align-items:center;justify-content:center;gap:24px}
+.exporting.show{display:flex}
+.exporting .ring{width:64px;height:64px;border:1px solid var(--hairline-strong);border-top-color:var(--ink);border-radius:50%;animation:spin 1.2s linear infinite}
+.exporting .txt{font-family:var(--mono);font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--body)}
+
+.hidden-file{display:none}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="statusbar">
+    <span>9:41</span>
+    <span class="net">●●●●● 5G</span>
+  </div>
+
+  <!-- ===== HOME ===== -->
+  <section class="screen active" id="home">
+    <div class="topbar">
+      <div class="brand">MOYU · 御史房</div>
+      <button class="icon-btn" id="home-info">i</button>
+    </div>
+    <div class="body">
+      <div class="home-meta">
+        <span>EST · 2026</span><span class="sep">/</span>
+        <span>IMPERIAL ARCHIVE</span><span class="sep">/</span>
+        <span>NO. 0023</span>
+      </div>
+      <div class="home-hero">
+        <div class="display-en">Desk<br/>Audit</div>
+        <div class="display-cn">摸鱼御史房</div>
+        <div class="line-rule"></div>
+        <div class="intro">
+          A ceremonial verdict<br/>
+          rendered upon thy desk<br/>
+          by the imperial censor
+        </div>
+      </div>
+      <div class="home-actions">
+        <button class="pill" id="btn-scan">📸 INITIATE SCAN</button>
+        <button class="pill ghost" id="btn-select">🖼️ SELECT IMAGE</button>
+        <button class="pill fill" id="btn-demo">⚡ DEMO MODE</button>
+        <input type="file" accept="image/*" class="hidden-file" id="file-input"/>
+        <input type="file" accept="image/*" capture="environment" class="hidden-file" id="cam-input"/>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== LOADING ===== -->
+  <section class="screen" id="loading">
+    <div class="topbar">
+      <div class="brand">MOYU · 御史房</div>
+      <button class="icon-btn" id="loading-cancel">×</button>
+    </div>
+    <div class="load-wrap">
+      <div class="load-ring"></div>
+      <div class="load-text">
+        SCANNING · NODE 00
+        <span class="cn">御史审阅中</span>
+      </div>
+    </div>
+    <div class="load-bottom">PLEASE HOLD · DO NOT CLOSE</div>
+  </section>
+
+  <!-- ===== REPORT ===== -->
+  <section class="screen" id="report">
+    <div class="topbar">
+      <div class="brand">MOYU · 御史房</div>
+      <button class="icon-btn" id="report-close">×</button>
+    </div>
+    <div class="scroll">
+      <div class="content">
+        <div class="meta-row">
+          <span id="r-no">SCROLL 0023</span><span class="sep">/</span>
+          <span>VERDICT</span><span class="sep">/</span>
+          <span id="r-date">2026.05.23</span>
+        </div>
+        <h1 class="headline" id="r-headline">摸鱼<br/>大将军</h1>
+        <div class="sub">THE IMPERIAL DECREE</div>
+
+        <div class="divider"><div class="line"></div><div class="glyph">御史宣判</div><div class="line"></div></div>
+
+        <div class="verdict-card">
+          <div class="verdict-eyebrow">第 <span id="r-no2">0023</span> 号 · 终章裁决书</div>
+          <p class="verdict-paragraph" id="r-paragraph"></p>
+        </div>
+
+        <div class="stats">
+          <div class="stat">
+            <div class="label">SCORE</div>
+            <div class="val" id="r-score">87</div>
+            <div class="unit">/ 100</div>
+          </div>
+          <div class="stat">
+            <div class="label">YI · 宜</div>
+            <div class="val" id="r-yi">04</div>
+            <div class="unit">/ 05</div>
+          </div>
+          <div class="stat">
+            <div class="label">JI · 忌</div>
+            <div class="val" id="r-ji">00</div>
+            <div class="unit">/ 05</div>
+          </div>
+        </div>
+
+        <div class="ledger">
+          <div class="ledger-col">
+            <div class="label">YI · MATCHED</div>
+            <div class="head">宜</div>
+            <ul id="r-yi-list"></ul>
+          </div>
+          <div class="ledger-col">
+            <div class="label">JI · MATCHED</div>
+            <div class="head">忌</div>
+            <ul id="r-ji-list"></ul>
+          </div>
+        </div>
+
+        <div class="award">
+          <div class="label">封号 · TITLE AWARDED</div>
+          <div class="seal">
+            <div class="title" id="r-title">划水<br/>大将军</div>
+          </div>
+          <div class="meta">SEALED IN VERMILION</div>
+        </div>
+      </div>
+    </div>
+    <div class="bottom-bar">
+      <button class="pill" id="btn-share">SHARE</button>
+      <button class="pill fill" id="btn-to-edit">✍ 二创神游</button>
+    </div>
+  </section>
+
+  <!-- ===== EDIT ===== -->
+  <section class="screen" id="edit">
+    <div class="topbar e-top">
+      <button class="icon-btn" id="edit-back">‹</button>
+      <div class="e-title">EDIT · 二创神游御笔</div>
+      <div class="e-tag" id="edit-tag">TIER —<br/>TITLE —</div>
+    </div>
+    <div class="e-hint">DRAG · ROTATE · SCALE · SEAL</div>
+    <div class="e-stage-wrap">
+      <div id="stage"></div>
+    </div>
+    <div class="e-bar">
+      <div class="e-actions">
+        <button class="pill ghost" id="btn-undo" disabled>UNDO</button>
+        <button class="pill fill" id="btn-done">DONE · 封诏</button>
+      </div>
+      <div class="e-tabs">
+        <button class="e-tab" data-tab="stamp"><span class="ico">🏷️</span>STAMP</button>
+        <button class="e-tab" data-tab="ink"><span class="ico">✍️</span>INSCRIBE</button>
+        <button class="e-tab" data-tab="title"><span class="ico">👑</span>TITLE</button>
+      </div>
+    </div>
+
+    <!-- drawers -->
+    <div class="drawer" id="drawer-stamp">
+      <div class="d-head">
+        <div class="d-title">STAMP · 朱印库</div>
+        <button class="d-close" data-close>×</button>
+      </div>
+      <div class="stamp-grid" id="stamp-grid"></div>
+    </div>
+
+    <div class="drawer" id="drawer-ink">
+      <div class="d-head">
+        <div class="d-title">INSCRIBE · 御笔批注</div>
+        <button class="d-close" data-close>×</button>
+      </div>
+      <div class="inscribe-row">
+        <input type="text" id="ink-text" placeholder="写下御批..." maxlength="20"/>
+        <div class="d-label">FONT</div>
+        <div class="chip-row" id="ink-fonts"></div>
+        <div class="d-label">SHADE · 黑白灰限定</div>
+        <div class="chip-row" id="ink-colors"></div>
+        <button class="pill fill" id="ink-add">ADD INSCRIPTION</button>
+      </div>
+    </div>
+
+    <div class="drawer" id="drawer-title">
+      <div class="d-head">
+        <div class="d-title">TITLE · 封号切换</div>
+        <button class="d-close" data-close>×</button>
+      </div>
+      <div class="title-list" id="title-list"></div>
+    </div>
+  </section>
+
+  <!-- ===== POSTER ===== -->
+  <section class="screen" id="poster">
+    <div class="topbar">
+      <div class="brand">MOYU · 御史房 · POSTER</div>
+      <button class="icon-btn" id="poster-close">‹</button>
+    </div>
+    <div class="scroll">
+      <div class="content">
+        <div class="poster-eyebrow">PREVIEW · 长按保存 · LONG PRESS</div>
+        <div class="poster" id="poster-node">
+          <div class="p-top">
+            <div class="p-brand">MOYU · 御史房</div>
+            <div class="p-no" id="p-no">NO. 0023 / 2026.05.23</div>
+          </div>
+          <div class="p-photo" id="p-photo">
+            <div class="ph-placeholder">CAPTURED · 御笔留痕</div>
+          </div>
+          <div class="p-mid">
+            <div class="p-en">THE IMPERIAL DECREE</div>
+            <div class="p-cn" id="p-cn">摸鱼<br/>大将军</div>
+            <div class="p-rule"></div>
+            <div class="p-score" id="p-score">87</div>
+            <div class="p-score-unit">MOYU SCORE / 100</div>
+            <div class="p-rule"></div>
+            <div class="p-title-label">封号 · TITLE</div>
+            <div class="p-title" id="p-title">划水大将军</div>
+          </div>
+          <div class="p-stats">
+            <div class="p-stat"><div class="v" id="p-yi">04</div><div class="l">Yi 宜</div></div>
+            <div class="p-stat"><div class="v" id="p-ji">00</div><div class="l">Ji 忌</div></div>
+            <div class="p-stat"><div class="v" id="p-pose">趴</div><div class="l">Pose</div></div>
+          </div>
+          <div class="p-bottom">
+            <div class="p-flow" id="p-flow">SCROLL · 0023 · MOYU · 2026</div>
+            <div class="p-seal">SEALED</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="bottom-bar">
+      <button class="pill fill" id="btn-dl-poster">DOWNLOAD</button>
+      <button class="pill" id="btn-copy-link">COPY LINK</button>
+      <button class="pill ghost" id="btn-restart">RESTART</button>
+    </div>
+  </section>
+
+  <div class="exporting" id="exporting">
+    <div class="ring"></div>
+    <div class="txt">SEALING IN VERMILION…</div>
+  </div>
+</div>
+
+<script type="module">
+import { analyzeImage, makeDemoImageDataURL } from './_shared/api.js';
+import { createStage } from './_shared/sticker-engine.js';
+import { exportNodeToPNG, showSaveModal, copyShareLink } from './_shared/export.js';
+import { toast } from './_shared/toast.js';
+
+const TOAST_OPT = { bg: 'rgba(0,0,0,.92)', color: '#fff', accent: '#fff' };
+const tt = (msg) => toast(msg, TOAST_OPT);
+
+const screens = ['home','loading','report','edit','poster'];
+let state = 'home';
+let lastResult = null;
+let stage = null;
+let userPhotoDataURL = null;
+let capturedURL = null;
+let selectedTitle = null;
+let currentTab = null;
+
+function go(name){
+  state = name;
+  screens.forEach(s=>{
+    document.getElementById(s).classList.toggle('active', s===name);
+  });
+  const sc = document.querySelector(`#${name} .scroll`);
+  if(sc) sc.scrollTop = 0;
+}
+function pad(n, w=2){ return String(n).padStart(w,'0'); }
+
+/* ============ SVG STAMPS (BUGATTI · MONO) ============ */
+function stampOutline(label, fs=24){
+  const span = label.length>4 ? label.length*0.7 : label.length;
+  return `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+    <rect x="6" y="6" width="108" height="108" fill="none" stroke="#fff" stroke-width="2"/>
+    <rect x="12" y="12" width="96" height="96" fill="none" stroke="#fff" stroke-width="0.5"/>
+    <text x="60" y="60" text-anchor="middle" dominant-baseline="central" fill="#fff" font-family="'ZCOOL QingKe HuangYou',serif" font-size="${fs}" letter-spacing="4">${label}</text>
+  </svg>`;
+}
+function stampSolid(label, fs=24){
+  return `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+    <rect x="6" y="6" width="108" height="108" fill="#000" stroke="#fff" stroke-width="2"/>
+    <text x="60" y="60" text-anchor="middle" dominant-baseline="central" fill="#fff" font-family="'ZCOOL QingKe HuangYou',serif" font-size="${fs}" letter-spacing="4">${label}</text>
+  </svg>`;
+}
+function stampInvert(label, fs=24){
+  return `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+    <rect x="6" y="6" width="108" height="108" fill="#fff"/>
+    <text x="60" y="60" text-anchor="middle" dominant-baseline="central" fill="#000" font-family="'ZCOOL QingKe HuangYou',serif" font-size="${fs}" letter-spacing="4">${label}</text>
+  </svg>`;
+}
+function stampDashed(label, fs=22){
+  return `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+    <rect x="6" y="6" width="108" height="108" fill="none" stroke="#fff" stroke-width="1.5" stroke-dasharray="4 3"/>
+    <text x="60" y="60" text-anchor="middle" dominant-baseline="central" fill="#fff" font-family="'ZCOOL QingKe HuangYou',serif" font-size="${fs}" letter-spacing="3">${label}</text>
+  </svg>`;
+}
+function stampNaked(label, fs=28){
+  return `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+    <text x="60" y="58" text-anchor="middle" dominant-baseline="central" fill="#fff" font-family="'ZCOOL QingKe HuangYou',serif" font-size="${fs}" letter-spacing="3">${label}</text>
+    <line x1="20" y1="86" x2="100" y2="86" stroke="#fff" stroke-width="1"/>
+    <text x="60" y="98" text-anchor="middle" fill="#fff" font-family="'JetBrains Mono',monospace" font-size="7" letter-spacing="2">CENSOR</text>
+  </svg>`;
+}
+function stampTier(label){
+  // 段位印章（右上角自动入场）
+  const chars = label.split('');
+  const lines = chars.length>=4 ? [chars.slice(0,Math.ceil(chars.length/2)).join(''), chars.slice(Math.ceil(chars.length/2)).join('')] : [label];
+  const fs = lines.length>1 ? 22 : 28;
+  const tspans = lines.map((l,i)=>`<tspan x="60" dy="${i===0? (lines.length>1?-12:0) : 26}">${l}</tspan>`).join('');
+  return `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+    <rect x="4" y="4" width="112" height="112" fill="none" stroke="#fff" stroke-width="2.5"/>
+    <rect x="11" y="11" width="98" height="98" fill="none" stroke="#fff" stroke-width="0.5"/>
+    <text text-anchor="middle" dominant-baseline="central" fill="#fff" font-family="'ZCOOL QingKe HuangYou',serif" font-size="${fs}" letter-spacing="4" y="60">${tspans}</text>
+  </svg>`;
+}
+function stampScore(score){
+  return `<svg viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+    <rect x="2" y="2" width="196" height="76" fill="#000" stroke="#fff" stroke-width="1.5"/>
+    <text x="14" y="32" fill="#fff" font-family="'JetBrains Mono',monospace" font-size="11" letter-spacing="3">MOYU SCORE</text>
+    <line x1="14" y1="40" x2="186" y2="40" stroke="#fff" stroke-width="0.6"/>
+    <text x="14" y="68" fill="#fff" font-family="'Cormorant Garamond',serif" font-size="32" font-weight="300">+ ${score}</text>
+    <text x="186" y="68" text-anchor="end" fill="#fff" font-family="'JetBrains Mono',monospace" font-size="9" letter-spacing="2">/100</text>
+  </svg>`;
+}
+function stampFace(){
+  return `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="60" cy="60" r="54" fill="none" stroke="#fff" stroke-width="1.5" stroke-dasharray="3 3"/>
+    <circle cx="60" cy="60" r="44" fill="none" stroke="#fff" stroke-width="0.6"/>
+    <text x="60" y="55" text-anchor="middle" fill="#fff" font-family="'ZCOOL QingKe HuangYou',serif" font-size="22" letter-spacing="2">御史</text>
+    <text x="60" y="80" text-anchor="middle" fill="#fff" font-family="'ZCOOL QingKe HuangYou',serif" font-size="20" letter-spacing="2">封</text>
+  </svg>`;
+}
+
+const STAMPS = [
+  { label:'准奏', svg: stampOutline('准奏', 28) },
+  { label:'驳回', svg: stampSolid('驳回', 28) },
+  { label:'神游太虚', svg: stampOutline('神游太虚', 20) },
+  { label:'大吉', svg: stampInvert('大吉', 30) },
+  { label:'摸鱼有理', svg: stampDashed('摸鱼有理', 18) },
+  { label:'奉天承运', svg: stampNaked('奉天承运', 20) },
+];
+
+const FONTS = [
+  { name:'楷书', val:"'ZCOOL QingKe HuangYou', serif" },
+  { name:'宋体', val:"'Noto Serif SC', serif" },
+  { name:'西文', val:"'Cormorant Garamond', serif" },
+];
+const COLORS = [
+  { name:'WHITE', val:'#ffffff' },
+  { name:'BODY',  val:'#cccccc' },
+  { name:'MUTED', val:'#999999' },
+  { name:'STRONG', val:'#e6e6e6' },
+  { name:'INK', val:'#ffffff', bold:true },
+];
+
+/* ============ REPORT RENDER ============ */
+function renderReport(data){
+  lastResult = data;
+  selectedTitle = (data.title_candidates && data.title_candidates[0]) || '摸鱼世家';
+  const tier = data.level_tier || '摸鱼大将军';
+  const tierHTML = tier.length>=4 ? tier.slice(0,Math.ceil(tier.length/2))+'<br/>'+tier.slice(Math.ceil(tier.length/2)) : tier;
+  document.getElementById('r-headline').innerHTML = tierHTML;
+
+  document.getElementById('r-paragraph').textContent = data.report?.paragraph || '';
+  document.getElementById('r-score').textContent = pad(data.moyu_score ?? 0);
+
+  const yi = data.report?.yi || [];
+  const ji = data.report?.ji || [];
+  document.getElementById('r-yi').textContent = pad(yi.length);
+  document.getElementById('r-ji').textContent = pad(ji.length);
+
+  const yiHTML = yi.map((v,i)=>`<li><span>${v}</span><span class="hits">N${i+1}</span></li>`).join('') || '<li><span style="color:var(--muted)">—</span><span class="hits">—</span></li>';
+  const jiHTML = ji.map((v,i)=>`<li><span>${v}</span><span class="hits">N${i+1}</span></li>`).join('') || '<li><span style="color:var(--muted)">—</span><span class="hits">—</span></li>';
+  document.getElementById('r-yi-list').innerHTML = yiHTML;
+  document.getElementById('r-ji-list').innerHTML = jiHTML;
+
+  const titleHTML = selectedTitle.length>=4 ? selectedTitle.slice(0,Math.ceil(selectedTitle.length/2))+'<br/>'+selectedTitle.slice(Math.ceil(selectedTitle.length/2)) : selectedTitle;
+  document.getElementById('r-title').innerHTML = titleHTML;
+}
+
+function renderPoster(){
+  if(!lastResult) return;
+  const d = lastResult;
+  const tier = d.level_tier || '摸鱼大将军';
+  const tierHTML = tier.length>=4 ? tier.slice(0,Math.ceil(tier.length/2))+'<br/>'+tier.slice(Math.ceil(tier.length/2)) : tier;
+  document.getElementById('p-cn').innerHTML = tierHTML;
+  document.getElementById('p-title').textContent = selectedTitle;
+  document.getElementById('p-score').textContent = pad(d.moyu_score ?? 0);
+  document.getElementById('p-yi').textContent = pad((d.report?.yi||[]).length);
+  document.getElementById('p-ji').textContent = pad((d.report?.ji||[]).length);
+  document.getElementById('p-pose').textContent = (d.pose_type||'坐').charAt(0);
+  const flow = `SCROLL · ${pad(23,4)} · MOYU · ${new Date().getFullYear()}`;
+  document.getElementById('p-flow').textContent = flow;
+
+  const photo = document.getElementById('p-photo');
+  photo.innerHTML = '';
+  if(capturedURL){
+    const img = document.createElement('img');
+    img.src = capturedURL;
+    photo.appendChild(img);
+  } else {
+    const ph = document.createElement('div'); ph.className='ph-placeholder'; ph.textContent='CAPTURED · 御笔留痕'; photo.appendChild(ph);
+  }
+}
+
+/* ============ EDIT SCREEN ============ */
+function recolorDeleteHandles(){
+  document.querySelectorAll('#stage .sticker-delete').forEach(el=>{
+    el.style.color = '#000';
+  });
+}
+
+function buildEditScreen(){
+  const stageEl = document.getElementById('stage');
+  stageEl.innerHTML='';
+  const W = 335, H = 420;
+  stage = createStage(stageEl, {
+    width: W, height: H,
+    bgImageDataURL: userPhotoDataURL || makeDemoImageDataURL(),
+    handleStyle: { stroke: '#fff', bg: '#000', delBg: '#fff', outline: 'rgba(255,255,255,.8)' }
+  });
+  stage.setOnChange(()=>{
+    document.getElementById('btn-undo').disabled = !stage.canUndo();
+    setTimeout(recolorDeleteHandles, 0);
+  });
+
+  const tier = lastResult?.level_tier || '摸鱼大将军';
+  const score = lastResult?.moyu_score ?? 87;
+
+  // 1) tier stamp
+  stage.addSticker({ type:'svg', svg: stampTier(tier), x: W-70, y: 80, w: 120, h: 120, rotation: -12 });
+  // 2) score ticket
+  stage.addSticker({ type:'svg', svg: stampScore(score), x: 90, y: H-50, w: 160, h: 60, rotation: -4 });
+  // 3) face seals
+  const faces = lastResult?.face_boxes || [];
+  faces.forEach(box=>{
+    const cx = (box.x + box.w/2) * W;
+    const cy = (box.y + box.h/2) * H;
+    const size = Math.max(80, box.w * W * 1.4);
+    stage.addSticker({ type:'svg', svg: stampFace(), x: cx, y: cy, w: size, h: size, rotation: 0 });
+  });
+
+  setTimeout(recolorDeleteHandles, 50);
+  document.getElementById('btn-undo').disabled = !stage.canUndo();
+
+  // edit tag
+  document.getElementById('edit-tag').innerHTML = `TIER · ${tier}<br/>TITLE · ${selectedTitle||'—'}`;
+
+  // stamp grid
+  const grid = document.getElementById('stamp-grid');
+  grid.innerHTML = STAMPS.map((s,i)=>`<div class="stamp-cell" data-i="${i}">${s.svg}</div>`).join('');
+  grid.querySelectorAll('.stamp-cell').forEach(cell=>{
+    cell.addEventListener('click', ()=>{
+      const i = +cell.dataset.i;
+      stage.addSticker({ type:'svg', svg: STAMPS[i].svg, x: W/2, y: H/2, w: 110, h: 110, rotation: (Math.random()*16-8) });
+      tt('STAMP · '+STAMPS[i].label);
+      closeDrawers();
+    });
+  });
+
+  // ink fonts/colors
+  const fontsRow = document.getElementById('ink-fonts');
+  fontsRow.innerHTML = FONTS.map((f,i)=>`<button class="chip ${i===0?'active':''}" data-i="${i}">${f.name}</button>`).join('');
+  let activeFont = 0;
+  fontsRow.querySelectorAll('.chip').forEach(c=>{
+    c.addEventListener('click',()=>{
+      fontsRow.querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));
+      c.classList.add('active');
+      activeFont = +c.dataset.i;
+    });
+  });
+  const colorsRow = document.getElementById('ink-colors');
+  colorsRow.innerHTML = COLORS.map((c,i)=>`<button class="color-chip ${i===0?'active':''}" style="background:${c.val}" data-i="${i}" title="${c.name}"></button>`).join('');
+  let activeColor = 0;
+  colorsRow.querySelectorAll('.color-chip').forEach(c=>{
+    c.addEventListener('click',()=>{
+      colorsRow.querySelectorAll('.color-chip').forEach(x=>x.classList.remove('active'));
+      c.classList.add('active');
+      activeColor = +c.dataset.i;
+    });
+  });
+  document.getElementById('ink-add').onclick = ()=>{
+    const txt = document.getElementById('ink-text').value.trim();
+    if(!txt){ tt('请先写下御批'); return; }
+    const f = FONTS[activeFont], c = COLORS[activeColor];
+    stage.addSticker({
+      type:'text', text: txt,
+      fontFamily: f.val, color: c.val,
+      fontSize: 22, fontWeight: c.bold?700:500,
+      letterSpacing: '2px',
+      x: 335/2, y: 200,
+      w: Math.max(80, txt.length*26), h: 38,
+      rotation: 0
+    });
+    document.getElementById('ink-text').value='';
+    tt('INSCRIBED');
+    closeDrawers();
+  };
+
+  // titles
+  const candidates = lastResult?.title_candidates || [selectedTitle];
+  const tList = document.getElementById('title-list');
+  tList.innerHTML = candidates.map(t=>`<div class="title-row ${t===selectedTitle?'active':''}" data-t="${t}"><div class="t-cn">${t}</div><div class="t-tag">${t===selectedTitle?'CURRENT':'TAP TO SELECT'}</div></div>`).join('');
+  tList.querySelectorAll('.title-row').forEach(r=>{
+    r.addEventListener('click',()=>{
+      selectedTitle = r.dataset.t;
+      document.getElementById('edit-tag').innerHTML = `TIER · ${tier}<br/>TITLE · ${selectedTitle}`;
+      tList.querySelectorAll('.title-row').forEach(x=>{
+        x.classList.toggle('active', x.dataset.t===selectedTitle);
+        x.querySelector('.t-tag').textContent = x.dataset.t===selectedTitle?'CURRENT':'TAP TO SELECT';
+      });
+      tt('TITLE · '+selectedTitle);
+    });
+  });
+}
+
+function closeDrawers(){
+  document.querySelectorAll('.drawer').forEach(d=>d.classList.remove('open'));
+  document.querySelectorAll('.e-tab').forEach(t=>t.classList.remove('active'));
+  currentTab = null;
+}
+function openDrawer(tab){
+  if(currentTab === tab){ closeDrawers(); return; }
+  closeDrawers();
+  currentTab = tab;
+  document.getElementById('drawer-'+tab).classList.add('open');
+  document.querySelector(`.e-tab[data-tab="${tab}"]`).classList.add('active');
+}
+
+document.querySelectorAll('#edit .e-tab').forEach(t=>{
+  t.addEventListener('click', ()=>openDrawer(t.dataset.tab));
+});
+document.querySelectorAll('.drawer [data-close]').forEach(b=>{
+  b.addEventListener('click', closeDrawers);
+});
+
+document.getElementById('btn-undo').addEventListener('click', ()=>{
+  if(stage && stage.canUndo()){
+    stage.undo();
+    setTimeout(recolorDeleteHandles, 0);
+    tt('UNDONE');
+  }
+});
+
+document.getElementById('btn-done').addEventListener('click', async ()=>{
+  if(!stage){ go('poster'); return; }
+  stage.clearSelection();
+  showExporting();
+  try{
+    capturedURL = await exportNodeToPNG(stage.el, { pixelRatio: 2.5, backgroundColor: '#000' });
+  }catch(err){
+    console.error(err); tt('SEAL FAILED · 重试');
+  }
+  hideExporting();
+  renderPoster();
+  go('poster');
+});
+
+document.getElementById('edit-back').addEventListener('click', ()=>{
+  if(confirm('返回则画布将清空，确认？')){
+    go('report');
+  }
+});
+
+/* ============ EXPORTING OVERLAY ============ */
+function showExporting(){ document.getElementById('exporting').classList.add('show'); }
+function hideExporting(){ document.getElementById('exporting').classList.remove('show'); }
+
+/* ============ FLOW ============ */
+async function runAnalyze(dataUrl){
+  userPhotoDataURL = dataUrl;
+  go('loading');
+  try{
+    const r = await analyzeImage(dataUrl);
+    renderReport(r);
+    go('report');
+  }catch(err){
+    console.error(err);
+    tt('SCAN FAILED · RETRY');
+    go('home');
+  }
+}
+
+function fileToDataURL(file){
+  return new Promise((res,rej)=>{
+    const fr = new FileReader();
+    fr.onload = ()=>res(fr.result);
+    fr.onerror = rej;
+    fr.readAsDataURL(file);
+  });
+}
+
+document.getElementById('btn-demo').addEventListener('click', ()=>{
+  runAnalyze(makeDemoImageDataURL());
+});
+document.getElementById('btn-scan').addEventListener('click', ()=>{
+  document.getElementById('cam-input').click();
+});
+document.getElementById('btn-select').addEventListener('click', ()=>{
+  document.getElementById('file-input').click();
+});
+['file-input','cam-input'].forEach(id=>{
+  document.getElementById(id).addEventListener('change', async e=>{
+    const f = e.target.files?.[0];
+    if(!f) return;
+    const url = await fileToDataURL(f);
+    runAnalyze(url);
+    e.target.value='';
+  });
+});
+
+document.getElementById('home-info').addEventListener('click', ()=>tt('御史房 · v0.1'));
+document.getElementById('loading-cancel').addEventListener('click', ()=>go('home'));
+document.getElementById('report-close').addEventListener('click', ()=>go('home'));
+document.getElementById('poster-close').addEventListener('click', ()=>go('edit'));
+document.getElementById('btn-share').addEventListener('click', async ()=>{
+  const ok = await copyShareLink();
+  tt(ok ? 'LINK COPIED' : '请手动复制 URL');
+});
+
+document.getElementById('btn-to-edit').addEventListener('click', ()=>{
+  go('edit');
+  setTimeout(buildEditScreen, 30);
+});
+
+document.getElementById('btn-dl-poster').addEventListener('click', async ()=>{
+  showExporting();
+  try{
+    const dataUrl = await exportNodeToPNG(document.getElementById('poster-node'), { pixelRatio: 2.5, backgroundColor: '#000' });
+    hideExporting();
+    showSaveModal(dataUrl, {
+      theme: { bg:'rgba(0,0,0,.95)', accent:'#fff', btnBg:'#fff', btnText:'#000', closeBg:'rgba(255,255,255,.1)' },
+      title: 'VERDICT · SEALED',
+      hint: 'MOBILE: <b style="background:#fff;color:#000;padding:1px 6px;border-radius:0">LONG PRESS</b> TO SAVE'
+    });
+  }catch(err){
+    console.error(err); hideExporting(); tt('SEAL FAILED · 重试');
+  }
+});
+
+document.getElementById('btn-copy-link').addEventListener('click', async ()=>{
+  const ok = await copyShareLink();
+  tt(ok ? 'LINK COPIED' : '请手动复制 URL');
+});
+
+document.getElementById('btn-restart').addEventListener('click', ()=>{
+  if(confirm('重审一张？当前画布将清空')){
+    capturedURL = null; userPhotoDataURL = null; lastResult = null; selectedTitle = null;
+    go('home');
+  }
+});
+
+// auto demo
+const params = new URLSearchParams(location.search);
+if(params.has('auto')){
+  runAnalyze(makeDemoImageDataURL());
+}
+</script>
+</body>
+</html>
