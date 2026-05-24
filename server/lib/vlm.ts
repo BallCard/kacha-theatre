@@ -1,7 +1,7 @@
 import { callRelay } from './vlm-relay.js';
 import { SYSTEM_PROMPT, USER_PROMPT, buildRetryPrompt } from './prompt.js';
 import { validateAnalyzeResult } from './schema.js';
-import { enforceTierConsistency } from './tier.js';
+import { enforceSignConsistency, enforceTierConsistency } from './tier.js';
 import { makeFallback } from './fallback.js';
 import type { AnalyzeResult } from './types.js';
 
@@ -30,6 +30,7 @@ function tryParseJson(raw: string): unknown | null {
 
 function postProcess(parsed: any): AnalyzeResult {
   parsed.level_tier = enforceTierConsistency(parsed.moyu_score, parsed.level_tier);
+  parsed.sign_type = enforceSignConsistency(parsed.moyu_score, parsed.sign_type);
   return parsed as AnalyzeResult;
 }
 

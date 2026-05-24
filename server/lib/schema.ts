@@ -1,14 +1,14 @@
 import Ajv from 'ajv';
 import { POSE_TYPES } from './types.js';
-import { TIERS } from './tier.js';
+import { SIGN_TYPES, TIERS } from './tier.js';
 
 const ajv = new Ajv({ allErrors: true });
 
 const schema = {
   type: 'object',
   required: [
-    'pose_type', 'desk_objects', 'moyu_score', 'level_tier',
-    'title_candidates', 'report', 'face_boxes',
+    'pose_type', 'desk_objects', 'moyu_score', 'sign_type', 'level_tier',
+    'title_candidates', 'report', 'face_boxes', 'initial_stickers',
   ],
   additionalProperties: true,
   properties: {
@@ -18,6 +18,7 @@ const schema = {
       items: { type: 'string', minLength: 1, maxLength: 30 },
     },
     moyu_score: { type: 'integer', minimum: 0, maximum: 100 },
+    sign_type: { type: 'string', enum: [...SIGN_TYPES] },
     level_tier: { type: 'string', enum: [...TIERS] },
     title_candidates: {
       type: 'array', minItems: 3, maxItems: 3,
@@ -42,6 +43,20 @@ const schema = {
           y: { type: 'number', minimum: 0, maximum: 1 },
           w: { type: 'number', minimum: 0, maximum: 1 },
           h: { type: 'number', minimum: 0, maximum: 1 },
+        },
+      },
+    },
+    initial_stickers: {
+      type: 'array', minItems: 1, maxItems: 2,
+      items: {
+        type: 'object',
+        required: ['id', 'x', 'y', 'rot'],
+        properties: {
+          id: { type: 'string', pattern: '^(yellow_tag|bubble|seal_red|tier_seal)_[0-9]{2}$' },
+          text: { type: 'string', maxLength: 6 },
+          x: { type: 'number', minimum: 0, maximum: 1 },
+          y: { type: 'number', minimum: 0, maximum: 1 },
+          rot: { type: 'number', minimum: -15, maximum: 15 },
         },
       },
     },

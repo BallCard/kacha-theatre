@@ -29,17 +29,32 @@ export const USER_PROMPT = `请以御史身份审阅此图。要求：
   - 81-95  → 摸鱼大将军
   - 96-100 → 假寐天尊
 
+【签型 sign_type】同样按 moyu_score 段映射：
+  - 0-20    → 下下签
+  - 21-40   → 下签
+  - 41-60   → 中签
+  - 61-80   → 上签
+  - 81-100  → 上上签
+
 【候选称号 title_candidates】3 个具体称号，必须与 level_tier 调性一致：
   - 2-8 字、朱红印章风
   - 第一个为推荐主称号（最贴该图调性），后两个为备选风味
   - 例（划水侍郎段位）：["假寐侍郎", "神隐巡按", "走神判官"]
 
-【御史奏折 report】
+【御史奏折 report】（即"运势批文"）
   - paragraph：30-120 字玄学解读，必须包含 "紫微/天罡/方位/时辰" 等占卜词 + 1 个具体桌面物件
   - yi（今日宜）：3 项，动词短语，每项 ≤ 5 字
   - ji（今日忌）：3 项，动词短语，每项 ≤ 5 字
 
 【人脸框 face_boxes】所有检测到的人脸，归一化坐标 [0,1]。无人脸返回 []
+
+【初始贴纸 initial_stickers】推荐 1-2 个贴纸作为卡片初始构图：
+  - 数量 1-2 个，宁少勿多
+  - 每个对象：{ "id": "<贴纸ID>", "text"?: "<≤6字>", "x": 0-1, "y": 0-1, "rot": -15~15 }
+  - id 取值（必须匹配正则 ^(yellow_tag|bubble|seal_red|tier_seal)_[0-9]{2}$）：
+    yellow_tag_01..06（黄色便利贴）/ bubble_01..06（漫画气泡）/ seal_red_01..06（朱红小印）/ tier_seal_01..06（段位印）
+  - 位置 (x,y) 不得与任何 face_box 重叠（保留 0.05 安全边距）；前端会兜底平移
+  - 文字 text 必须与 desk_objects 或 pose_type 强相关（如"凉透了"对应凉咖啡，"Zzz"对应趴桌型）
 
 直接输出 JSON，第一个字符必须是 {，不要解释、不要包裹代码块。
 
@@ -48,6 +63,7 @@ export const USER_PROMPT = `请以御史身份审阅此图。要求：
   "pose_type": "趴桌型",
   "desk_objects": ["半杯冷美式", "青轴机械键盘", "亮着的双屏"],
   "moyu_score": 78,
+  "sign_type": "上签",
   "level_tier": "划水侍郎",
   "title_candidates": ["假寐侍郎", "神隐巡按", "走神判官"],
   "report": {
@@ -55,7 +71,11 @@ export const USER_PROMPT = `请以御史身份审阅此图。要求：
     "yi": ["闭目养神", "假装思考", "等下班"],
     "ji": ["开周会", "改PPT", "接电话"]
   },
-  "face_boxes": [{ "x": 0.36, "y": 0.22, "w": 0.20, "h": 0.24 }]
+  "face_boxes": [{ "x": 0.36, "y": 0.22, "w": 0.20, "h": 0.24 }],
+  "initial_stickers": [
+    { "id": "yellow_tag_02", "text": "凉透了", "x": 0.12, "y": 0.78, "rot": -6 },
+    { "id": "bubble_01", "text": "Zzz", "x": 0.70, "y": 0.10, "rot": 8 }
+  ]
 }`;
 
 export const RETRY_PROMPT = `上一次输出未通过 JSON schema 校验，错误信息：{ERRORS}

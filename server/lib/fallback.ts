@@ -4,6 +4,7 @@ export const FALLBACK_RESULT: AnalyzeResult = {
   pose_type: '假装思考型',
   desk_objects: ['显示器', '桌面'],
   moyu_score: 60,
+  sign_type: '中签',
   level_tier: '摸鱼修士',
   title_candidates: ['半日仙人', '神游侍中', '摸鱼修士'],
   report: {
@@ -12,6 +13,9 @@ export const FALLBACK_RESULT: AnalyzeResult = {
     ji: ['被领导看到', '开会发言', '改PPT'],
   },
   face_boxes: [],
+  initial_stickers: [
+    { id: 'yellow_tag_03', text: '再摸会儿', x: 0.15, y: 0.80, rot: -4 },
+  ],
 };
 
 export function makeFallback(): AnalyzeResult {

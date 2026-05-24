@@ -145,6 +145,14 @@ body{display:flex;justify-content:center;align-items:flex-start}
 .edit-summary .meta .pose{font-family:var(--mono);font-size:10px;letter-spacing:1.5px;color:#c9b88a;text-transform:uppercase}
 .edit-summary .badge{font-family:var(--kai);font-size:12px;font-weight:700;background:var(--primary);color:var(--canvas);padding:5px 10px;border-radius:2px;letter-spacing:1px}
 
+/* 签型徽章（5档配色，ADR-005 偏离 / Part1 spec §4） */
+.sign-chip{display:inline-flex;align-items:center;font-family:var(--kai);font-size:11px;font-weight:800;letter-spacing:2px;padding:2px 8px;margin-left:6px;border-radius:2px;color:#fdfaf2;background:#5b5b5b;border:1px solid rgba(255,255,255,.15);vertical-align:middle}
+.sign-chip[data-sign="下下签"]{background:#5b5b5b}
+.sign-chip[data-sign="下签"]{background:#5d6f88}
+.sign-chip[data-sign="中签"]{background:#c08a3e;color:#2a1a08}
+.sign-chip[data-sign="上签"]{background:#3f8c5a}
+.sign-chip[data-sign="上上签"]{background:#d4222b;border-color:#f0c869;box-shadow:0 0 0 1px #f0c869 inset,0 0 6px rgba(240,200,105,.5)}
+
 .edit-hint{margin:0 20px 8px;font-family:var(--kai);font-size:11px;letter-spacing:1px;color:var(--body);text-align:center;position:relative;z-index:2}
 
 .stage-wrap{margin:0 20px;border-radius:4px;overflow:hidden;background:var(--surface);border:1.5px solid var(--primary);box-shadow:0 4px 14px rgba(0,0,0,.1);position:relative;z-index:2}
@@ -386,7 +394,7 @@ body{display:flex;justify-content:center;align-items:flex-start}
     <div class="edit-summary" id="edit-summary">
       <div class="num">—<small>/100</small></div>
       <div class="meta">
-        <div class="tier">—</div>
+        <div class="tier">—<span class="sign-chip" data-sign="">—</span></div>
         <div class="pose">—</div>
       </div>
       <div class="badge">封号 —</div>
@@ -701,6 +709,144 @@ const STICKER_LIBRARY = [
   { name:'奉天承运', url:'_assets/seal-fengtian.png', shape:'sq' },
 ];
 
+// AI 自动垫印规则（ADR-005 偏离 6）：
+// 优先消费 VLM 返回的 initial_stickers（归一化坐标 → 像素 + 避脸兜底）；
+// 字段缺失或全部不可映射时走 heuristic（根据 score / yi / ji 选 2 枚朱红小印，避开右上段位印 + 左下分数票 + 人脸框）。
+// 候选锚点（中心点）：左上 / 右中 / 左中 / 右下，按"远离硬占位 + 远离人脸"挑前 2 个。
+
+// VLM id → 本地资源 url 的映射（guofeng 当前只有 seal_red 与 tier_seal 两类 PNG）
+function resolveStickerAsset(id) {
+  if (!id) return null;
+  const m = id.match(/^(yellow_tag|bubble|seal_red|tier_seal)_(\d{2})$/);
+  if (!m) return null;
+  const [, kind, nStr] = m;
+  const n = parseInt(nStr, 10);
+  if (kind === 'seal_red') {
+    return STICKER_LIBRARY[(n - 1) % STICKER_LIBRARY.length]?.url || null;
+  }
+  if (kind === 'tier_seal') {
+    const tiers = ['打工新丁', '划水学徒', '摸鱼修士', '划水侍郎', '摸鱼大将军', '假寐天尊'];
+    return TIER_IMG[tiers[(n - 1) % 6]] || null;
+  }
+  // yellow_tag / bubble 暂无 PNG 资源，返回 null 让上层走 heuristic
+  return null;
+}
+
+// 把 VLM 给的归一化贴纸映射成 stage 像素坐标 + 避脸兜底
+function mapInitialStickersFromVLM(r) {
+  const list = Array.isArray(r.initial_stickers) ? r.initial_stickers : [];
+  if (list.length === 0) return [];
+  const SIZE = 85;
+  const faceObstacles = (r.face_boxes || []).map(b => ({
+    x: (b.x + b.w / 2) * STAGE_W,
+    y: (b.y + b.h / 2) * STAGE_H,
+    r: Math.max(b.w * STAGE_W, b.h * STAGE_H) * 0.9 + 20,
+  }));
+  const hardOccupied = [
+    { x: STAGE_W - 65, y: 80, r: 80 },                  // 右上段位印
+    { x: 100,          y: STAGE_H - 60, r: 70 },        // 左下分数票
+  ];
+  const safeAnchors = [
+    { x: 60,           y: 90,             rot: -8 },
+    { x: STAGE_W - 55, y: STAGE_H / 2,    rot: 6  },
+    { x: 55,           y: STAGE_H / 2+30, rot: 4  },
+    { x: STAGE_W - 60, y: STAGE_H - 70,   rot: -10 },
+  ];
+  const out = [];
+  for (const s of list.slice(0, 2)) {
+    const url = resolveStickerAsset(s.id);
+    if (!url) return []; // 任一 id 不可映射，整体走 heuristic（保持视觉一致）
+    let x = s.x * STAGE_W;
+    let y = s.y * STAGE_H;
+    const rot = typeof s.rot === 'number' ? s.rot : 0;
+    // 避脸/避占位：与任一障碍重叠则就近换最远 safeAnchor
+    const allObstacles = [...hardOccupied, ...faceObstacles];
+    const hit = allObstacles.some(o => Math.hypot(o.x - x, o.y - y) < o.r + SIZE / 2 - 8);
+    if (hit) {
+      const best = safeAnchors
+        .map(a => ({ a, d: Math.min(...allObstacles.map(o => Math.hypot(o.x - a.x, o.y - a.y))) }))
+        .sort((u, v) => v.d - u.d)[0]?.a;
+      if (best) { x = best.x; y = best.y; }
+    }
+    out.push({ url, x, y, size: SIZE, rotation: rot });
+  }
+  return out;
+}
+
+function autoPickSeals(r) {
+  // 0) 优先消费 VLM 返回的 initial_stickers
+  const fromVLM = mapInitialStickersFromVLM(r);
+  if (fromVLM.length > 0) return fromVLM;
+
+  // 1) 选两枚印章名（从 STICKER_LIBRARY 中按规则挑）
+  const yi = (r.report?.yi || []).join('|');
+  const ji = (r.report?.ji || []).join('|');
+  const pose = r.pose_type || '';
+  const score = r.moyu_score ?? 50;
+  const picked = [];
+  const push = (name) => {
+    if (picked.includes(name)) return;
+    if (STICKER_LIBRARY.find(s => s.name === name)) picked.push(name);
+  };
+  if (score >= 80)       push('神游太虚');
+  else if (score >= 55)  push('摸鱼有理');
+  else if (score >= 30)  push('奉天承运');
+  else                   push('驳回');
+  if (/睡|趴|瘫|假寐|瞌睡/.test(pose) || /神游|养神|闭目/.test(yi))      push('神游太虚');
+  else if (/会议|汇报|开会|对齐|催|急|DDL/i.test(ji))                       push('驳回');
+  else if (score >= 70)                                                       push('大吉');
+  else if (/摸鱼|划水/.test(yi))                                              push('摸鱼有理');
+  else                                                                        push('准奏');
+  // 兜底补齐到 2 张
+  for (const fallback of ['大吉','准奏','摸鱼有理','奉天承运']) {
+    if (picked.length >= 2) break;
+    push(fallback);
+  }
+  const chosen = picked.slice(0, 2).map(name => STICKER_LIBRARY.find(s => s.name === name));
+
+  // 2) 候选锚点（中心点；size=85）
+  const SIZE = 85;
+  const anchors = [
+    { x: 60,           y: 90,            rot: -8 },   // 左上
+    { x: STAGE_W - 55, y: STAGE_H/2,     rot: 6  },   // 右中
+    { x: 55,           y: STAGE_H/2 + 30,rot: 4  },   // 左中
+    { x: STAGE_W - 60, y: STAGE_H - 70,  rot: -10 },  // 右下
+  ];
+
+  // 3) 标出"已占"区域（右上段位印 + 左下分数票 + 人脸框）
+  const occupied = [
+    { x: STAGE_W - 65, y: 80, r: 80 },              // 段位大印（半径放大避撞）
+    { x: 100,          y: STAGE_H - 60, r: 70 },    // 分数票
+  ];
+  (r.face_boxes||[]).forEach(b => {
+    occupied.push({
+      x: (b.x + b.w/2) * STAGE_W,
+      y: (b.y + b.h/2) * STAGE_H,
+      r: Math.max(b.w*STAGE_W, b.h*STAGE_H) * 0.9 + 20,
+    });
+  });
+
+  // 4) 选前 2 个不与占位冲突的锚点；不够就强塞剩余 anchors
+  const minSep = SIZE * 0.9;
+  const out = [];
+  for (const a of anchors) {
+    if (out.length >= chosen.length) break;
+    const hit = occupied.some(o => Math.hypot(o.x - a.x, o.y - a.y) < o.r + SIZE/2 - 8);
+    if (hit) continue;
+    const tooClose = out.some(u => Math.hypot(u.x - a.x, u.y - a.y) < minSep);
+    if (tooClose) continue;
+    out.push(a);
+  }
+  while (out.length < chosen.length) out.push(anchors[out.length % anchors.length]);
+
+  return chosen.map((s, i) => ({
+    url: s.url,
+    x: out[i].x, y: out[i].y,
+    size: SIZE,
+    rotation: out[i].rot,
+  }));
+}
+
 // 段位印章映射
 const TIER_IMG = {
   '打工新丁':   '_assets/tier-1-dagongxinding.png',
@@ -792,10 +938,12 @@ function enterEdit(){
   if(!r) return;
   const sumEl = document.getElementById('edit-summary');
   sumEl.querySelector('.num').innerHTML = `${r.moyu_score}<small>/100</small>`;
-  sumEl.querySelector('.tier').textContent = r.level_tier;
+  // 段位 + 签型徽章（5档配色）
+  const sign = r.sign_type || '';
+  sumEl.querySelector('.tier').innerHTML = `${r.level_tier}<span class="sign-chip" data-sign="${sign}">${sign || '—'}</span>`;
   sumEl.querySelector('.pose').textContent = `${r.pose_type} · NO.${state.reportId.slice(0,6)}`;
   sumEl.querySelector('.badge').textContent = `封号 · ${(r.title_candidates||[])[state.activeTitleIdx]||'—'}`;
-  document.getElementById('edit-tier-badge').textContent = r.level_tier;
+  document.getElementById('edit-tier-badge').innerHTML = `${r.level_tier}<span class="sign-chip" data-sign="${sign}" style="margin-left:8px">${sign || '—'}</span>`;
 
   const stageEl = document.getElementById('stage');
   stageEl.innerHTML = '';
@@ -826,6 +974,15 @@ function enterEdit(){
     const cy = (box.y + box.h/2)*STAGE_H;
     const size = Math.max(60, box.w*STAGE_W*1.4);
     state.stage.addSticker({ type:'image', imageUrl: cleanedOf('_assets/face-seal.png'), x:cx, y:cy, w:size, h:size, rotation:0 });
+  });
+
+  // AI 自动垫 2 枚朱红小印 —— 按 score / yi / ji 选印 + 避开人脸 + 避开已占的右上段位印 / 左下分数票（ADR-005 偏离 6）
+  autoPickSeals(r).forEach(p => {
+    state.stage.addSticker({
+      type:'image',
+      imageUrl: cleanedOf(p.url),
+      x: p.x, y: p.y, w: p.size, h: p.size, rotation: p.rotation,
+    });
   });
 
   const grid = document.getElementById('sticker-grid');
@@ -898,7 +1055,7 @@ function renderPoster(){
         <div class="pscore-row">
           <div class="lab">摸鱼指数</div>
           <div class="stamp-num">${r.moyu_score}<small>/100</small></div>
-          <div class="ti">${r.level_tier}</div>
+          <div class="ti">${r.level_tier}<span class="sign-chip" data-sign="${r.sign_type||''}" style="margin-left:6px">${r.sign_type||''}</span></div>
         </div>
       </div>
       ${cap}

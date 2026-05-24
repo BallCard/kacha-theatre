@@ -5,6 +5,7 @@ const VALID = {
   pose_type: '趴桌型',
   desk_objects: ['半杯冷美式', '青轴键盘'],
   moyu_score: 87,
+  sign_type: '上上签',
   level_tier: '摸鱼大将军',
   title_candidates: ['划水大将军', '假寐侍郎', '摸鱼世家'],
   report: {
@@ -13,6 +14,9 @@ const VALID = {
     ji: ['开会', '改PPT', '接电话'],
   },
   face_boxes: [{ x: 0.32, y: 0.18, w: 0.24, h: 0.28 }],
+  initial_stickers: [
+    { id: 'yellow_tag_02', text: '凉透了', x: 0.12, y: 0.78, rot: -6 },
+  ],
 };
 
 describe('validateAnalyzeResult', () => {
