@@ -20,7 +20,7 @@ export function ReportCard({ paragraph, yi, ji }: ReportCardProps) {
         <div className="flex items-center gap-1.5">
           <span className="text-[#d4222b] font-serif text-[18px] font-black">▌</span>
           <span className="font-serif text-[#2a2830] font-bold text-sm tracking-wider" style={{ fontFamily: "'STKaiti', 'Kaiti', serif" }}>
-            摸鱼御史奏折
+            咔嚓剧场·御史房批复
           </span>
         </div>
         <span className="text-[10px] font-serif font-semibold text-[#8a8a8a] bg-[#ebe2c7] px-2 py-0.5 rounded-full" style={{ fontFamily: "'STKaiti', 'Kaiti', serif" }}>

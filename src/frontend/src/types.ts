@@ -39,13 +39,13 @@ export interface StickerDefinition {
 // ============================================================
 
 /**
- * 主题无关的剧情上下文。任何上游分析模块（当前是摸鱼御史，未来可换校园/乙游/悬疑等）
+ * 主题无关的剧情上下文。任何上游分析模块（当前是摸鱼主题，未来可换校园/乙游/悬疑等）
  * 都通过一个 adapter 把自己的分析结果转成 StoryContext 喂给剧情引擎。
  */
 export interface StoryContext {
   theme: {
     id: string;                    // 'moyu-yushi' | 'campus' | 'otome' | ...
-    name: string;                  // "摸鱼御史·御史房"
+    name: string;                  // "摸鱼·御史房"
     visualStyle: string;           // 喂给图生图的风格锚词（"chinese ancient court painting, ukiyo-e meets anime"）
     languageStyle: string;         // 喂给 LLM 的语气描述（"半文半白、玄学占卜、互联网梗"）
   };

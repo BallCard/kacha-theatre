@@ -2,7 +2,7 @@
  * 离线兜底用的预录剧情。?mock=1 或 API 抽风时使用。
  *
  * Part 2 设计（5 节点 / 3 策略 / 宜忌强约束 / 6 结局），见
- *   docs/superpowers/specs/2026-05-23-摸鱼御史-part2-剧情游戏.md
+ *   docs/superpowers/specs/2026-05-23-kacha-juchang-part2-design.md
  *
  * 旁白/对白用 {NAME} 占位，渲染前会被 StoryScreen.applyNameToArc 替换为玩家姓名。
  */
@@ -224,7 +224,7 @@ export const MOCK_STORY_ARC: StoryArc = {
 export const MOCK_STORY_CONTEXT: StoryContext = {
   theme: {
     id: 'moyu-yushi',
-    name: '摸鱼御史·御史房',
+    name: '摸鱼·御史房',
     visualStyle:
       'chinese ancient court painting style fused with modern anime illustration, ' +
       'warm earthy palette, parchment texture',

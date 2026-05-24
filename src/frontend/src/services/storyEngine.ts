@@ -1,7 +1,7 @@
 /**
  * 剧情引擎：核心负责生成「整棵剧情树」和「每帧连环画」。
  *
- * Part 2 设计（见 docs/superpowers/specs/2026-05-23-摸鱼御史-part2-剧情游戏.md）：
+ * Part 2 设计（见 docs/superpowers/specs/2026-05-23-kacha-juchang-part2-design.md）：
  *   - 1 开篇 + 5 节点（辰/午前/未/申/酉）+ 6 结局
  *   - 每节点 3 选项分别对应「顺应天命 / 逆天而行 / 中立观望」
  *   - 每节点至少 1 个选项 yijiMatch='yi'、至少 1 个 yijiMatch='ji'，关键词必须来自 Part 1 奏折
@@ -42,7 +42,7 @@ const ALL_ENDING_TYPES: EndingType[] = [
   '哭笑不得',
 ];
 
-const STORY_SYSTEM_PROMPT = `你是「摸鱼御史」剧情编剧。请把一张办公室照片演成 5 幕互动剧。
+const STORY_SYSTEM_PROMPT = `你是御史房派驻的"演义官"，负责把一张办公室照片演成 5 幕互动剧。
 
 【调性】
 - 半文半白御史腔为主，可塞「周报 / KPI / 开会 / 划水 / 加班 / 钉钉」等现代办公词制造反差

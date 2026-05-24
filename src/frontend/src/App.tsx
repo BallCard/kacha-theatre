@@ -275,7 +275,7 @@ export default function App() {
       // 点 a[download] 直接下载到本地
       const a = document.createElement("a");
       a.href = dataUrl;
-      a.download = `摸鱼御史_${selectedTitle || '诏书'}.png`;
+      a.download = `咔嚓剧场_${selectedTitle || '诏书'}.png`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -329,7 +329,7 @@ export default function App() {
                 className="text-2xl font-black text-[#d4222b] font-serif tracking-widest drop-shadow-xs"
                 style={{ fontFamily: "'STKaiti', 'Kaiti', 'STSong', serif" }}
               >
-                摸鱼御史
+                咔嚓剧场
               </span>
             </header>
 

@@ -2,14 +2,15 @@
 
 > **重要**：前后端开发的"宪法"，所有接口必须先在这里定义，再开发。
 > **更新规则**：任何接口变更必须先更新本文档，并通知相关开发者。
-> **设计依据**：[设计文档 §3](./superpowers/specs/2026-05-23-摸鱼御史-design.md#§3-模块拆分)
+> **表述规范**：每个接口标注归属 (Part 1) 或 (Part 2)。详见 [CLAUDE.md 表述规范](../CLAUDE.md)。
+> **设计依据**：[Part 1 设计 §3](./superpowers/specs/2026-05-23-kacha-juchang-part1-design.md) · [Part 2 设计 §5](./superpowers/specs/2026-05-23-kacha-juchang-part2-design.md)
 
 ## 基础信息
 
 | 项 | 值 |
 |---|---|
 | Base URL（dev） | `http://localhost:3000` |
-| Base URL（prod） | `https://moyu.run`（或 Vercel 二级域名） |
+| Base URL（prod） | 待申请部署域名（kacha.run 候选，或 Vercel 二级域名 `kacha-juchang.vercel.app`） |
 | 协议 | HTTPS |
 | 编码 | UTF-8 JSON |
 
@@ -17,11 +18,12 @@
 
 > v2.1 在 v2 基础上新增 Part 2 剧情接口（`/plot/next`、`/plot/ending`），见下方 §3、§4。
 > Part 1 的 `/analyze` 接口不动。
-> 设计依据：[ADR-004 Part2 增量](./decisions/004-Part2-剧情游戏增量.md) + [Part 2 设计文档](./superpowers/specs/2026-05-23-摸鱼御史-part2-剧情游戏.md)
+> 设计依据：[ADR-004 Part2 增量](./decisions/004-Part2-剧情游戏增量.md) · [ADR-005 对标新需求文档](./decisions/005-咔嚓剧场对标新需求文档.md) · [Part 2 设计文档](./superpowers/specs/2026-05-23-kacha-juchang-part2-design.md)
 
-### 1. POST /analyze — VLM 审阅图片（Part 1 核心接口）
+### 1. POST /analyze — (Part 1) VLM 审阅图片，输出运势卡片数据
 
-**用途**：把用户上传的图片送给 VLM 审阅，返回结构化"御史奏折"。
+**归属**：Part 1（运势卡片）
+**用途**：把用户上传的图片送给 VLM 审阅，返回结构化"御史奏折"+ 评分 + 段位 + 签型 + AI 初始贴纸建议。
 
 **请求**：
 
@@ -63,7 +65,7 @@ Content-Type: application/json
 
 | 字段 | 类型 | 约束 |
 |---|---|---|
-| `pose_type` | enum | 7 种姿态之一（详见 [§6.3 schema](./superpowers/specs/2026-05-23-摸鱼御史-design.md)） |
+| `pose_type` | enum | 7 种姿态之一（详见 [Part 1 §6.3 schema](./superpowers/specs/2026-05-23-kacha-juchang-part1-design.md)） |
 | `desk_objects` | string[] | 0-5 项 |
 | `moyu_score` | int | 0-100 |
 | `level_tier` | enum | 6 档之一，必须与 score 一致（不一致后端按 score 强制覆盖） |
@@ -86,7 +88,7 @@ Content-Type: application/json
 
 **失败响应**（HTTP 200，body 仍返回兜底数据，前端不需要处理 5xx 业务错）：
 
-后端 VLM 全挂时返回 [§6.5 兜底模板](./superpowers/specs/2026-05-23-摸鱼御史-design.md#65-兜底模板vlm-全挂的最后一道)，前端无感知。
+后端 VLM 全挂时返回 [Part 1 §6.5 兜底模板](./superpowers/specs/2026-05-23-kacha-juchang-part1-design.md)，前端无感知。
 
 **异常响应**（HTTP 5xx，仅在请求格式错时返回）：
 
@@ -107,7 +109,7 @@ Content-Type: application/json
 
 ---
 
-### 2. GET /health — 健康检查
+### 2. GET /health — (Part 1 & Part 2 共用) 健康检查
 
 **用途**：现场演示前确认后端服务在线。
 
@@ -117,7 +119,7 @@ GET /health → 200 { "status": "ok", "ts": 1716480000 }
 
 ---
 
-### 3. POST /plot/next — 单节点剧情生成（Part 2 核心接口）
+### 3. POST /plot/next — (Part 2) 单节点剧情生成
 
 **用途**：Part 1 出完奏折后，用户进入剧情游戏，每个节点调一次本接口。
 
@@ -195,7 +197,7 @@ Content-Type: application/json
 
 ---
 
-### 4. POST /plot/ending — 终章裁决（Part 2）
+### 4. POST /plot/ending — (Part 2) 终章裁决
 
 **用途**：5 节点跑完后，前端按 §4.2 规则算出 `ending_type`，调此接口生成御史房裁决书。
 
@@ -262,7 +264,7 @@ Content-Type: application/json
 - `POST /board/report` — 举报下架
 - `POST /scroll/save` — 卷宗持久化（连载叙事专用）
 
-详见 [设计文档 §15 P1+ 路线](./superpowers/specs/2026-05-23-摸鱼御史-design.md#§15-p1-路线-mvp-跑通后再做-本设计文档不再展开)。
+详见 [Part 1 §15 P1+ 路线](./superpowers/specs/2026-05-23-kacha-juchang-part1-design.md)。
 
 ---
 

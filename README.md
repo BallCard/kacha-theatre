@@ -1,11 +1,11 @@
-# 抖音 AI 创变者计划 2026 · 杭州站 · 摸鱼御史
+# 抖音 AI 创变者计划 2026 · 杭州站 · 咔嚓剧场
 
 > 队长：波尔卡德
 > 团队：4 人
 > 比赛时间：2026.05.23 09:00 - 2026.05.24 18:30
 > 开发时长：25 小时
 > **赛道：赛道四 · 视觉搜索**
-> **作品：摸鱼御史（MVP v2.1 — Part 1 单图体验 + Part 2 互动剧情）**
+> **作品：咔嚓剧场（Part 1 摸鱼主题运势卡片 + Part 2 古风互动剧情，MVP v2.1）**
 
 ## 项目状态
 
@@ -14,12 +14,13 @@
 - [x] 文档系统搭建
 - [x] Git 初始化
 - [x] 赛道选择 → **赛道四**
-- [x] 创意确定 → **摸鱼御史**
-- [x] MVP v2 范围锁定（Part 1 单图体验）
+- [x] 创意确定 → **咔嚓剧场**（首期主题：摸鱼 / 古代批阅氛围）
+- [x] MVP v2 范围锁定（Part 1 运势卡片）
 - [x] **MVP v2.1 范围扩展（Part 2 互动剧情增量）**
-- [x] 技术栈选择 → React 19 + Konva.js / Vercel Functions BFF / OpenAI 兼容中转(主 gemini-2.5-flash-nothinking,兜底 gpt-4.1-mini)
-- [x] Part 1 设计文档定稿（[摸鱼御史-design.md](./docs/superpowers/specs/2026-05-23-摸鱼御史-design.md)）
-- [x] Part 2 设计文档定稿（[摸鱼御史-part2-剧情游戏.md](./docs/superpowers/specs/2026-05-23-摸鱼御史-part2-剧情游戏.md)）
+- [x] 对标新需求文档（[ADR-005](./docs/decisions/005-咔嚓剧场对标新需求文档.md)）
+- [x] 技术栈选择 → React 19 + Konva.js / Vercel Functions BFF / OpenAI 兼容中转(主 gemini-2.5-flash-nothinking,兜底 gpt-4.1-mini) + gpt-image-2 链
+- [x] Part 1 设计文档定稿（[part1-design.md](./docs/superpowers/specs/2026-05-23-kacha-juchang-part1-design.md)）
+- [x] Part 2 设计文档定稿（[part2-design.md](./docs/superpowers/specs/2026-05-23-kacha-juchang-part2-design.md)）
 - [x] 素材生图 prompt 就绪（[sticker-prompts.md](./design/sticker-prompts.md)）
 - [x] 前端生成 prompt 就绪（[frontend-gemini-prompt.md](./design/frontend-gemini-prompt.md)）
 - [ ] 25 张贴纸资源生成
@@ -32,30 +33,31 @@
 
 ## 作品速览
 
-**一句话**：上传一张办公室日常照，AI 用搞怪御史调性打摸鱼分（0-100）、起段位称号、写运势奏折；用户先在贴纸库里二创出海报，再点「召见御史·演今日剧」进入 5 节点互动剧情，6 种结局之一收尾，最后导出一张连环画长图。
+**一句话**：上传一张办公室日常照，Part 1 用古代批阅口吻打"摸鱼分"（0-100）、起段位称号、写运势奏折并出可分享卡片；用户在贴纸库里二创出海报后点「召见御史·演今日剧」进入 Part 2 — 同一张照片承接 5 节点互动剧情，6 种结局之一收尾，导出一张连环画长图。
 
-### Part 1 · 单图体验（< 60s）
+### Part 1 · 运势卡片（< 60s）
 
-上传 → AI 审阅（VLM 单次调用）→ 出海报（朱红印章 + 等级徽章 + 大字称号 + 奏折）→ 修图二创（拖贴纸 / 加文字 / 切称号）→ 导出竖版长图
+上传 → AI 审阅（VLM 单次调用）→ 出卡片（朱红印章 + 等级徽章 + 大字称号 + 奏折批文 + **AI 自动叠 1-2 个相关贴纸**）→ 用户二创（拖更多贴纸 / 加文字 / 切称号 / 删改 AI 默认贴纸）→ 导出竖版长图
 
 **段位系统**：6 档（打工新丁 / 划水学徒 / 摸鱼修士 / 划水侍郎 / 摸鱼大将军 / **假寐天尊**），各档独立配色 + 印章样式，假寐天尊带七彩光晕。
+**签型系统**：5 档（下下签 / 下签 / 中签 / 上签 / 上上签），由摸鱼分按段映射。
 
 ### Part 2 · 互动剧情（< 90s）
 
-奏折页点 CTA → 5 节点剧情（辰/午前/未/申/酉）→ 每节点 3 选项（顺应天命 / 逆天而行 / 中立观望）→ 宜忌真生效（今日宜对应选项稳过，今日忌对应选项必翻车）→ 6 结局之一 → 御史房裁决书 + 连环画长图导出
+奏折页点 CTA → 5 节点剧情（辰/午前/未/申/酉）→ 每节点 3 选项（顺应天命 / 逆天而行 / 中立观望）→ 宜忌真生效（今日宜对应选项稳过，今日忌对应选项必翻车）→ 6 结局之一 → 御史房裁决书 + 连环画长图导出。**叙事承接 Part 1 上传的同一张照片场景；文风维持古风一致**（与 Part 1 视觉语言统一，[ADR-005](./docs/decisions/005-咔嚓剧场对标新需求文档.md) 已明确否决"现代口语化"方向）。
 
 **6 种结局**：天降祥瑞 / 御史降罚 / 逆天改命 / 贵人相助 / 天命应验 / 哭笑不得
 
-**详见**：[Part 1 设计](./docs/superpowers/specs/2026-05-23-摸鱼御史-design.md) | [Part 2 设计](./docs/superpowers/specs/2026-05-23-摸鱼御史-part2-剧情游戏.md)
+**详见**：[Part 1 设计](./docs/superpowers/specs/2026-05-23-kacha-juchang-part1-design.md) | [Part 2 设计](./docs/superpowers/specs/2026-05-23-kacha-juchang-part2-design.md)
 
 ## 快速导航
 
 ### 核心文档
-- **[Part 1 设计文档](./docs/superpowers/specs/2026-05-23-摸鱼御史-design.md)** — 单图体验完整设计（14 章）
-- **[Part 2 设计文档](./docs/superpowers/specs/2026-05-23-摸鱼御史-part2-剧情游戏.md)** — 5 节点互动剧情完整设计（11 章）
-- **[CLAUDE.md](./CLAUDE.md)** — 比赛背景、评审标准、文档更新规则
+- **[Part 1 设计文档](./docs/superpowers/specs/2026-05-23-kacha-juchang-part1-design.md)** — 运势卡片完整设计（14 章）
+- **[Part 2 设计文档](./docs/superpowers/specs/2026-05-23-kacha-juchang-part2-design.md)** — 5 节点互动剧情完整设计（11 章）
+- **[CLAUDE.md](./CLAUDE.md)** — 项目身份、表述规范、文档更新规则
 - **[团队信息](./docs/team.md)** — 成员分工
-- **[API契约](./docs/api-contract.md)** — 前后端接口（含 /plot/next、/plot/ending）
+- **[API契约](./docs/api-contract.md)** — 前后端接口（Part 1 /analyze + Part 2 /plot/next、/plot/ending）
 
 ### 设计资源
 - **[贴纸生图 prompt](./design/sticker-prompts.md)** — 25 张资产的提示词
@@ -66,10 +68,11 @@
 ### 决策与记录
 - **[ADR-001 赛道选择](./docs/decisions/001-赛道选择.md)** — ✅ 已决（赛道四）
 - **[ADR-002 技术栈](./docs/decisions/002-技术栈选择.md)** — ✅ 已决
-- **[ADR-003 MVP 范围](./docs/decisions/003-MVP-范围.md)** — ✅ 已决（Part 1 单图体验）
-- **[ADR-004 Part 2 增量](./docs/decisions/004-Part2-剧情游戏增量.md)** — ✅ 已决（5 节点互动剧情）
+- **[ADR-003 MVP 范围](./docs/decisions/003-MVP-范围.md)** — ✅ 已决（Part 1 运势卡片）
+- **[ADR-004 Part 2 增量](./docs/decisions/004-Part2-剧情游戏增量.md)** — ✅ 已决（Part 2 5 节点互动剧情）
+- **[ADR-005 对标新需求文档](./docs/decisions/005-咔嚓剧场对标新需求文档.md)** — ✅ 已决（品牌改名 + 4 条偏离点）
 - **[开发日志](./docs/devlog/)** — 每 4-6 小时更新
-- **[队友需求归档](./docs/requirements/)** — 咔嚓剧场需求文档原稿
+- **[需求归档](./docs/requirements/)** — 咔嚓剧场需求文档与剧情向技术设计文档原稿
 
 ## 技术栈
 
@@ -98,10 +101,11 @@
 ## 开发原则
 
 - **80 分能演示 > 95 分半成品**
-- **AI 是编剧不是辅助**：VLM 一次往返同时输出评分、段位、3 个候选称号、玄学奏折
-- **用户做二创**：AI 不自动盖贴纸，所有视觉元素由用户从工具栏拖入
+- **AI 是编剧不是辅助**：Part 1 VLM 一次往返同时输出评分、段位、签型、3 个候选称号、玄学奏折；Part 2 5 节点 + 6 结局规则引擎
+- **用户做二创（AI 先垫底）**：Part 1 AI 先按识别到的姿态/物品自动盖 1-2 个相关贴纸作为初始构图，用户在此基础上从工具栏继续拖贴纸 / 加文字 / 切称号 / 删改 AI 自动盖的贴纸
 - **不识别人脸身份**：主角由用户上传动作隐式声明，规避隐私雷区
 - **演示前必须有 offline fallback**
+- **表述规范**：所有讨论/文档/commit 必须 Part 1 / Part 2 明确分述（见 [CLAUDE.md](./CLAUDE.md)）
 
 ## 目录结构
 
@@ -117,7 +121,8 @@
 │   ├── mockups/ wireframes/ poster/
 ├── docs/
 │   ├── superpowers/specs/
-│   │   └── 2026-05-23-摸鱼御史-design.md  # MVP v2 设计文档（权威）
+│   │   ├── 2026-05-23-kacha-juchang-part1-design.md  # Part 1 设计文档（权威）
+│   │   └── 2026-05-23-kacha-juchang-part2-design.md  # Part 2 设计文档（权威）
 │   ├── decisions/                     # ADR
 │   ├── devlog/                        # 开发日志
 │   ├── meetings/                      # 会议记录

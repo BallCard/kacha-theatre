@@ -1,4 +1,4 @@
-# 摸鱼御史 · 后端 + Prompt + 兜底 + 联调 + 演示 实施计划
+# 咔嚓剧场 · Part 1 后端 + Prompt + 兜底 + 联调 + 演示 实施计划
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
@@ -8,7 +8,7 @@
 
 **Tech Stack:** Node 20 / TypeScript / Vercel Serverless / Express（本地 dev） / ajv / undici / dotenv / 豆包 vision-pro / GPT-4o（备选）
 
-**设计依据:** [设计文档](../specs/2026-05-23-摸鱼御史-design.md) §3 §6 §11 §13；[API 契约](../../api-contract.md)
+**设计依据:** [设计文档](../specs/2026-05-23-kacha-juchang-part1-design.md) §3 §6 §11 §13；[API 契约](../../api-contract.md)
 
 **时间预算:** 12 小时纯开发 + 3 小时联调 + 2 小时演示物料 = 17h，留 8h buffer 给 prompt 调优和睡眠。
 
@@ -221,7 +221,7 @@ git commit -m "[后端] 工程脚手架 + Vercel + TS 配置"
 - Create: `server/lib/tier.ts`
 - Test: `server/test/tier.test.ts`
 
-依据：[设计文档 §4](../specs/2026-05-23-摸鱼御史-design.md#§4-等级系统mvp-主打玩法) 6 档表。
+依据：[设计文档 §4](../specs/2026-05-23-kacha-juchang-part1-design.md#§4-等级系统mvp-主打玩法) 6 档表。
 
 - [ ] **Step 1: 写失败测试 `server/test/tier.test.ts`**
 
@@ -389,7 +389,7 @@ git commit -m "[后端] AnalyzeResult 类型定义"
 - Create: `server/lib/schema.ts`
 - Test: `server/test/schema.test.ts`
 
-依据：[设计文档 §6.3](../specs/2026-05-23-摸鱼御史-design.md#63-json-schema-强约束)
+依据：[设计文档 §6.3](../specs/2026-05-23-kacha-juchang-part1-design.md#63-json-schema-强约束)
 
 - [ ] **Step 1: 写失败测试**
 
@@ -565,7 +565,7 @@ git commit -m "[后端] ajv schema 校验 + 8 项约束测试"
 - Create: `server/lib/fallback.ts`
 - Test: `server/test/fallback.test.ts`
 
-依据：[设计文档 §6.5](../specs/2026-05-23-摸鱼御史-design.md#65-兜底模板vlm-全挂的最后一道)
+依据：[设计文档 §6.5](../specs/2026-05-23-kacha-juchang-part1-design.md#65-兜底模板vlm-全挂的最后一道)
 
 - [ ] **Step 1: 写测试**
 
@@ -646,12 +646,12 @@ git commit -m "[后端] 兜底模板（VLM 全挂保命路径）"
 **Files:**
 - Create: `server/lib/prompt.ts`
 
-依据：[设计文档 §6.1 / §6.2 / §6.4](../specs/2026-05-23-摸鱼御史-design.md#§6-prompt-工程vlm-调性命门)
+依据：[设计文档 §6.1 / §6.2 / §6.4](../specs/2026-05-23-kacha-juchang-part1-design.md#§6-prompt-工程vlm-调性命门)
 
 - [ ] **Step 1: 实现 `server/lib/prompt.ts`**
 
 ```typescript
-export const SYSTEM_PROMPT = `你是「摸鱼御史」，一位穿越到现代办公室的明代御史台官员，专门记录同事的摸鱼证据。
+export const SYSTEM_PROMPT = `你是御史房派驻现代办公室的明代御史台官员，专门记录同事的摸鱼证据。
 你的语气：半文半白、玄学占卜、互联网梗调（不要 emoji，不要用 yyds/绝绝子 等流行语缩写）。
 你的工作：观察用户上传的办公室照片，给出摸鱼评分 + 段位称号 + 一份御史奏折。
 
@@ -662,7 +662,7 @@ export const SYSTEM_PROMPT = `你是「摸鱼御史」，一位穿越到现代�
 4. 严格按照 JSON schema 输出，不要额外文字、不要 markdown 代码块包裹
 5. 中文输出`;
 
-export const USER_PROMPT = `请以摸鱼御史身份审阅此图。要求：
+export const USER_PROMPT = `请以御史身份审阅此图。要求：
 
 【姿态分类 pose_type】从以下挑一个最贴近的：
   趴桌型 / 仰头型 / 手撑头型 / 椅背瘫型 / 走神望天型 / 假装思考型 / 无人值守型
@@ -1040,7 +1040,7 @@ git commit -m "[后端] VLM 调度（豆包主 + retry + GPT-4o 备 + 兜底）"
 - Create: `server/lib/demo-match.ts`
 - Test: `server/test/demo-match.test.ts`
 
-依据：[设计文档 §11.2](../specs/2026-05-23-摸鱼御史-design.md#112-兜底触发机制前端) —— 现场预录图被上传时，按 sha1 匹配直接返回手调过的 JSON，不调 VLM。
+依据：[设计文档 §11.2](../specs/2026-05-23-kacha-juchang-part1-design.md#112-兜底触发机制前端) —— 现场预录图被上传时，按 sha1 匹配直接返回手调过的 JSON，不调 VLM。
 
 - [ ] **Step 1: 写测试**
 
@@ -1112,7 +1112,7 @@ git commit -m "[后端] demo hash 匹配（演示样本图直返预录 JSON）"
 **Files:**
 - Create: `server/lib/logger.ts`
 
-依据：[设计文档 §13](../specs/2026-05-23-摸鱼御史-design.md#§13-埋点--数据观测)
+依据：[设计文档 §13](../specs/2026-05-23-kacha-juchang-part1-design.md#§13-埋点--数据观测)
 
 - [ ] **Step 1: 实现 `server/lib/logger.ts`**
 
@@ -1432,7 +1432,7 @@ git commit -m "[后端] Prompt 调优：score 稳定 + 调性收紧 + JSON 输�
 - Create: `assets/demo/demo_02_仰头.jpg`
 - Create: `assets/demo/demo_03_假思考.jpg`
 
-依据：[设计文档 §11.1](../specs/2026-05-23-摸鱼御史-design.md#111-预录样例3-张全闭环可用)
+依据：[设计文档 §11.1](../specs/2026-05-23-kacha-juchang-part1-design.md#111-预录样例3-张全闭环可用)
 
 - [ ] **Step 1: 摆拍/找图**
 
@@ -1787,7 +1787,7 @@ git commit -m "[联调] 前后端 happy path + 三档对比 + offline 兜底验�
 <html lang="zh">
 <head>
 <meta charset="UTF-8">
-<title>摸鱼御史 · 二维码立牌</title>
+<title>咔嚓剧场 · 二维码立牌</title>
 <style>
 @page { size: A4; margin: 0; }
 body { margin: 0; font-family: "Noto Serif SC", "Source Han Serif", serif; background: #f4f1ea; color: #2a2830; }
@@ -1803,7 +1803,7 @@ body { margin: 0; font-family: "Noto Serif SC", "Source Han Serif", serif; backg
 <body>
 <div class="card">
   <div>
-    <div class="title">摸鱼御史</div>
+    <div class="title">咔嚓剧场</div>
     <div class="subtitle">MoYu Imperial · 一张照片，一份御史奏折</div>
   </div>
   <div class="qr"><img src="qr-code.png" alt="QR"></div>
@@ -1851,7 +1851,7 @@ git commit -m "[演示物料] A4 二维码立牌"
 <html lang="zh">
 <head>
 <meta charset="UTF-8">
-<title>摸鱼御史 · 名片 ×20</title>
+<title>咔嚓剧场 · 名片 ×20</title>
 <style>
 @page { size: A4; margin: 10mm; }
 body { margin: 0; font-family: "Noto Serif SC", serif; }
@@ -1869,7 +1869,7 @@ body { margin: 0; font-family: "Noto Serif SC", serif; }
 <!-- 复制 10 次 -->
 <div class="card">
   <div>
-    <div class="brand">摸鱼御史</div>
+    <div class="brand">咔嚓剧场</div>
     <div class="tagline">一张办公照，一份御史奏折</div>
   </div>
   <div style="display:flex;justify-content:space-between;align-items:flex-end;">
@@ -1985,7 +1985,7 @@ git commit -m "[演示物料] 现场 checklist + pitch 数据同步"
 **Files:**
 - 无文件改动，纯练习。
 
-- [ ] **Step 1: 把 [§10 pitch 脚本](../specs/2026-05-23-摸鱼御史-design.md#§10-90s-pitch-脚本) 打印或在手机上打开**
+- [ ] **Step 1: 把 [§10 pitch 脚本](../specs/2026-05-23-kacha-juchang-part1-design.md#§10-90s-pitch-脚本) 打印或在手机上打开**
 
 - [ ] **Step 2: 计时排练 3 次**
 
@@ -2050,7 +2050,7 @@ URL 加 ?offline=1 → 上传任一图 → 验证仍出海报
 - [ ] **Step 6: 作品提交（5.24 12:00 前）**
 
 按主办方平台要求填写：
-- 作品名：摸鱼御史 MoYu Imperial
+- 作品名：咔嚓剧场 Kacha Juchang
 - 体验链接：前端 prod URL
 - 演示视频：导出的海报 + 30s 录屏拼一段
 - 简介：从 §1 抄

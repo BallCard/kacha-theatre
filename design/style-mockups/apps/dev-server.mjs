@@ -79,7 +79,7 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`\n  摸鱼御史 · 三套原型本地预览`);
+  console.log(`\n  咔嚓剧场 · 三套原型本地预览`);
   console.log(`  静态根目录   : ${ROOT}`);
   console.log(`  本地访问     : http://localhost:${PORT}/`);
   console.log(`  /api 反代到 : ${BACKEND}`);

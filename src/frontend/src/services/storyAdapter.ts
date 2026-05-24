@@ -1,7 +1,7 @@
 import { AnalyzeResult, StoryContext } from '../types';
 
 /**
- * 把摸鱼御史的 AnalyzeResult 转成主题无关的 StoryContext。
+ * 把 Part 1 摸鱼主题的 AnalyzeResult 转成主题无关的 StoryContext。
  *
  * 未来加新主题：再写一个 `xxxAdapter(rawResult, image) → StoryContext`，
  * 剧情引擎（storyEngine）完全不动。
@@ -14,7 +14,7 @@ export function adaptMoyuYushi(
   return {
     theme: {
       id: 'moyu-yushi',
-      name: '摸鱼御史·御史房',
+      name: '摸鱼·御史房',
       visualStyle:
         'chinese ancient court painting style fused with modern anime illustration, ' +
         'warm earthy palette (cinnabar red, antique gold, ink black), ' +

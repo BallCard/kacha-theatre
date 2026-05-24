@@ -26,7 +26,7 @@
        连环画 5 张分镜
 ```
 
-**核心解耦**：剧情引擎只接 `StoryContext`，不知道也不关心上游主题是「摸鱼御史」还是「校园社团」。换主题只需要换 `storyAdapter`，引擎和 UI 不动。
+**核心解耦**：剧情引擎只接 `StoryContext`，不知道也不关心上游主题是「咔嚓剧场」还是「校园社团」。换主题只需要换 `storyAdapter`，引擎和 UI 不动。
 
 ---
 
@@ -160,7 +160,7 @@ no text, no captions, no watermark, no subtitles
 
 ---
 
-## 4. 当前主题适配（摸鱼御史）
+## 4. 当前主题适配（咔嚓剧场）
 
 `storyAdapter.adaptMoyuYushi(result, imageBase64, selectedTitle)`：
 
@@ -168,7 +168,7 @@ no text, no captions, no watermark, no subtitles
 {
   theme: {
     id: 'moyu-yushi',
-    name: '摸鱼御史·御史房',
+    name: '咔嚓剧场·御史房',
     visualStyle: 'chinese ancient court painting style fused with modern anime, ...',
     languageStyle: '半文半白、玄学占卜调、夹杂互联网梗。...',
   },
