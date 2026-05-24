@@ -1,355 +1,79 @@
-import { PanelSpec, StoryNode, EndingSpec } from '../types';
+import type { StoryWalkStep, StoryTheme, StoryArtStyle } from '../types';
 
 interface ComicStripExportProps {
-  themeName: string;
-  protagonistName?: string;         // 玩家自定义的主角名字，落款用
-  introPanel: PanelSpec;
-  visitedNodes: StoryNode[];        // 玩家实际走过的节点（按时间序）
-  visitedChoiceLabels: string[];    // 与 visitedNodes 等长，记录每个节点最终选了哪个选项
-  ending: EndingSpec;
-  finalStats: Record<string, number>;
-  // Part 2 增量
-  yiHits?: number;
-  jiHits?: number;
-  matchedYiKeywords?: string[];
-  matchedJiKeywords?: string[];
+  theme: StoryTheme;
+  artStyle: StoryArtStyle;
+  characterAName: string;
+  steps: StoryWalkStep[];               // 4 步：root + A + A.B + A.B.C
 }
 
-/**
- * 用于 html-to-image 截图的长条连环画：
- * 每页是一帧分镜（图 + 旁白 + 对白 + 玩家选择），最后接结局卡。
- *
- * 该组件渲染到离屏位置（opacity:0 + 绝对定位），平时不可见，截图时也不需要展示给用户。
- */
-export function ComicStripExport({
-  themeName,
-  protagonistName,
-  introPanel,
-  visitedNodes,
-  visitedChoiceLabels,
-  ending,
-  finalStats,
-  yiHits,
-  jiHits,
-  matchedYiKeywords,
-  matchedJiKeywords,
-}: ComicStripExportProps) {
-  const totalPages = 1 + visitedNodes.length + 1; // intro + nodes + ending
-
+// 离屏渲染的纵向连环画，用于 html-to-image 长图导出
+export function ComicStripExport({ theme, artStyle, characterAName, steps }: ComicStripExportProps) {
   return (
     <div
-      id="printable-comic-strip"
-      className="bg-[#f5efe1] text-[#2a2830] select-none"
+      id="comic-strip-export"
       style={{
+        position: 'absolute',
+        left: '-99999px',
+        top: 0,
         width: 720,
-        padding: 28,
-        boxSizing: 'border-box',
-        backgroundImage: 'radial-gradient(#eedca2 0.8px, transparent 0.8px)',
-        backgroundSize: '24px 24px',
+        background: '#0e0e10',
+        color: '#fdfaf2',
+        fontFamily: '"PingFang SC","Noto Sans SC","Microsoft YaHei",sans-serif',
+        padding: 24,
       }}
     >
-      {/* 顶部封面条 */}
-      <div className="border-[8px] border-[#d4222b] rounded-2xl p-5 mb-5 bg-white/40 text-center relative overflow-hidden">
-        <div className="absolute top-1 left-1 w-5 h-5 border-t-2 border-l-2 border-[#f0c869]" />
-        <div className="absolute top-1 right-1 w-5 h-5 border-t-2 border-r-2 border-[#f0c869]" />
-        <div className="absolute bottom-1 left-1 w-5 h-5 border-b-2 border-l-2 border-[#f0c869]" />
-        <div className="absolute bottom-1 right-1 w-5 h-5 border-b-2 border-r-2 border-[#f0c869]" />
-        <div className="text-[10px] font-mono tracking-[0.4em] text-[#85744f] font-bold mb-1">
-          IMPERIAL · STORY · COMIC
+      <header style={{ textAlign: 'center', padding: '12px 0 20px' }}>
+        <div style={{ fontSize: 32, fontWeight: 900, letterSpacing: 4 }}>咔嚓剧场 · 互动剧情</div>
+        <div style={{ fontSize: 16, opacity: 0.7, marginTop: 8 }}>
+          {theme} · {artStyle} · 主角光环 vs {characterAName}
         </div>
-        <h1
-          className="text-3xl font-black text-[#d4222b] tracking-[0.2em] font-serif"
-          style={{ fontFamily: "'STKaiti', 'Kaiti', 'STSong', serif" }}
-        >
-          {themeName} · 全本
-        </h1>
-        {protagonistName && (
-          <p
-            className="text-sm text-[#2a2830] mt-2 font-serif tracking-wider"
-            style={{ fontFamily: "'STKaiti', 'Kaiti', serif" }}
-          >
-            主 角 · {protagonistName}
-          </p>
-        )}
-        <p
-          className="text-xs text-[#85744f] mt-2 font-serif"
-          style={{ fontFamily: "'STKaiti', 'Kaiti', serif" }}
-        >
-          甲辰年 · 共 {totalPages} 卷
-        </p>
-      </div>
+      </header>
 
-      {/* 第 1 页：开篇 */}
-      <ComicPage
-        pageIndex={0}
-        totalPages={totalPages}
-        label="开 篇"
-        panel={introPanel}
-      />
-
-      {/* 中间页：玩家走过的互动节点 */}
-      {visitedNodes.map((node, i) => (
-        <ComicPage
-          key={node.id}
-          pageIndex={i + 1}
-          totalPages={totalPages}
-          label={node.sceneTitle || `第 ${i + 1} 幕`}
-          panel={node}
-          choiceLabel={visitedChoiceLabels[i]}
-        />
+      {steps.map((step, idx) => (
+        <div key={step.pathKey} style={{ marginBottom: 28 }}>
+          <div style={{ fontSize: 14, opacity: 0.6, marginBottom: 8 }}>
+            第 {idx + 1} 幕 / 路径 {step.pathKey}
+          </div>
+          <img
+            src={step.node.imageUrl}
+            crossOrigin="anonymous"
+            style={{ width: '100%', borderRadius: 12, display: 'block' }}
+            alt=""
+          />
+          <div style={{ marginTop: 12, fontSize: 18, lineHeight: 1.7 }}>{step.node.narration}</div>
+          {step.node.characterLine && (
+            <div style={{ marginTop: 8, fontSize: 16, opacity: 0.85, fontStyle: 'italic' }}>
+              「{step.node.characterLine}」
+            </div>
+          )}
+          {step.chosen && step.node.choices && (
+            <div style={{ marginTop: 10, fontSize: 14, color: '#f0c869' }}>
+              → 我选了：{step.node.choices.find((c) => c.id === step.chosen)?.text}
+            </div>
+          )}
+        </div>
       ))}
 
-      {/* 最后一页：结局 */}
-      <ComicPage
-        pageIndex={totalPages - 1}
-        totalPages={totalPages}
-        label={ending.endingType ? `结 · ${ending.endingType}` : `结 · ${ending.title}`}
-        panel={ending}
-        isEnding
-      />
-
-      {/* Part 2：宜忌总结 + 授封 */}
-      {(yiHits !== undefined || jiHits !== undefined || ending.titleAward) && (
-        <div className="bg-[#fdfaf2] border border-[#dfd9bf] rounded-2xl p-4 mt-2 mb-2">
-          {ending.titleAward && (
-            <div className="text-center pb-3 mb-3 border-b border-dashed border-[#dcbca0]">
-              <div className="text-[10px] font-bold text-[#85744f] uppercase tracking-[0.3em] font-mono mb-1">
-                · 授 封 ·
-              </div>
-              <div
-                className="text-2xl font-black text-[#d4222b] tracking-widest font-serif"
-                style={{ fontFamily: "'STKaiti', 'Kaiti', serif" }}
-              >
-                {ending.titleAward}
-              </div>
-            </div>
-          )}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="bg-[#f0c869]/15 border border-[#f0c869]/60 rounded-xl p-3">
-              <div className="flex items-center justify-between mb-1">
-                <span
-                  className="text-xs font-bold text-[#8a7243] tracking-widest font-serif"
-                  style={{ fontFamily: "'STKaiti', 'Kaiti', serif" }}
-                >
-                  今 日 宜
-                </span>
-                <span className="text-xl font-black text-[#d4222b] font-mono">
-                  {yiHits ?? 0}
-                </span>
-              </div>
-              <p
-                className="text-xs text-[#85744f] font-serif leading-relaxed"
-                style={{ fontFamily: "'STKaiti', 'Kaiti', serif" }}
-              >
-                {matchedYiKeywords && matchedYiKeywords.length > 0
-                  ? matchedYiKeywords.join('、')
-                  : '今日未命中'}
-              </p>
-            </div>
-            <div className="bg-[#d4222b]/15 border border-[#d4222b]/60 rounded-xl p-3">
-              <div className="flex items-center justify-between mb-1">
-                <span
-                  className="text-xs font-bold text-[#8a3a3a] tracking-widest font-serif"
-                  style={{ fontFamily: "'STKaiti', 'Kaiti', serif" }}
-                >
-                  今 日 忌
-                </span>
-                <span className="text-xl font-black text-[#d4222b] font-mono">
-                  {jiHits ?? 0}
-                </span>
-              </div>
-              <p
-                className="text-xs text-[#85744f] font-serif leading-relaxed"
-                style={{ fontFamily: "'STKaiti', 'Kaiti', serif" }}
-              >
-                {matchedJiKeywords && matchedJiKeywords.length > 0
-                  ? matchedJiKeywords.join('、')
-                  : '今日未触犯'}
-              </p>
-            </div>
+      {steps.length > 0 && steps[steps.length - 1].node.ending && (
+        <div style={{
+          padding: 24, borderRadius: 16,
+          background: steps[steps.length - 1].node.ending!.aWins ? '#3b2c1a' : '#1a2e3b',
+          border: '1px solid rgba(240,200,105,.4)', marginTop: 12,
+        }}>
+          <div style={{ fontSize: 22, fontWeight: 900, color: '#f0c869', marginBottom: 10 }}>
+            【{steps[steps.length - 1].node.ending!.type}】
+            {steps[steps.length - 1].node.ending!.aWins ? ` · ${characterAName} 翻身` : ' · 我的主场'}
+          </div>
+          <div style={{ fontSize: 18, lineHeight: 1.7 }}>
+            {steps[steps.length - 1].node.ending!.verdict}
           </div>
         </div>
       )}
 
-      {/* 数值面板 */}
-      <div className="bg-[#fdfaf2] border border-[#dfd9bf] rounded-2xl p-4 mt-2 mb-4">
-        <div className="text-[10px] font-bold text-[#85744f] uppercase tracking-[0.3em] font-mono mb-3 text-center">
-          ⚖ 最 终 御 评
-        </div>
-        <div className="grid grid-cols-3 gap-3">
-          {Object.entries(finalStats).map(([name, value]) => (
-            <div
-              key={name}
-              className="flex flex-col items-center bg-white/70 rounded-xl py-3 border border-[#e8dfc7]"
-            >
-              <span
-                className="text-xs text-[#85744f] font-serif"
-                style={{ fontFamily: "'STKaiti', 'Kaiti', serif" }}
-              >
-                {name}
-              </span>
-              <span className="text-2xl font-bold text-[#d4222b] font-mono mt-0.5">{value}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* 落款 */}
-      <div className="flex items-center justify-between pt-4 border-t border-dashed border-[#dcbca0]">
-        <div className="flex flex-col text-left">
-          <span className="text-[10px] font-semibold text-[#8a8a8a] uppercase font-mono tracking-wider">
-            Imperial Story Engine · Full Album
-          </span>
-          <span
-            className="text-[11px] text-[#b39e70] font-serif font-bold mt-0.5"
-            style={{ fontFamily: "'STKaiti', 'Kaiti', serif" }}
-          >
-            御 史 台 · 全 本 摹 印 · 甲 辰 年
-          </span>
-        </div>
-        <div className="w-14 h-14 border-2 border-red-600 rounded flex items-center justify-center font-serif text-xs font-black leading-tight text-red-600 -rotate-6 px-1 py-0.5 shadow-xs text-center">
-          御史
-          <br />
-          监印
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ComicPage({
-  pageIndex,
-  totalPages,
-  label,
-  panel,
-  choiceLabel,
-  isEnding,
-}: {
-  pageIndex: number;
-  totalPages: number;
-  label: string;
-  panel: PanelSpec | StoryNode | EndingSpec;
-  choiceLabel?: string;
-  isEnding?: boolean;
-}) {
-  const title = isEnding ? (panel as EndingSpec).title : undefined;
-
-  return (
-    <div className={`mb-5 rounded-2xl border-4 ${isEnding ? 'border-[#d4222b]' : 'border-[#e8dfc7]'} bg-white/60 overflow-hidden shadow-sm`}>
-      {/* 页眉 */}
-      <div className="flex items-center justify-between bg-[#d4222b] text-[#fdfaf2] px-4 py-2">
-        <span
-          className="text-sm font-bold tracking-widest font-serif"
-          style={{ fontFamily: "'STKaiti', 'Kaiti', serif" }}
-        >
-          {label}
-        </span>
-        <span className="text-[10px] font-mono tracking-widest opacity-90">
-          P {pageIndex + 1} / {totalPages}
-        </span>
-      </div>
-
-      {/* 图像 */}
-      <div className="relative w-full bg-[#0e0c0a]" style={{ aspectRatio: '3 / 4' }}>
-        {panel.imageUrl ? (
-          <img
-            src={panel.imageUrl}
-            alt={label}
-            referrerPolicy="no-referrer"
-            crossOrigin="anonymous"
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="absolute inset-0 flex items-center justify-center text-[#b39e70] text-sm font-serif">
-            （御史落墨中，本卷尚未生成）
-          </div>
-        )}
-
-        {/* 旁白条 */}
-        {panel.narration && (
-          <div
-            className="absolute top-0 left-0 right-0 px-4 pt-3 pb-6"
-            style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.85), transparent)' }}
-          >
-            <p
-              className="text-[#fdfaf2] text-sm leading-relaxed font-serif"
-              style={{ fontFamily: "'STKaiti', 'Kaiti', serif", textShadow: '0 2px 6px rgba(0,0,0,0.85)' }}
-            >
-              {panel.narration}
-            </p>
-          </div>
-        )}
-
-        {/* 对白气泡 */}
-        {'characterLine' in panel && panel.characterLine && (
-          <div
-            className="absolute bottom-0 left-0 right-0 px-4 pt-8 pb-4"
-            style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.9), transparent)' }}
-          >
-            <div className="inline-block bg-[#d4222b] border border-[#f0c869] rounded-r-2xl rounded-tl-2xl px-3 py-1.5 max-w-[88%]">
-              <p
-                className="text-[#fdfaf2] text-sm font-bold font-serif"
-                style={{ fontFamily: "'STKaiti', 'Kaiti', serif" }}
-              >
-                「{panel.characterLine}」
-              </p>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* 选择记录条（仅互动节点） */}
-      {choiceLabel && (
-        <div className="px-4 py-2.5 bg-[#fdfaf2] border-t border-[#e8dfc7] flex items-center gap-2">
-          <span className="text-[10px] font-bold text-[#85744f] tracking-widest font-mono shrink-0">
-            御 笔 定 夺 →
-          </span>
-          <span
-            className="text-sm font-bold text-[#2a2830] font-serif"
-            style={{ fontFamily: "'STKaiti', 'Kaiti', serif" }}
-          >
-            {choiceLabel}
-          </span>
-        </div>
-      )}
-
-      {/* 结局长文案 */}
-      {isEnding && (
-        <div className="px-4 py-3 bg-[#fdfaf2] border-t border-[#e8dfc7]">
-          {(panel as EndingSpec).endingType && (
-            <div className="inline-block bg-[#d4222b] text-[#fdfaf2] px-3 py-1 rounded-full mb-2">
-              <span
-                className="text-[11px] font-black tracking-[0.3em] font-serif"
-                style={{ fontFamily: "'STKaiti', 'Kaiti', serif" }}
-              >
-                ★ {(panel as EndingSpec).endingType} ★
-              </span>
-            </div>
-          )}
-          {title && (
-            <div
-              className="text-lg font-black text-[#d4222b] mb-1.5 font-serif tracking-wider text-center"
-              style={{ fontFamily: "'STKaiti', 'Kaiti', serif" }}
-            >
-              {title}
-            </div>
-          )}
-          {(panel as EndingSpec).titleAward && (
-            <div
-              className="text-sm text-[#8a7243] mb-2 font-serif font-bold tracking-widest text-center"
-              style={{ fontFamily: "'STKaiti', 'Kaiti', serif" }}
-            >
-              授 封 · {(panel as EndingSpec).titleAward}
-            </div>
-          )}
-          <p
-            className="text-xs leading-loose text-[#2a2830] font-serif"
-            style={{ fontFamily: "'STKaiti', 'Kaiti', serif" }}
-          >
-            {(panel as EndingSpec).narration}
-          </p>
-        </div>
-      )}
+      <footer style={{ textAlign: 'center', marginTop: 24, opacity: 0.5, fontSize: 12 }}>
+        © 咔嚓剧场 · Generated on {new Date().toLocaleDateString()}
+      </footer>
     </div>
   );
 }

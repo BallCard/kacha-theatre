@@ -6,6 +6,8 @@ import { sha1OfBase64, matchDemoResult } from '../lib/demo-match.js';
 import { makeFallback } from '../lib/fallback.js';
 import { validateAnalyzeResult } from '../lib/schema.js';
 import { logEvent } from '../lib/logger.js';
+import { sha256OfBase64, shortHash } from '../lib/hash.js';
+import { getJson, putJson } from '../lib/cache.js';
 import type { AnalyzeResult, AnalyzeRequest } from '../lib/types.js';
 
 const MAX_IMAGE_BYTES = 2 * 1024 * 1024;
@@ -39,7 +41,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   const hash = sha1OfBase64(body.image);
-  await logEvent({ ev: 'analyze_start', hash });
+  const imageHash = shortHash(sha256OfBase64(body.image));
+  await logEvent({ ev: 'analyze_start', hash, imageHash });
 
   // 1. demo hash 短路
   if (process.env.DEMO_MATCH_ON !== '0') {
@@ -55,7 +58,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
   }
 
-  // 2. VLM 调度
+  // 2. 持久化哈希缓存（同一张图同一结果，prompt 升级走 CACHE_VERSION）
+  const cached = await getJson<AnalyzeResult>('analyze', imageHash, 'result');
+  if (cached) {
+    const v = validateAnalyzeResult(cached);
+    if (v.ok) {
+      await logEvent({ ev: 'analyze_cache_hit', imageHash, tier: cached.level_tier });
+      res.status(200).json(cached);
+      return;
+    }
+  }
+
+  // 3. VLM 调度
   try {
     const { result, trace } = await analyzeWithVLM(body.image, body.provider ?? 'doubao');
     await logEvent({
@@ -66,6 +80,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       tier: result.level_tier,
       attempts: trace.attempts.length,
     });
+    // 仅 VLM 真生成结果写缓存；兜底（finalSource === 'fallback'）不写
+    if (trace.finalSource !== 'fallback') {
+      await putJson('analyze', imageHash, 'result', result);
+    }
     res.status(200).json(result);
   } catch (e: any) {
     await logEvent({ ev: 'analyze_error', err: e?.message ?? String(e) });

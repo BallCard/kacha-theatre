@@ -1,11 +1,11 @@
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect } from "react";
 import { mockAnalyze } from "./mock/analyzeResults";
-import { CanvasItem, AnalyzeResult, StoryContext } from "./types";
+import { CanvasItem, AnalyzeResult } from "./types";
 import { StickerCanvas } from "./components/StickerCanvas";
 import { ToolBar } from "./components/ToolBar";
 import { PosterPreview } from "./components/PosterPreview";
-import { StoryScreen } from "./screens/StoryScreen";
-import { adaptMoyuYushi } from "./services/storyAdapter";
+import { StoryV2Screen } from "./screens/StoryV2Screen";
+import { sha256OfDataUrl } from "./services/storyApi";
 import { getStickerUrl, getBigTierStampUrl, getScoreTicketUrl } from "./utils/assets";
 import { autoPickStickers } from "./utils/autoPickStickers";
 import {
@@ -45,14 +45,32 @@ export default function App() {
   const [modalMessage, setModalMessage] = useState<string | null>(null);
   const [isExporting, setIsExporting] = useState<boolean>(false);
 
-  // 剧情游戏：StoryScreen 重玩通过 key 强制重挂载触发
+  // 剧情游戏：StoryV2Screen 重玩通过 key 强制重挂载触发
   const [storyKey, setStoryKey] = useState(0);
+  const [storyImageHash, setStoryImageHash] = useState<string | null>(null);
 
-  // 当进入 story 屏时，把当前 analyzeResult + 原图 + selectedTitle 适配成 StoryContext
-  const storyContext = useMemo<StoryContext | null>(() => {
-    if (!analyzeResult || !imageSrc) return null;
-    return adaptMoyuYushi(analyzeResult, imageSrc, selectedTitle || analyzeResult.title_candidates[0] || '摸鱼判官');
-  }, [analyzeResult, imageSrc, selectedTitle]);
+  // 进入 Part 2 时按需算 imageHash（供 /plot/v2/node 复用同图缓存）
+  useEffect(() => {
+    if (screen === 'story' && imageSrc && !storyImageHash) {
+      sha256OfDataUrl(imageSrc).then(setStoryImageHash).catch(() => {});
+    }
+  }, [screen, imageSrc, storyImageHash]);
+
+  // 古风原型「入梦」按钮带过来的图，自动进入 Part 2
+  useEffect(() => {
+    const fromGuofeng = new URLSearchParams(location.search).has('fromGuofeng');
+    if (!fromGuofeng) return;
+    const img = localStorage.getItem('kacha_story_image');
+    const h = localStorage.getItem('kacha_story_hash');
+    if (img) {
+      setImageSrc(img);
+      if (h) setStoryImageHash(h);
+      setScreen('story');
+      // 用完即清，防止 F5 还在 story
+      localStorage.removeItem('kacha_story_image');
+      localStorage.removeItem('kacha_story_hash');
+    }
+  }, []);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -678,20 +696,14 @@ export default function App() {
         )}
 
         {/* =======================================================
-            SCREEN 5: INTERACTIVE STORY GAME (御史外传)
+            SCREEN 5: INTERACTIVE STORY GAME (Part 2 v2)
            ======================================================= */}
-        {screen === "story" && storyContext && (
-          <StoryScreen
+        {screen === "story" && imageSrc && (
+          <StoryV2Screen
             key={storyKey}
-            context={storyContext}
+            initialImageBase64={imageSrc}
+            initialImageHash={storyImageHash ?? undefined}
             onExit={() => setScreen('preview')}
-            onBackHome={() => {
-              setImageSrc(null);
-              setAnalyzeResult(null);
-              setCanvasItems([]);
-              setScreen('home');
-            }}
-            onRestart={() => setStoryKey((k) => k + 1)}
           />
         )}
 

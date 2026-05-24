@@ -15,8 +15,12 @@
 import 'dotenv/config';
 import http from 'node:http';
 import { URL } from 'node:url';
+import { readFile, stat } from 'node:fs/promises';
+import { join, normalize, sep } from 'node:path';
 import analyzeHandler from './api/analyze.js';
 import healthHandler from './api/health.js';
+import plotV2NodeHandler from './api/plot/v2/node.js';
+import { cacheRoot } from './lib/cache.js';
 
 const PORT = Number(process.env.PORT ?? 3000);
 
@@ -116,6 +120,15 @@ const server = http.createServer(async (req, res) => {
       await (analyzeHandler as any)(reqShim, resShim);
       return;
     }
+    if (pathname === '/api/plot/v2/node') {
+      await (plotV2NodeHandler as any)(reqShim, resShim);
+      return;
+    }
+    // 静态托管缓存目录的 PNG（/cache/v1/story/.../xxx.png）
+    if (pathname.startsWith('/cache/')) {
+      await serveCache(pathname, res);
+      return;
+    }
     res.statusCode = 404;
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify({ error: 'NOT_FOUND', path: pathname }));
@@ -129,9 +142,34 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
+async function serveCache(urlPath: string, res: http.ServerResponse) {
+  // /cache/<VERSION>/<ns>/<hash>/<scope...>.png
+  // 把 URL 路径直接映射到 server/data/cache/<...>
+  const rel = decodeURIComponent(urlPath.replace(/^\/cache\//, ''));
+  const safe = normalize(rel).replace(/^(\.\.[\\/])+/, '');
+  const root = cacheRoot();
+  // cacheRoot 已经包含 v1，rel 第一段也是 v1，所以走 ../cache/<rel>
+  const fullPath = join(root, '..', safe);
+  try {
+    const st = await stat(fullPath);
+    if (!st.isFile()) { res.statusCode = 404; res.end(); return; }
+    const buf = await readFile(fullPath);
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'image/png');
+    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    res.end(buf);
+  } catch {
+    res.statusCode = 404;
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify({ error: 'CACHE_MISS', path: urlPath }));
+  }
+}
+
 server.listen(PORT, () => {
   console.log(`\n  咔嚓剧场 · 本地 API 服务器`);
   console.log(`  POST http://localhost:${PORT}/api/analyze`);
+  console.log(`  POST http://localhost:${PORT}/api/plot/v2/node`);
   console.log(`  GET  http://localhost:${PORT}/api/health`);
+  console.log(`  GET  http://localhost:${PORT}/cache/...   (PNG 静态)`);
   console.log(`  CORS 已开 (*)\n`);
 });

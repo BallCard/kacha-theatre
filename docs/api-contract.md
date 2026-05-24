@@ -119,7 +119,9 @@ GET /health → 200 { "status": "ok", "ts": 1716480000 }
 
 ---
 
-### 3. POST /plot/next — (Part 2) 单节点剧情生成
+### 3. POST /plot/next — (Part 2 · **DEPRECATED**) 旧版 5 节点剧情接口
+
+> **已废弃**：被 [§5 POST /plot/v2/node](#5-post-plotv2node) 替代，详见 [ADR-007](./decisions/007-Part2-v2重做与示例缓存.md)。保留章节作为历史记录。
 
 **用途**：Part 1 出完奏折后，用户进入剧情游戏，每个节点调一次本接口。
 
@@ -197,7 +199,9 @@ Content-Type: application/json
 
 ---
 
-### 4. POST /plot/ending — (Part 2) 终章裁决
+### 4. POST /plot/ending — (Part 2 · **DEPRECATED**) 旧版终章接口
+
+> **已废弃**：被 [§5 POST /plot/v2/node](#5-post-plotv2node) 终幕节点统一覆盖，详见 [ADR-007](./decisions/007-Part2-v2重做与示例缓存.md)。
 
 **用途**：5 节点跑完后，前端按 §4.2 规则算出 `ending_type`，调此接口生成御史房裁决书。
 
@@ -251,6 +255,80 @@ Content-Type: application/json
 | 6 | 哭笑不得 | 兜底 |
 
 **性能要求**：P50 ≤ 3s，P95 ≤ 5s。VLM 全挂走 6 个预录裁决文案兜底。
+
+---
+
+### 5. POST /plot/v2/node — (Part 2 v2) 单节点剧情 + 图像生成 · **当前使用**
+
+**用途**：Part 2 v2 唯一剧情接口。一次返回一个节点的旁白 + 选项（或终幕） + 已落盘的场景图 URL。详见 [ADR-007](./decisions/007-Part2-v2重做与示例缓存.md)。
+
+**请求**：
+
+```
+POST /api/plot/v2/node
+Content-Type: application/json
+
+{
+  "imageHash": "abc123...",          // 与首次请求一致；首次没有则可省，后端从 image 算
+  "image": "data:image/jpeg;base64,...", // 首次必传（后端落盘 source.png 供后续复用）
+  "theme": "宫斗剧",                  // 五选一：宫斗剧/穿越重生/悬疑探案/打脸/爽文
+  "artStyle": "恋与深空",             // 三选一：恋与深空/蓝色监狱/仙逆
+  "pathKey": "root" | "A" | "A.B" | "A.B.C",
+  "model": "claude-sonnet-4-6",      // 可选；'claude-sonnet-4-6' | 'gpt-5' | 'gpt-4o' | 'gpt-4o-mini'
+  "characterAName": "A",             // 可选，被拍者的称呼，默认 'A'
+  "ancestors": [ { "pathKey": "root" }, { "pathKey": "A" } ]  // 可选，前端记录的父链
+}
+```
+
+**成功响应**（HTTP 200）：
+
+```json
+{
+  "pathKey": "A.B",
+  "imageHash": "abc123...",
+  "imageUrl": "/cache/v1/story/abc123/宫斗剧__恋与深空/A.B.png",
+  "narration": "60-140 字第一人称旁白",
+  "characterLine": "可空，0-30 字台词",
+  "imagePrompt": "已注入画风与镜头的最终英文 prompt",
+  "choices": [ { "id": "A", "text": "..." }, { "id": "B", "text": "..." }, { "id": "C", "text": "..." } ],
+  "ending": null,
+  "shotUsed": "sword swing mid-strike, dynamic diagonal composition",
+  "modelUsed": "claude-sonnet-4-6",
+  "cacheHit": true
+}
+```
+
+终幕（`pathKey` 深度 = 3，如 `A.B.C`）：`choices = null`，`ending = { type, verdict, aWins }`，`aWins` 由后端按 `A_WINS_RATE`（默认 0.10）随机决定。
+
+**字段约束**：
+
+| 字段 | 类型 | 约束 |
+|---|---|---|
+| `pathKey` | string | `root` / `A` / `A.B` / `A.B.C`，深度 0-3 |
+| `narration` | string | 20-400 字 |
+| `imagePrompt` | string | 已包含 reference 保真提示 + 镜头关键词 + 画风前缀 |
+| `choices` | array \| null | 非终幕时严格 3 项 (id ∈ A/B/C)；终幕时为 null |
+| `ending.type` | string | 戏剧化标题，2-30 字 |
+| `ending.verdict` | string | 20-400 字 |
+| `ending.aWins` | boolean | 后端 roll 决定，~10% true |
+| `imageUrl` | string | 后端静态托管路径，`/cache/<VERSION>/story/<hash>/<theme>__<style>/<pathKey>.png` |
+| `cacheHit` | boolean | true 表示直接来自盘上缓存，无 LLM/图模型调用 |
+
+**错误码**：
+
+| code | HTTP | 含义 |
+|---|---|---|
+| `MISSING_IMAGE` | 400 | 首次请求未带 image 字段，且 imageHash 在盘上无 source |
+| `INVALID_THEME` / `INVALID_ART_STYLE` / `INVALID_PATH_KEY` | 400 | 字段不在白名单 |
+| `LLM_FAILED` | 502 | 剧情模型连续失败（已尝试降级链） |
+| `IMAGE_FAILED` | 502 | 图模型连续失败 |
+
+**缓存命中**：服务端先查 `server/data/cache/v1/story/<hash>/<theme>__<style>/<pathKey>.json` + 同名 `.png`，命中即直接返回（不调 LLM、不调 gpt-image-2）。未命中走实时生成并写回。版本号见 `CACHE_VERSION` 常量。
+
+**性能**：
+- 缓存命中 < 80ms
+- 未命中：text P50 ≈ 4s（claude-sonnet-4-6） + image P50 ≈ 8s（gpt-image-2 low）≈ 总 12s
+- 演示前请用 `npm run warmup-story` 把示例 `(image, theme, artStyle)` 的 40 个节点灌满
 
 ---
 

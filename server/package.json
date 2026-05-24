@@ -10,7 +10,8 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "bench": "tsx scripts/prompt-bench.ts",
-    "seed-demo": "tsx scripts/seed-demo-json.ts"
+    "seed-demo": "tsx scripts/seed-demo-json.ts",
+    "warmup-story": "tsx scripts/warmup-story.ts"
   },
   "dependencies": {
     "ajv": "^8.12.0",
