@@ -20,7 +20,9 @@
 3. **Part 1 ↔ Part 2 关系**：两 Part 在工程上有独立性，但**叙事上**——Part 2 故事承接 Part 1 上传的同一张照片场景，Part 1 输出的运势卡片数据是 Part 2 唯一决定性输入（无独立"另传卡片图"入口）。
 4. **品牌词约束**：项目品牌名统一为「咔嚓剧场」，**不再使用"摸鱼御史"作为品牌词**。代码注释、变量名、UI 文案如有历史残留，遇到时一并替换；新增内容禁止再引入。
 5. **决策偏离记录**：与新需求文档（`docs/requirements/咔嚓剧场需求文档.docx` + `剧情向技术设计文档.docx`）的偏离点均在 [`docs/decisions/005-咔嚓剧场对标新需求文档.md`](./docs/decisions/005-咔嚓剧场对标新需求文档.md) 固化，新协作者先看这份再读旧 ADR。
-6. **主线前端**：当前以 [`design/style-mockups/apps/guofeng.html`](./design/style-mockups/apps/guofeng.html)（古风原型，原生 HTML + JS）为 Part 1 主线前端，所有新功能在它之上迭代。`src/frontend/`（React 版本）保留可跑但**不再作为演示主线**，原因见 [`docs/decisions/006-古风原型转主线前端.md`](./docs/decisions/006-古风原型转主线前端.md)。
+6. **主线前端**：当前以 [`design/style-mockups/apps/kacha.html`](./design/style-mockups/apps/kacha.html)（**bugatti 米白朱砂风 · Part 1 + Part 2 一体八屏**，原生 HTML + JS）为主前端，所有新功能在它之上迭代。原因见 [`docs/decisions/008-kacha-取代-guofeng-为主前端.md`](./docs/decisions/008-kacha-取代-guofeng-为主前端.md)。
+   - `design/style-mockups/apps/guofeng.html`（古风原型）保留可跑但**不再作为主线**，作为视觉对照与兜底，见 [`docs/decisions/006-古风原型转主线前端.md`](./docs/decisions/006-古风原型转主线前端.md)。
+   - `src/frontend/`（React 版本）保留可跑作为 Part 2 v2 的二号实现（同后端不同前端），不再主动叠功能。
 
 ## 文档路由
 
@@ -34,7 +36,8 @@
 | 团队分工 / 协作规范 | [docs/team.md](./docs/team.md) · [docs/collaboration.md](./docs/collaboration.md) |
 | 开发日志 | [docs/devlog/](./docs/devlog/) |
 | 设计资源（贴纸 prompt、海报、线框） | [design/](./design/) |
-| 主线前端原型（古风 · 当前演示口径） | [design/style-mockups/apps/guofeng.html](./design/style-mockups/apps/guofeng.html) |
+| 主线前端原型（kacha · bugatti 米白朱砂 · 当前演示口径） | [design/style-mockups/apps/kacha.html](./design/style-mockups/apps/kacha.html) |
+| 古风原型（已退役，对照与兜底） | [design/style-mockups/apps/guofeng.html](./design/style-mockups/apps/guofeng.html) |
 | 文档系统总览 | [docs/GUIDE.md](./docs/GUIDE.md) |
 
 ## 文档更新职责（AI 主动）

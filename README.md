@@ -18,7 +18,7 @@
 - [x] MVP v2 范围锁定（Part 1 运势卡片）
 - [x] **MVP v2.1 范围扩展（Part 2 互动剧情增量）**
 - [x] 对标新需求文档（[ADR-005](./docs/decisions/005-咔嚓剧场对标新需求文档.md)）
-- [x] 技术栈选择 → **Part 1 主线古风原型 HTML** (guofeng.html) + **Part 2 走 React** + 本地 Node 服务器 (主 `gemini-2.5-flash-nothinking`，兜底 `gpt-4.1-mini`) + 局域网展示，弃 Vercel
+- [x] 技术栈选择 → **主前端 kacha.html · bugatti 米白朱砂风 · Part 1+Part 2 一体八屏**（[ADR-008](./docs/decisions/008-kacha-取代-guofeng-为主前端.md)）；旧 guofeng 古风原型保留兜底（[ADR-006](./docs/decisions/006-古风原型转主线前端.md)），src/frontend (React) 作 Part 2 v2 二号实现；本地 Node 服务器 (主 `gemini-2.5-flash-nothinking`，兜底 `gpt-4.1-mini`) + 局域网展示，弃 Vercel
 - [x] Part 1 设计文档定稿（[part1-design.md](./docs/superpowers/specs/2026-05-23-kacha-juchang-part1-design.md)）
 - [x] Part 2 设计文档定稿（[part2-design.md](./docs/superpowers/specs/2026-05-23-kacha-juchang-part2-design.md)）
 - [x] 素材生图 prompt 就绪（[sticker-prompts.md](./design/sticker-prompts.md)）
