@@ -225,11 +225,26 @@ body{display:flex;justify-content:center;align-items:flex-start}
 .poster-bottom .btn{flex:1}
 
 /* exporting overlay */
-.exporting{position:fixed;inset:0;background:rgba(244,236,216,.88);backdrop-filter:blur(2px);z-index:100000;display:none;align-items:center;justify-content:center;flex-direction:column;gap:18px}
+.exporting{position:fixed;inset:0;background:rgba(244,236,216,.92);backdrop-filter:blur(3px);z-index:100000;display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px;padding:0 32px}
 .exporting.show{display:flex}
+.exporting .scroll-stage{width:160px;height:160px;margin-bottom:4px}
 .spinner{width:42px;height:42px;border:2px solid rgba(184,37,42,.2);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .exporting .lbl{font-family:var(--display-cn);color:var(--ink);font-size:15px;letter-spacing:3px}
+
+/* 进度条 —— 三处 loading 共用 */
+.progress{
+  width:200px;max-width:80%;height:3px;background:var(--hairline);
+  border-radius:9999px;overflow:hidden;margin-top:14px;position:relative;
+}
+.progress .fill{
+  height:100%;background:var(--accent);width:0%;
+  transition:width .25s ease-out;border-radius:9999px;
+}
+.progress .pct{
+  position:absolute;right:0;top:8px;font-family:var(--mono);font-size:9px;
+  letter-spacing:1.5px;color:var(--muted);
+}
 
 .file-input{display:none}
 
@@ -388,6 +403,7 @@ body{display:flex;justify-content:center;align-items:flex-start}
       <div class="load-title">御史批阅</div>
       <div class="load-sub">A FORTUNE BEING WRITTEN</div>
       <div class="load-dots" id="load-dots">奉旨拟稿</div>
+      <div class="progress" id="p1-progress"><div class="fill"></div><div class="pct">0%</div></div>
     </div>
   </div>
 
@@ -549,6 +565,7 @@ body{display:flex;justify-content:center;align-items:flex-start}
       <div class="load-title" id="story-loading-title">御史演义中</div>
       <div class="load-sub">A DREAM BEING DRAWN</div>
       <div class="load-dots">起卷拟稿</div>
+      <div class="progress" id="p2-progress"><div class="fill"></div><div class="pct">0%</div></div>
     </div>
   </div>
 
@@ -627,8 +644,13 @@ body{display:flex;justify-content:center;align-items:flex-start}
   </div>
 
   <div class="exporting" id="exporting">
-    <div class="spinner"></div>
-    <div class="lbl">内阁学士奉诏摹印中…</div>
+    <div class="scroll-stage">
+      <img class="load-illust active" data-frame="0" src="_assets/kacha-exporting-1.png" alt="" />
+      <img class="load-illust"        data-frame="1" src="_assets/kacha-exporting-2.png" alt="" />
+      <img class="load-illust"        data-frame="2" src="_assets/kacha-exporting-3.png" alt="" />
+    </div>
+    <div class="lbl">内阁学士奉诏摹印中</div>
+    <div class="progress" id="export-progress"><div class="fill"></div><div class="pct">0%</div></div>
   </div>
 </div>
 
@@ -663,6 +685,9 @@ const ASSET_LIST = [
   ['_assets/kacha-loading-p2-1.png', null],
   ['_assets/kacha-loading-p2-2.png', null],
   ['_assets/kacha-loading-p2-3.png', null],
+  ['_assets/kacha-exporting-1.png', null],
+  ['_assets/kacha-exporting-2.png', null],
+  ['_assets/kacha-exporting-3.png', null],
 ];
 const ASSETS_READY = (async () => {
   const results = await Promise.allSettled(ASSET_LIST.map(([url]) => loadCleanImage(url, { tol: 30, fade: 1.6 })));
@@ -728,6 +753,59 @@ function stopLoadingFrames(){
   if (_loadingTimer) { clearInterval(_loadingTimer); _loadingTimer = null; }
 }
 
+// exporting overlay 自带一组帧循环
+let _exportingTimer = null;
+function startExportingFrames(){
+  stopExportingFrames();
+  const frames = document.querySelectorAll('#exporting .load-illust');
+  if (frames.length < 2) return;
+  let i = 0;
+  frames.forEach((f, idx) => f.classList.toggle('active', idx === 0));
+  _exportingTimer = setInterval(() => {
+    frames.forEach(f => f.classList.remove('active'));
+    i = (i + 1) % frames.length;
+    frames[i].classList.add('active');
+  }, 1200);
+}
+function stopExportingFrames(){
+  if (_exportingTimer) { clearInterval(_exportingTimer); _exportingTimer = null; }
+}
+
+// 假进度条：渐近 90%，完成时跳 100%。tau 单位 ms，对应"预期耗时"的时间常数
+function makeProgress(barId, tau){
+  const bar = document.getElementById(barId);
+  const fillEl = bar.querySelector('.fill');
+  const pctEl = bar.querySelector('.pct');
+  let t0 = 0, timer = null;
+  function set(p){
+    const c = Math.max(0, Math.min(1, p));
+    fillEl.style.width = (c*100).toFixed(1)+'%';
+    pctEl.textContent = Math.round(c*100)+'%';
+  }
+  return {
+    start(){
+      t0 = Date.now();
+      set(0);
+      if (timer) clearInterval(timer);
+      timer = setInterval(()=>{
+        const dt = Date.now() - t0;
+        set(0.9 * (1 - Math.exp(-dt / tau)));
+      }, 120);
+    },
+    finish(){
+      if (timer) { clearInterval(timer); timer = null; }
+      set(1);
+    },
+    reset(){
+      if (timer) { clearInterval(timer); timer = null; }
+      set(0);
+    },
+  };
+}
+const progressP1 = makeProgress('p1-progress', 4000);
+const progressP2 = makeProgress('p2-progress', 12000);
+const progressExport = makeProgress('export-progress', 2000);
+
 function hash8(s){
   let h=2166136261>>>0;
   for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)>>>0;}
@@ -736,7 +814,11 @@ function hash8(s){
 function fileToDataURL(file){
   return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file);});
 }
-function showExporting(show){ document.getElementById('exporting').classList.toggle('show', !!show); }
+function showExporting(show){
+  document.getElementById('exporting').classList.toggle('show', !!show);
+  if (show) { startExportingFrames(); progressExport.start(); }
+  else { progressExport.finish(); stopExportingFrames(); }
+}
 
 const STICKER_LIBRARY = [
   { name:'准奏',     url:'_assets/seal-zhunzou.png'  },
@@ -893,6 +975,7 @@ async function composeText(imgUrl, text, opts={}) {
 // ============ flow ============
 async function runAnalyze(dataUrl){
   go('loading');
+  progressP1.start();
   state.bgDataURL = dataUrl;
   state.reportId = hash8(dataUrl.slice(0,200) + Date.now());
   try{
@@ -900,9 +983,11 @@ async function runAnalyze(dataUrl){
     state.result = result;
     state.activeTitleIdx = 0;
     state.capturedURL = null;
+    progressP1.finish();
     enterEdit();
   }catch(err){
     console.error(err);
+    progressP1.reset();
     t('御史走神了，请稍后重试');
     go('home');
   }
@@ -1291,14 +1376,17 @@ async function loadStoryNode(pathKey){
   document.getElementById('story-loading-title').textContent =
     pathKey === 'root' ? '御史演义中' : '续卷生成中';
   go('story-loading');
+  progressP2.start();
   try{
     const node = await fetchStoryNode(pathKey);
     if (!story.imageHash && node.imageHash) story.imageHash = node.imageHash;
     story.steps.push({ pathKey, node });
+    progressP2.finish();
     if (node.ending) renderStoryEnding(node);
     else renderStoryNode(node);
   } catch(err){
     console.error(err);
+    progressP2.reset();
     t('梦境断片：'+(err.message||'').slice(0,40));
     go('story-intake');
   }
