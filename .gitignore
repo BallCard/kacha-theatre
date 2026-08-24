@@ -62,3 +62,6 @@ server/node_modules/
 
 # 本地测试照片（个人隐私，勿入库）
 /f324abed3e1d0663015b4e85319dddb4.jpg
+
+# Private collaboration links are not part of the public showcase.
+/demo视频的飞书地址.txt

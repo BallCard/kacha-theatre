@@ -18,6 +18,7 @@ import { buildStorySystemPrompt, buildStoryUserPrompt, applyArtStyle, type Ances
 import { validateStoryNode, type StoryNodeOutput } from '../../../lib/storySchema.js';
 import { callStoryLLM, tryParseJson } from '../../../lib/storyLLM.js';
 import { generateImage } from '../../../lib/imageGen.js';
+import { compressForReference } from '../../../lib/imageCompress.js';
 import { logEvent } from '../../../lib/logger.js';
 
 const A_WINS_RATE = Number(process.env.A_WINS_RATE ?? '0.10');
@@ -107,14 +108,18 @@ async function runNode(body: NodeRequest, opts: RunOptions = {}): Promise<NodeRe
   if (!imageHash && body.image) imageHash = shortHash(sha256OfBase64(body.image));
   if (!imageHash) return { error: 'MISSING_IMAGE', detail: '首次请求需带 image', status: 400 };
 
-  // source image 落盘
-  let referenceImageBase64: string | undefined = body.image;
+  // source image 落盘 —— 首次到达时压到 ≤1024px JPEG，避免 6MB 原图反复上传打爆网关
+  let referenceImageBase64: string | undefined;
   const sourceBuf = await getBinary('story', imageHash, 'source');
-  if (!sourceBuf && body.image) {
-    const b64 = body.image.includes(',') ? body.image.split(',')[1] : body.image;
-    await putBinary('story', imageHash, 'source', Buffer.from(b64, 'base64'));
-  } else if (sourceBuf && !referenceImageBase64) {
-    referenceImageBase64 = `data:image/png;base64,${sourceBuf.toString('base64')}`;
+  if (sourceBuf) {
+    referenceImageBase64 = `data:image/jpeg;base64,${sourceBuf.toString('base64')}`;
+  } else if (body.image) {
+    const rawB64 = body.image.includes(',') ? body.image.split(',')[1] : body.image;
+    const rawBuf = Buffer.from(rawB64, 'base64');
+    const small = await compressForReference(rawBuf, { maxSide: 1024, jpegQuality: 82 });
+    await putBinary('story', imageHash, 'source', small);
+    referenceImageBase64 = `data:image/jpeg;base64,${small.toString('base64')}`;
+    await logEvent({ ev: 'story_source_stored', imageHash, rawKB: Math.round(rawBuf.length / 1024), smallKB: Math.round(small.length / 1024) });
   }
   if (!referenceImageBase64) return { error: 'MISSING_IMAGE', detail: '盘上无源图', status: 400 };
 

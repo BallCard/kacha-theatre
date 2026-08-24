@@ -96,7 +96,7 @@ docs/演示物料/                        # 5.24 上午前完成
 - [ ] **Step 1: 初始化 server 目录**
 
 ```bash
-cd D:/Workspace/competitions/抖音创变者26.05.22
+cd D:/Workspace/competitions/douyin-creator-hackathon-2026
 mkdir -p server/api server/lib server/test server/scripts server/data
 cd server
 ```
@@ -208,7 +208,7 @@ Expected: 无报错，`node_modules` 出现。
 - [ ] **Step 8: Commit**
 
 ```bash
-cd D:/Workspace/competitions/抖音创变者26.05.22
+cd D:/Workspace/competitions/douyin-creator-hackathon-2026
 git add server/package.json server/tsconfig.json server/vercel.json server/.env.example server/.gitignore
 git commit -m "[后端] 工程脚手架 + Vercel + TS 配置"
 ```
@@ -1159,8 +1159,8 @@ git commit -m "[后端] JSONL 埋点（VLM 延迟 / score 分布）"
 - [ ] **Step 1: 建立空的 hash-map**
 
 ```bash
-mkdir -p D:/Workspace/competitions/抖音创变者26.05.22/assets/demo
-echo "{}" > D:/Workspace/competitions/抖音创变者26.05.22/assets/demo/hash-map.json
+mkdir -p D:/Workspace/competitions/douyin-creator-hackathon-2026/assets/demo
+echo "{}" > D:/Workspace/competitions/douyin-creator-hackathon-2026/assets/demo/hash-map.json
 ```
 
 - [ ] **Step 2: 实现 `server/api/health.ts`**
@@ -1259,7 +1259,7 @@ export const config = {
 - [ ] **Step 4: 本地启动 dev server**
 
 ```bash
-cd D:/Workspace/competitions/抖音创变者26.05.22/server
+cd D:/Workspace/competitions/douyin-creator-hackathon-2026/server
 # 先填好 .env
 cp .env.example .env
 # 编辑 .env 写入 ARK_API_KEY 和 ARK_MODEL
@@ -1360,14 +1360,14 @@ main().catch(e => { console.error(e); process.exit(1); });
 - [ ] **Step 2: 放入 fixtures**
 
 ```bash
-mkdir -p D:/Workspace/competitions/抖音创变者26.05.22/server/scripts/bench-fixtures
+mkdir -p D:/Workspace/competitions/douyin-creator-hackathon-2026/server/scripts/bench-fixtures
 # 拷贝任意 3-5 张办公室照片进去（趴桌 / 仰头 / 正常工作 / 假装思考各一张）
 ```
 
 - [ ] **Step 3: 跑一遍**
 
 ```bash
-cd D:/Workspace/competitions/抖音创变者26.05.22/server
+cd D:/Workspace/competitions/douyin-creator-hackathon-2026/server
 npm run bench
 ```
 
@@ -1453,7 +1453,7 @@ git commit -m "[后端] Prompt 调优：score 稳定 + 调性收紧 + JSON 输�
 - [ ] **Step 2: 放入 `assets/demo/`**
 
 ```bash
-ls D:/Workspace/competitions/抖音创变者26.05.22/assets/demo/
+ls D:/Workspace/competitions/douyin-creator-hackathon-2026/assets/demo/
 ```
 
 Expected: 3 张 jpg 都在。
@@ -1461,7 +1461,7 @@ Expected: 3 张 jpg 都在。
 - [ ] **Step 3: Commit（jpg 进 git，因为这是兜底命根子，必须随代码走）**
 
 ```bash
-cd D:/Workspace/competitions/抖音创变者26.05.22
+cd D:/Workspace/competitions/douyin-creator-hackathon-2026
 git add assets/demo/demo_01_趴桌.jpg assets/demo/demo_02_仰头.jpg assets/demo/demo_03_假思考.jpg
 git commit -m "[素材] 3 张演示样本图（95/70/35 三档）"
 ```
@@ -1514,7 +1514,7 @@ main().catch(e => { console.error(e); process.exit(1); });
 - [ ] **Step 2: 跑脚本**
 
 ```bash
-cd D:/Workspace/competitions/抖音创变者26.05.22/server
+cd D:/Workspace/competitions/douyin-creator-hackathon-2026/server
 npm run seed-demo
 ```
 
@@ -1543,7 +1543,7 @@ Expected: `{ ok: true }`
 - [ ] **Step 4: 写入 hash-map.json**
 
 ```bash
-cd D:/Workspace/competitions/抖音创变者26.05.22
+cd D:/Workspace/competitions/douyin-creator-hackathon-2026
 node -e "
 const {createHash}=require('crypto');
 const fs=require('fs');
@@ -1594,7 +1594,7 @@ git commit -m "[素材] 3 张样本图配套预录 JSON + sha1 hash-map（兜底
 - [ ] **Step 1: Vercel 项目初始化**
 
 ```bash
-cd D:/Workspace/competitions/抖音创变者26.05.22/server
+cd D:/Workspace/competitions/douyin-creator-hackathon-2026/server
 npx vercel login   # GitHub 登录
 npx vercel link    # 关联或新建项目，project name: moyu-yushi-api
 ```
@@ -1705,7 +1705,7 @@ git commit -m "[部署] Vercel 上线 + hash-map 内联化 + 同步脚本"
 - [ ] **Step 1: 前端起本地 dev**
 
 ```bash
-cd D:/Workspace/competitions/抖音创变者26.05.22/src
+cd D:/Workspace/competitions/douyin-creator-hackathon-2026/src
 npm install
 npm run dev
 ```
@@ -1817,7 +1817,7 @@ body { margin: 0; font-family: "Noto Serif SC", "Source Han Serif", serif; backg
 - [ ] **Step 3: 把 QR PNG 放同目录**
 
 ```bash
-cd D:/Workspace/competitions/抖音创变者26.05.22/docs/演示物料
+cd D:/Workspace/competitions/douyin-creator-hackathon-2026/docs/演示物料
 # 把生成的二维码命名 qr-code.png 放这里
 ```
 

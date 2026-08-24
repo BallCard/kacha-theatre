@@ -9,27 +9,21 @@
 
 ## 项目状态
 
-**当前阶段**：MVP v2.1 设计定稿（Part 1 + Part 2），Part 1 已部分开工
+**最终状态**：✅ 作品提交完成 · 游园会展示 · 比赛结束
 
 - [x] 文档系统搭建
 - [x] Git 初始化
 - [x] 赛道选择 → **赛道四**
 - [x] 创意确定 → **咔嚓剧场**（首期主题：摸鱼 / 古代批阅氛围）
 - [x] MVP v2 范围锁定（Part 1 运势卡片）
-- [x] **MVP v2.1 范围扩展（Part 2 互动剧情增量）**
 - [x] 对标新需求文档（[ADR-005](./docs/decisions/005-咔嚓剧场对标新需求文档.md)）
-- [x] 技术栈选择 → **主前端 kacha.html · bugatti 米白朱砂风 · Part 1+Part 2 一体八屏**（[ADR-008](./docs/decisions/008-kacha-取代-guofeng-为主前端.md)）；旧 guofeng 古风原型保留兜底（[ADR-006](./docs/decisions/006-古风原型转主线前端.md)），src/frontend (React) 作 Part 2 v2 二号实现；本地 Node 服务器 (主 `gemini-2.5-flash-nothinking`，兜底 `gpt-4.1-mini`) + 局域网展示，弃 Vercel
+- [x] 技术栈 → **kacha.html** 主线 · Part 1+Part 2 一体八屏（[ADR-008](./docs/decisions/008-kacha-取代-guofeng-为主前端.md)）
 - [x] Part 1 设计文档定稿（[part1-design.md](./docs/superpowers/specs/2026-05-23-kacha-juchang-part1-design.md)）
 - [x] Part 2 设计文档定稿（[part2-design.md](./docs/superpowers/specs/2026-05-23-kacha-juchang-part2-design.md)）
-- [x] 素材生图 prompt 就绪（[sticker-prompts.md](./design/sticker-prompts.md)）
-- [x] 前端生成 prompt 就绪（[frontend-gemini-prompt.md](./design/frontend-gemini-prompt.md)）
-- [ ] 25 张贴纸资源生成
-- [ ] 前端工程脚手架（Part 1 已交付 Gemini）
-- [ ] 后端 /analyze 接口（Part 1）
-- [ ] 后端 /plot/next + /plot/ending 接口（Part 2）
-- [ ] Prompt 工程调试
-- [ ] 联调 + 兜底素材
-- [ ] 演示物料
+- [x] 后端 /api/analyze 接口（VLM 调度 + 兜底 + 缓存）
+- [x] 后端 /api/plot/v2/node 接口（40 节点 + 推测预热 + 图生成 + 缓存）
+- [x] 前端 kacha.html 八屏全闭环（拍照→评分→二创→Part 2 入梦→剧情→连环画导出）
+- [x] 游园会海报 · Demo 视频 · 作品提交
 
 ## 作品速览
 
@@ -44,7 +38,7 @@
 
 ### Part 2 · 互动剧情（< 90s）
 
-奏折页点 CTA → 5 节点剧情（辰/午前/未/申/酉）→ 每节点 3 选项（顺应天命 / 逆天而行 / 中立观望）→ 宜忌真生效（今日宜对应选项稳过，今日忌对应选项必翻车）→ 6 结局之一 → 御史房裁决书 + 连环画长图导出。**叙事承接 Part 1 上传的同一张照片场景；文风维持古风一致**（与 Part 1 视觉语言统一，[ADR-005](./docs/decisions/005-咔嚓剧场对标新需求文档.md) 已明确否决"现代口语化"方向）。
+奏折页点 CTA → Part 2 入梦（选主题×画风）→ 四层剧情树（1+3+9+27=40 节点）→ 每节点 ABC 三选项 → 每节点 AI 配图 → 6 结局之一（天降祥瑞、御史降罚、逆天改命、贵人相助、天命应验、哭笑不得）→ 连环画长图导出。**叙事承接 Part 1 上传的同一张照片场景；文风维持古风一致**（与 Part 1 视觉语言统一，[ADR-005](./docs/decisions/005-咔嚓剧场对标新需求文档.md) 已明确否决"现代口语化"方向）。
 
 **6 种结局**：天降祥瑞 / 御史降罚 / 逆天改命 / 贵人相助 / 天命应验 / 哭笑不得
 
@@ -78,7 +72,7 @@
 
 | 层 | 选型 | 理由 |
 |---|---|---|
-| **Part 1 主线前端** | 古风原型 `design/style-mockups/apps/guofeng.html`（原生 HTML + JS + 小型 sticker-engine） | 视觉真"古代批阅"——卷轴杆 + 朱红印章 + 紫禁城水印 + 楷体批文（[ADR-006](./docs/decisions/006-古风原型转主线前端.md)） |
+| **主线前端（Part 1+Part 2）** | `kacha.html`（原生 HTML+CSS+JS，~1524 行，bugatti 米白朱砂风，八屏一体，`_shared/sticker-engine.js`） | 宣纸米白+墨黑+朱砂，美术馆图录调性；零构建零路由，演示在一页内完成 Part 1→Part 2 无缝过渡（[ADR-008](./docs/decisions/008-kacha-取代-guofeng-为主前端.md)） |
 | **Part 2 前端** | React 19 + Vite + TypeScript（`src/frontend/`） | 5 节点剧情 + 配图 + 长图导出已在 React 版实现，不切 |
 | 样式 | TailwindCSS（Part 2）/ 原生 CSS（Part 1 guofeng） | 简洁风、零包袱 |
 | Canvas | Konva.js（Part 2）/ 自研 sticker-engine（Part 1） | 拖拽 / 缩放 / 旋转手势 |

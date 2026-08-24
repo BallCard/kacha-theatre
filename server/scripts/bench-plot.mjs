@@ -4,6 +4,9 @@ import { fetch } from 'undici';
 
 const API = 'http://localhost:3000/api/plot/v2/node';
 const IMG = new URL('../../f324abed3e1d0663015b4e85319dddb4.jpg', import.meta.url);
+// 用没测过的组合，确保冷启动
+const THEME = process.env.BENCH_THEME ?? '打脸';
+const STYLE = process.env.BENCH_STYLE ?? '仙逆';
 
 async function loadImage() {
   const buf = await readFile(IMG);
@@ -13,7 +16,7 @@ async function loadImage() {
 async function call(pathKey, image, label, opts = {}) {
   const start = Date.now();
   const body = {
-    theme: '宫斗剧', artStyle: '恋与深空', pathKey,
+    theme: THEME, artStyle: STYLE, pathKey,
     model: 'claude-sonnet-4-6', characterAName: 'A',
     ...(image ? { image } : {}),
     ...(opts.imageHash ? { imageHash: opts.imageHash } : {}),
@@ -34,30 +37,30 @@ async function call(pathKey, image, label, opts = {}) {
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function main() {
-  console.log('=== 加载测试图 ===');
+  console.log(`=== 加载测试图（theme=${THEME} style=${STYLE}）===`);
   const img = await loadImage();
   console.log(`图大小: ${(img.length / 1024).toFixed(0)} KB base64`);
 
-  console.log('\n=== Round 1: 冷启动 root（无任何缓存）===');
+  console.log('\n=== Round 1: 冷启动 root ===');
   const root = await call('root', img, '冷启动');
   if (root.error) { console.error('root 失败，终止'); return; }
   const hash = root.imageHash;
 
-  console.log('\n=== 等 2s 看 prefetch 进度，然后请求 A ===');
-  await sleep(2000);
-  const t1 = Date.now();
-  const childA = await call('A', null, '点击 A', { imageHash: hash });
-  console.log(`  → A 总耗时 ${Date.now() - t1}ms`);
+  console.log('\n=== 等 8s（模拟用户看节点），再请求 A ===');
+  await sleep(8000);
+  await call('A', null, '点击 A', { imageHash: hash });
 
-  console.log('\n=== 立刻再请求一次 A（验证缓存命中）===');
+  console.log('\n=== 立刻验证缓存命中（重复 A）===');
   await call('A', null, '重复 A', { imageHash: hash });
 
-  console.log('\n=== 等 4s 后请求 A.A，看深层 prefetch ===');
-  await sleep(4000);
+  console.log('\n=== 等 8s 再请求 A.A（看 depth-2 prefetch）===');
+  await sleep(8000);
   await call('A.A', null, '点 A.A', { imageHash: hash });
 
-  console.log('\n=== 立刻 A.A.A（终幕）===');
+  console.log('\n=== 终幕 A.A.A ===');
   await call('A.A.A', null, '终幕', { imageHash: hash });
+
+  console.log('\n=== 全流程完成 ===');
 }
 
 main().catch((e) => { console.error(e); process.exit(1); });
