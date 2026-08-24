@@ -1,0 +1,1524 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+<title>咔嚓剧场 · KACHA THEATRE · App</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=JetBrains+Mono:wght@400;500&family=Noto+Serif+SC:wght@300;400;500;700&family=ZCOOL+QingKe+HuangYou&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* 宣纸米白 + 墨黑 + 朱砂点睛 —— 与 03-bugatti-mobile 同款 */
+  --canvas:#f4ecd8; --soft:#ece2c4; --card:#e6dbb9; --elev:#dccfa8;
+  --hairline:#d4c4a0; --hairline-strong:#a8916a;
+  --ink:#1a1410; --body:#5a4d3a; --strong:#2a2118; --muted:#8a7d68;
+  --accent:#b8252a; --accent-deep:#8c1a1f; --jade:#3f7a4f;
+  --display:"Cormorant Garamond","Noto Serif SC",serif;
+  --display-cn:"ZCOOL QingKe HuangYou","Noto Serif SC",serif;
+  --serif:"Noto Serif SC",serif;
+  --mono:"JetBrains Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{background:#2a2418;font-family:var(--serif);color:var(--ink);min-height:100vh}
+body{display:flex;justify-content:center;align-items:flex-start}
+.phone{
+  width:375px;height:812px;background:var(--canvas);position:relative;
+  overflow:hidden;border-radius:36px;box-shadow:0 30px 80px rgba(0,0,0,.45);margin:24px 0;
+}
+@media (max-width:480px){
+  html,body{background:var(--canvas)}
+  .phone{width:100vw;height:100vh;border-radius:0;box-shadow:none;margin:0}
+}
+
+/* status bar */
+.statusbar{height:38px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;font-family:var(--mono);font-size:12px;color:var(--ink);position:relative;z-index:3;flex-shrink:0}
+
+/* topbar */
+.topbar{padding:0 20px 12px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--hairline);flex-shrink:0;position:relative;z-index:3}
+.brand{font-family:var(--display);font-size:11px;font-weight:400;letter-spacing:3px;text-transform:uppercase;color:var(--ink)}
+.brand .cn{font-family:var(--display-cn);font-size:14px;letter-spacing:2px;margin-right:6px;color:var(--ink)}
+.icon-btn{width:30px;height:30px;border:1px solid var(--hairline-strong);border-radius:50%;display:grid;place-items:center;font-size:13px;color:var(--ink);background:transparent;cursor:pointer}
+
+/* screen frame */
+.screen{position:absolute;inset:0;background:var(--canvas);display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .25s ease}
+.screen.active{opacity:1;pointer-events:auto}
+.scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+
+/* ============ HOME ============ */
+.home-content{padding:24px 22px 28px;display:flex;flex-direction:column;min-height:100%}
+.meta-row{font-family:var(--mono);font-size:9px;font-weight:400;letter-spacing:2px;text-transform:uppercase;color:var(--muted);text-align:center;margin-bottom:24px;line-height:1.6}
+.meta-row .sep{margin:0 8px;opacity:.4}
+
+.headline{font-family:var(--display-cn);font-size:64px;font-weight:400;line-height:.98;letter-spacing:5px;text-align:center;margin-bottom:14px;color:var(--ink)}
+.headline em{font-style:normal;color:var(--accent)}
+.sub{font-family:var(--display);font-size:12px;font-weight:300;letter-spacing:3px;text-transform:uppercase;text-align:center;color:var(--muted);margin-bottom:32px}
+
+.divider{display:flex;align-items:center;justify-content:center;gap:12px;margin:20px 0 22px}
+.divider .line{flex:1;height:1px;background:var(--hairline-strong)}
+.divider .glyph{font-family:var(--mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
+.divider .glyph.cn{font-family:var(--display-cn);font-size:13px;letter-spacing:2px;color:var(--ink)}
+
+/* intro card on home */
+.intro-card{background:var(--soft);border:1px solid var(--hairline);padding:20px 18px;margin-bottom:24px;position:relative}
+.intro-card::before{content:"";position:absolute;left:0;top:0;width:2px;height:36px;background:var(--accent)}
+.intro-eyebrow{font-family:var(--mono);font-size:9px;letter-spacing:1.8px;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+.intro-paragraph{font-family:var(--serif);font-size:13px;font-weight:400;line-height:1.75;color:var(--strong);text-indent:2em}
+
+/* CTA group */
+.cta-group{display:flex;flex-direction:column;gap:10px;margin-top:auto}
+.btn{
+  font-family:var(--display);font-size:12px;font-weight:400;letter-spacing:3px;text-transform:uppercase;
+  height:48px;border-radius:9999px;background:transparent;color:var(--ink);
+  border:1px solid var(--hairline-strong);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.btn .cn{font-family:var(--display-cn);font-size:14px;letter-spacing:3px}
+.btn.fill{background:var(--accent);color:var(--canvas);border-color:var(--accent)}
+.btn.fill:active{background:var(--accent-deep)}
+.btn.subtle{color:var(--muted);border-color:var(--hairline)}
+.btn:active{transform:scale(.98)}
+.btn[disabled]{opacity:.4;cursor:not-allowed}
+
+.cta-row{display:flex;gap:10px}
+.cta-row .btn{flex:1}
+
+/* ============ LOADING ============ */
+.load-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 32px;text-align:center}
+.scroll-stage{width:200px;height:200px;position:relative;margin-bottom:24px;display:flex;align-items:center;justify-content:center;animation:breath 2.2s ease-in-out infinite}
+.load-illust{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;transition:opacity .5s ease}
+.load-illust.active{opacity:1}
+@keyframes breath{0%,100%{transform:scale(1);opacity:.95}50%{transform:scale(1.04);opacity:1}}
+.load-title{font-family:var(--display-cn);font-size:28px;font-weight:400;color:var(--ink);margin-bottom:8px;letter-spacing:4px}
+.load-sub{font-family:var(--display);font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);margin-bottom:24px}
+.load-dots{font-family:var(--mono);font-size:10px;color:var(--accent);letter-spacing:3px;text-transform:uppercase}
+.load-dots::after{content:"…";display:inline-block;animation:dots 1.4s steps(4,end) infinite}
+@keyframes dots{0%{content:""}25%{content:"·"}50%{content:"··"}75%{content:"···"}}
+
+/* ============ EDIT ============ */
+.edit-topbar{display:flex;justify-content:space-between;align-items:center;padding:0 16px 10px;border-bottom:1px solid var(--hairline);flex-shrink:0;position:relative;z-index:3}
+.back-btn{width:32px;height:32px;border-radius:50%;border:1px solid var(--hairline-strong);background:transparent;color:var(--ink);font-size:15px;display:grid;place-items:center;cursor:pointer}
+.edit-title{display:flex;flex-direction:column;align-items:center;gap:2px}
+.edit-title .cn{font-family:var(--display-cn);font-size:15px;letter-spacing:3px;color:var(--ink)}
+.edit-title .en{font-family:var(--mono);font-size:8.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}
+.tier-chip{font-family:var(--display-cn);font-size:11px;letter-spacing:2px;padding:5px 10px;background:var(--accent);color:var(--canvas);border-radius:9999px}
+
+/* summary strip */
+.edit-summary{margin:12px 16px 8px;border:1px solid var(--hairline);display:grid;grid-template-columns:auto 1fr auto;gap:0;background:var(--soft)}
+.edit-summary .col{padding:10px 14px;border-right:1px solid var(--hairline);display:flex;flex-direction:column;justify-content:center}
+.edit-summary .col:last-child{border-right:0}
+.edit-summary .col .lab{font-family:var(--mono);font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
+.edit-summary .col .v{font-family:var(--display);font-size:28px;font-weight:300;line-height:1;color:var(--accent)}
+.edit-summary .col .v small{font-family:var(--mono);font-size:9px;color:var(--muted);margin-left:3px;letter-spacing:1px}
+.edit-summary .col.sign .v{font-family:var(--display-cn);font-size:22px;letter-spacing:2px;color:var(--ink)}
+.edit-summary .col.title{flex:1}
+.edit-summary .col.title .v{font-family:var(--display-cn);font-size:18px;letter-spacing:2px;color:var(--ink);line-height:1.1}
+
+.sign-chip{display:inline-flex;align-items:center;font-family:var(--display-cn);font-size:10px;letter-spacing:1.5px;padding:2px 7px;border-radius:9999px;color:var(--canvas);background:#5b5b5b;margin-left:4px}
+.sign-chip[data-sign="下下签"]{background:#5b5b5b}
+.sign-chip[data-sign="下签"]{background:#5d6f88}
+.sign-chip[data-sign="中签"]{background:#c08a3e;color:#2a1a08}
+.sign-chip[data-sign="上签"]{background:var(--jade)}
+.sign-chip[data-sign="上上签"]{background:var(--accent)}
+
+.edit-hint{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);text-align:center;padding:4px 16px 8px}
+
+.stage-wrap{margin:0 16px;border:1px solid var(--hairline);background:#000;overflow:hidden;position:relative;flex-shrink:0}
+#stage{display:block;margin:0 auto;background:#000}
+
+/* bottom toolbar (edit) */
+.edit-toolbar{position:absolute;left:0;right:0;bottom:0;background:var(--canvas);border-top:1px solid var(--hairline);padding-bottom:env(safe-area-inset-bottom,0);z-index:6}
+.edit-tools-row{display:flex;align-items:center;gap:6px;padding:10px 12px 16px}
+.tool-btn{
+  flex:1;height:42px;border-radius:9999px;border:1px solid var(--hairline-strong);background:transparent;
+  color:var(--ink);font-family:var(--display);font-size:11px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:4px;
+}
+.tool-btn .cn{font-family:var(--display-cn);font-size:13px;letter-spacing:2px}
+.tool-btn.active{background:var(--ink);color:var(--canvas);border-color:var(--ink)}
+.tool-btn.warn{color:var(--muted)}
+.tool-btn.warn[disabled]{opacity:.35;cursor:not-allowed}
+.tool-btn.done{background:var(--accent);color:var(--canvas);border-color:var(--accent)}
+.tool-btn.done:active{background:var(--accent-deep)}
+
+/* drawer */
+.drawer-backdrop{position:absolute;inset:0;background:rgba(26,20,16,.45);opacity:0;pointer-events:none;transition:opacity .2s;z-index:30}
+.drawer-backdrop.show{opacity:1;pointer-events:auto}
+.drawer{position:absolute;left:0;right:0;bottom:0;background:var(--canvas);border-top:1px solid var(--hairline-strong);padding:16px 18px 22px;transform:translateY(110%);transition:transform .25s ease;z-index:40;max-height:62%;overflow-y:auto}
+.drawer.show{transform:translateY(0)}
+.drawer-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--hairline)}
+.drawer-head h3{font-family:var(--display-cn);font-size:17px;letter-spacing:3px;color:var(--ink)}
+.drawer-head .en{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-left:6px}
+.drawer-head .close{width:28px;height:28px;border-radius:50%;background:transparent;border:1px solid var(--hairline-strong);font-size:15px;color:var(--ink);cursor:pointer}
+
+/* sticker grid */
+.sticker-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.sticker-grid .item{aspect-ratio:1;background:var(--soft);border:1px solid var(--hairline);display:grid;place-items:center;cursor:pointer;padding:6px}
+.sticker-grid .item:active{transform:scale(.95)}
+.sticker-grid .item img{width:100%;height:100%;object-fit:contain}
+
+/* text drawer */
+.text-row{display:flex;flex-direction:column;gap:12px}
+.text-row input{height:42px;border-radius:4px;border:1px solid var(--hairline-strong);padding:0 14px;font-family:var(--serif);font-size:15px;background:var(--soft);color:var(--ink)}
+.text-row .label{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}
+.text-row .chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{padding:7px 14px;border-radius:9999px;border:1px solid var(--hairline-strong);background:transparent;font-family:var(--display-cn);font-size:13px;cursor:pointer;color:var(--ink);letter-spacing:1px}
+.chip.active{background:var(--ink);color:var(--canvas);border-color:var(--ink)}
+.color-chip{width:28px;height:28px;border-radius:50%;border:2px solid transparent;cursor:pointer;display:inline-block}
+.color-chip.active{border-color:var(--ink);box-shadow:0 0 0 2px var(--canvas) inset}
+.text-add-btn{height:44px;border-radius:9999px;background:var(--accent);color:var(--canvas);border:0;font-family:var(--display-cn);font-size:14px;letter-spacing:4px;cursor:pointer}
+
+/* titles drawer */
+.titles{display:flex;gap:8px;flex-wrap:wrap}
+.title-pill{font-family:var(--display-cn);font-size:14px;padding:8px 14px;border-radius:9999px;border:1px solid var(--hairline-strong);background:transparent;color:var(--ink);cursor:pointer;letter-spacing:1px}
+.title-pill.active{background:var(--accent);color:var(--canvas);border-color:var(--accent)}
+
+/* ============ POSTER ============ */
+.poster-scroll{flex:1;overflow-y:auto;padding:0;position:relative}
+.poster{background:var(--canvas);padding:8px 22px 28px;position:relative}
+
+.poster .pheadline{font-family:var(--display-cn);font-size:54px;font-weight:400;line-height:.98;letter-spacing:5px;text-align:center;margin:18px 0 12px;color:var(--ink)}
+.poster .pheadline em{font-style:normal;color:var(--accent)}
+.poster .psub{font-family:var(--display);font-size:12px;font-weight:300;letter-spacing:3px;text-transform:uppercase;text-align:center;color:var(--muted);margin-bottom:28px}
+
+.poster .pcaptured-wrap{margin-bottom:24px;border:1px solid var(--hairline);background:#000}
+.poster .pcaptured{width:100%;height:auto;display:block}
+.poster .pcaptured-placeholder{width:100%;aspect-ratio:335/420;background:var(--soft);display:grid;place-items:center;color:var(--muted);font-family:var(--mono);font-size:11px;letter-spacing:2px;text-transform:uppercase}
+
+.poster .verdict-card{background:var(--soft);border:1px solid var(--hairline);padding:22px 18px;margin-bottom:24px;position:relative}
+.poster .verdict-card::before{content:"";position:absolute;left:0;top:0;width:2px;height:40px;background:var(--accent)}
+.poster .verdict-eyebrow{font-family:var(--mono);font-size:9px;letter-spacing:1.8px;text-transform:uppercase;color:var(--accent);margin-bottom:12px}
+.poster .verdict-paragraph{font-family:var(--serif);font-size:13.5px;font-weight:400;line-height:1.75;color:var(--strong);text-align:justify;text-indent:2em}
+.poster .verdict-paragraph::first-letter{font-family:var(--display-cn);font-size:42px;float:left;line-height:.85;margin:4px 8px 0 0;color:var(--accent)}
+
+.poster .stats{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline);margin-bottom:24px}
+.poster .stat{padding:18px 6px;border-right:1px solid var(--hairline);text-align:center}
+.poster .stat:last-child{border-right:0}
+.poster .stat .label{font-family:var(--mono);font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.poster .stat .val{font-family:var(--display);font-size:36px;font-weight:300;line-height:1;color:var(--ink)}
+.poster .stat:first-child .val{color:var(--accent)}
+.poster .stat.sign .val{font-family:var(--display-cn);font-size:22px;letter-spacing:2px}
+.poster .stat .unit{font-family:var(--mono);font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-top:4px}
+
+.poster .ledger{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--hairline);margin-bottom:24px}
+.poster .ledger-col{padding:18px 14px;border-right:1px solid var(--hairline)}
+.poster .ledger-col:last-child{border:0}
+.poster .ledger-col .label{font-family:var(--mono);font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.poster .ledger-col .head{font-family:var(--display-cn);font-size:28px;letter-spacing:3px;color:var(--ink);margin-bottom:12px;line-height:1}
+.poster .ledger-col:first-child .head{color:var(--ink)}
+.poster .ledger-col:last-child .head{color:var(--accent)}
+.poster .ledger-col ul{list-style:none}
+.poster .ledger-col li{font-family:var(--serif);font-size:12.5px;color:var(--body);padding:6px 0;border-bottom:1px solid var(--hairline);display:flex;justify-content:space-between}
+.poster .ledger-col li:last-child{border:0}
+
+.poster .award{text-align:center;padding:8px 0 4px;margin-bottom:20px}
+.poster .award .label{font-family:var(--mono);font-size:9px;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);margin-bottom:16px}
+.poster .award .seal{display:inline-block;border:1.5px solid var(--accent);padding:18px 32px;background:rgba(184,37,42,.04)}
+.poster .award .seal .title{font-family:var(--display-cn);font-size:30px;letter-spacing:5px;line-height:1;color:var(--accent)}
+.poster .award .meta{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-top:14px}
+
+.poster .pfoot{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);text-align:center;border-top:1px solid var(--hairline);padding-top:12px}
+
+.poster-actions{padding:14px 22px 4px;display:flex;flex-direction:column;gap:10px}
+
+/* poster bottom bar */
+.poster-bottom{position:absolute;left:0;right:0;bottom:0;background:var(--canvas);border-top:1px solid var(--hairline);padding:12px 16px 28px;display:flex;gap:10px;z-index:10}
+.poster-bottom .btn{flex:1}
+
+/* exporting overlay */
+.exporting{position:fixed;inset:0;background:rgba(244,236,216,.92);backdrop-filter:blur(3px);z-index:100000;display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px;padding:0 32px}
+.exporting.show{display:flex}
+.exporting .scroll-stage{width:160px;height:160px;margin-bottom:4px}
+.spinner{width:42px;height:42px;border:2px solid rgba(184,37,42,.2);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.exporting .lbl{font-family:var(--display-cn);color:var(--ink);font-size:15px;letter-spacing:3px}
+
+/* 进度条 —— 三处 loading 共用 */
+.progress{
+  width:200px;max-width:80%;height:3px;background:var(--hairline);
+  border-radius:9999px;overflow:hidden;margin-top:14px;position:relative;
+}
+.progress .fill{
+  height:100%;background:var(--accent);width:0%;
+  transition:width .25s ease-out;border-radius:9999px;
+}
+.progress .pct{
+  position:absolute;right:0;top:8px;font-family:var(--mono);font-size:9px;
+  letter-spacing:1.5px;color:var(--muted);
+}
+
+.file-input{display:none}
+
+/* ============ PART 2 · STORY ============ */
+.story-content{padding:20px 20px 24px;display:flex;flex-direction:column;min-height:100%}
+.story-photo-preview{
+  width:100%;aspect-ratio:1/1;border:1px solid var(--hairline);background:var(--soft);
+  margin-bottom:18px;overflow:hidden;position:relative;
+}
+.story-photo-preview img{width:100%;height:100%;object-fit:cover;display:block}
+.story-photo-preview .placeholder{
+  position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  color:var(--muted);font-family:var(--mono);font-size:11px;letter-spacing:2px;text-transform:uppercase;gap:6px;
+}
+.story-photo-preview .replace{
+  position:absolute;right:8px;bottom:8px;background:rgba(26,20,16,.78);color:var(--canvas);
+  padding:5px 10px;font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;
+  border-radius:9999px;cursor:pointer;border:1px solid var(--hairline-strong);
+}
+
+.story-field{margin-bottom:14px}
+.story-field .lab{font-family:var(--mono);font-size:9px;letter-spacing:1.8px;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.story-chips{display:flex;flex-wrap:wrap;gap:6px}
+.story-chip{
+  font-family:var(--display-cn);font-size:13px;letter-spacing:1px;padding:6px 12px;border-radius:9999px;
+  border:1px solid var(--hairline-strong);background:transparent;color:var(--ink);cursor:pointer;
+}
+.story-chip.active{background:var(--accent);color:var(--canvas);border-color:var(--accent)}
+.story-input{
+  width:100%;height:38px;padding:0 12px;font-family:var(--serif);font-size:14px;
+  background:var(--soft);border:1px solid var(--hairline-strong);color:var(--ink);border-radius:4px;
+}
+
+/* shutter overlay */
+.shutter-overlay{
+  position:absolute;inset:0;background:var(--canvas);z-index:50;display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .15s;
+}
+.shutter-overlay.show{opacity:1;pointer-events:auto}
+.shutter-flash{position:absolute;inset:0;background:#fff;opacity:0;animation:flash 1.2s ease-out forwards}
+@keyframes flash{0%{opacity:0}10%{opacity:.95}40%{opacity:.5}100%{opacity:0}}
+.shutter-text{font-family:var(--display-cn);font-size:84px;letter-spacing:14px;color:var(--accent);position:relative;z-index:2;animation:shutterText 1.2s ease-out forwards}
+@keyframes shutterText{0%{transform:scale(.4);opacity:0}30%{transform:scale(1.08);opacity:1}80%{transform:scale(1);opacity:.8}100%{transform:scale(.98);opacity:0}}
+
+/* node screen */
+.node-content{padding:14px 18px 24px;display:flex;flex-direction:column;gap:14px}
+.node-meta{font-family:var(--mono);font-size:9px;letter-spacing:1.8px;text-transform:uppercase;color:var(--muted);text-align:center}
+.node-meta .accent{color:var(--accent)}
+.node-image{width:100%;aspect-ratio:1/1;background:#000;border:1px solid var(--hairline);overflow:hidden;position:relative}
+.node-image img{width:100%;height:100%;object-fit:cover;display:block}
+.node-image .loading-stub{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--muted);font-family:var(--mono);font-size:11px;letter-spacing:2px;text-transform:uppercase}
+
+.node-narration{
+  font-family:var(--serif);font-size:14px;line-height:1.75;color:var(--strong);text-align:justify;
+  padding:14px 16px;background:var(--soft);border:1px solid var(--hairline);position:relative;
+}
+.node-narration::before{content:"";position:absolute;left:0;top:0;width:2px;height:32px;background:var(--accent)}
+.node-character-line{
+  font-family:var(--display-cn);font-size:14px;color:var(--accent);letter-spacing:1.5px;
+  padding:6px 12px;border-left:2px solid var(--accent);background:rgba(184,37,42,.04);
+}
+
+.node-choices{display:flex;flex-direction:column;gap:10px}
+.node-choice{
+  display:flex;align-items:center;gap:12px;padding:12px 14px;
+  background:transparent;border:1px solid var(--hairline-strong);border-radius:4px;
+  font-family:var(--serif);font-size:14px;color:var(--ink);cursor:pointer;text-align:left;line-height:1.5;
+  transition:all .15s;
+}
+.node-choice .tag{
+  font-family:var(--display);font-size:14px;letter-spacing:2px;color:var(--accent);
+  width:24px;height:24px;border:1px solid var(--accent);border-radius:50%;display:grid;place-items:center;flex-shrink:0;
+}
+.node-choice:active{background:var(--soft)}
+.node-choice:hover{border-color:var(--accent)}
+
+.node-bottom{padding:10px 16px 22px;display:flex;gap:10px;border-top:1px solid var(--hairline);background:var(--canvas)}
+.node-bottom .btn{flex:1;height:42px;font-size:11px}
+
+/* ending screen */
+.ending-content{padding:20px 22px 24px;display:flex;flex-direction:column;gap:18px}
+.ending-headline{font-family:var(--display-cn);font-size:52px;letter-spacing:6px;text-align:center;line-height:1;color:var(--accent);margin-top:8px}
+.ending-sub{font-family:var(--display);font-size:11px;letter-spacing:3px;text-transform:uppercase;text-align:center;color:var(--muted);margin-top:-8px}
+.ending-divider{display:flex;align-items:center;justify-content:center;gap:10px;margin:4px 0}
+.ending-divider .line{flex:1;height:1px;background:var(--hairline-strong)}
+.ending-divider .glyph{font-family:var(--display-cn);font-size:13px;letter-spacing:2px;color:var(--ink)}
+.ending-verdict{
+  font-family:var(--serif);font-size:13.5px;line-height:1.8;color:var(--strong);text-align:justify;
+  padding:18px 16px;background:var(--soft);border:1px solid var(--hairline);position:relative;text-indent:2em;
+}
+.ending-verdict::before{content:"";position:absolute;left:0;top:0;width:2px;height:40px;background:var(--accent)}
+.ending-verdict::first-letter{font-family:var(--display-cn);font-size:36px;float:left;line-height:.85;margin:4px 8px 0 0;color:var(--accent)}
+
+.ending-wins{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  padding:14px 0;border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline);
+}
+.ending-wins .lab{font-family:var(--mono);font-size:9px;letter-spacing:1.8px;text-transform:uppercase;color:var(--muted)}
+.ending-wins .v{font-family:var(--display-cn);font-size:18px;letter-spacing:3px;color:var(--accent)}
+.ending-wins .v.lose{color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="phone" id="phone">
+
+  <!-- =================== HOME =================== -->
+  <div class="screen" id="screen-home">
+    <div class="statusbar"><span>9:41</span><span style="font-family:var(--mono);font-size:11px">●●●●● 5G</span></div>
+    <div class="topbar">
+      <div class="brand"><span class="cn">咔嚓剧场</span>KACHA THEATRE</div>
+      <div class="icon-btn" id="btn-history">⌛</div>
+    </div>
+    <div class="scroll">
+      <div class="home-content">
+        <div class="meta-row">
+          <span>摸鱼 · 御史房</span><span class="sep">/</span>
+          <span>ESTAB. 26</span><span class="sep">/</span>
+          <span>v0.3</span>
+        </div>
+        <h1 class="headline">案前<br/><em>一照</em></h1>
+        <div class="sub">A SNAP · A VERDICT</div>
+
+        <div class="divider"><div class="line"></div><div class="glyph cn">御史房</div><div class="line"></div></div>
+
+        <div class="intro-card">
+          <div class="intro-eyebrow">第 — 号 · 收件须知</div>
+          <p class="intro-paragraph">卿持影至此，朕命御史照《摸鱼律》批阅，出评分、宜忌、封号一份，准卿盖印颁行群聊以弹劾同僚。</p>
+        </div>
+
+        <div class="cta-group">
+          <button class="btn fill" id="btn-camera"><span class="cn">拍一张审审</span></button>
+          <div class="cta-row">
+            <button class="btn" id="btn-album"><span class="cn">相册</span></button>
+            <button class="btn subtle" id="btn-demo"><span class="cn">Demo</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <input type="file" accept="image/*" capture="environment" id="file-camera" class="file-input">
+    <input type="file" accept="image/*" id="file-album" class="file-input">
+  </div>
+
+  <!-- =================== LOADING =================== -->
+  <div class="screen" id="screen-loading">
+    <div class="statusbar"><span>9:41</span><span style="font-family:var(--mono);font-size:11px">●●●●● 5G</span></div>
+    <div class="topbar">
+      <div class="brand"><span class="cn">咔嚓剧场</span>KACHA THEATRE</div>
+      <div style="font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase">批阅中</div>
+    </div>
+    <div class="load-wrap">
+      <div class="scroll-stage">
+        <img class="load-illust active" data-frame="0" src="_assets/loading-scroll.png" alt="" />
+        <img class="load-illust"        data-frame="1" src="_assets/loading-yubi.png" alt="" />
+        <img class="load-illust"        data-frame="2" src="_assets/loading-stamp.png" alt="" />
+      </div>
+      <div class="load-title">御史批阅</div>
+      <div class="load-sub">A FORTUNE BEING WRITTEN</div>
+      <div class="load-dots" id="load-dots">奉旨拟稿</div>
+      <div class="progress" id="p1-progress"><div class="fill"></div><div class="pct">0%</div></div>
+    </div>
+  </div>
+
+  <!-- =================== EDIT =================== -->
+  <div class="screen" id="screen-edit">
+    <div class="statusbar"><span>9:41</span><span style="font-family:var(--mono);font-size:11px">●●●●● 5G</span></div>
+    <div class="edit-topbar">
+      <button class="back-btn" id="btn-edit-back">←</button>
+      <div class="edit-title">
+        <div class="cn">二创神游御笔</div>
+        <div class="en">EDIT · STAMP · TITLE</div>
+      </div>
+      <div class="tier-chip" id="edit-tier-badge">—</div>
+    </div>
+
+    <div class="edit-summary" id="edit-summary">
+      <div class="col score">
+        <div class="lab">摸鱼指数</div>
+        <div class="v"><span class="num">—</span><small>/100</small></div>
+      </div>
+      <div class="col title">
+        <div class="lab">封号 · TITLE</div>
+        <div class="v"><span class="badge">—</span></div>
+      </div>
+      <div class="col sign">
+        <div class="lab">签型</div>
+        <div class="v"><span class="tier">—</span></div>
+      </div>
+    </div>
+
+    <div class="edit-hint">拖动朱印 · 右下点拉伸旋转</div>
+
+    <div class="stage-wrap">
+      <div id="stage"></div>
+    </div>
+
+    <div class="drawer-backdrop" id="edit-drawer-backdrop"></div>
+
+    <div class="drawer" id="drawer-stickers">
+      <div class="drawer-head"><h3>印玺六枚<span class="en">SEALS</span></h3><button class="close" data-close>×</button></div>
+      <div class="sticker-grid" id="sticker-grid"></div>
+    </div>
+    <div class="drawer" id="drawer-text">
+      <div class="drawer-head"><h3>御笔朱批<span class="en">VERMILION</span></h3><button class="close" data-close>×</button></div>
+      <div class="text-row">
+        <input id="text-input" placeholder="写一句御批…如「朕已阅」" maxlength="20" value="朕已阅"/>
+        <div class="label">字体 · FONT</div>
+        <div class="chips" id="font-chips">
+          <span class="chip active" data-font='"STKaiti","KaiTi","楷体",serif' data-name="楷">楷体</span>
+          <span class="chip" data-font='"STSong","SimSun","宋体",serif' data-name="宋">宋体</span>
+          <span class="chip" data-font='"STXingkai","行楷","STKaiti",serif' data-name="行">行书</span>
+        </div>
+        <div class="label">颜色 · COLOR</div>
+        <div class="chips" id="color-chips">
+          <span class="color-chip active" style="background:#b8252a" data-color="#b8252a"></span>
+          <span class="color-chip" style="background:#a8916a" data-color="#a8916a"></span>
+          <span class="color-chip" style="background:#1a1410" data-color="#1a1410"></span>
+          <span class="color-chip" style="background:#f4ecd8;border:1px solid #999" data-color="#f4ecd8"></span>
+          <span class="color-chip" style="background:#3f7a4f" data-color="#3f7a4f"></span>
+        </div>
+        <button class="text-add-btn" id="text-add-btn">加到画布</button>
+      </div>
+    </div>
+    <div class="drawer" id="drawer-titles">
+      <div class="drawer-head"><h3>封号三选<span class="en">TITLES</span></h3><button class="close" data-close>×</button></div>
+      <p style="font-family:var(--serif);font-size:12px;color:var(--body);margin-bottom:14px">钦点其一，镌于奏折之尾</p>
+      <div class="titles" id="titles-pills"></div>
+    </div>
+
+    <div class="edit-toolbar">
+      <div class="edit-tools-row">
+        <button class="tool-btn" data-drawer="stickers"><span class="cn">印玺</span></button>
+        <button class="tool-btn" data-drawer="text"><span class="cn">御批</span></button>
+        <button class="tool-btn" data-drawer="titles"><span class="cn">封号</span></button>
+        <button class="tool-btn warn" id="btn-undo" disabled>↶</button>
+        <button class="tool-btn done" id="btn-finish"><span class="cn">完颁</span></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =================== POSTER =================== -->
+  <div class="screen" id="screen-poster">
+    <div class="statusbar"><span>9:41</span><span style="font-family:var(--mono);font-size:11px">●●●●● 5G</span></div>
+    <div class="edit-topbar">
+      <button class="back-btn" id="btn-back-edit">←</button>
+      <div class="edit-title">
+        <div class="cn">奏折长图</div>
+        <div class="en">FINAL SCROLL</div>
+      </div>
+      <div style="width:32px"></div>
+    </div>
+    <div class="poster-scroll" id="poster-scroll">
+      <div id="poster-host"><!-- poster rendered by JS --></div>
+    </div>
+    <div class="poster-bottom">
+      <button class="btn" id="btn-share"><span class="cn">链接</span></button>
+      <button class="btn" id="btn-export-poster"><span class="cn">长图</span></button>
+      <button class="btn fill" id="btn-enter-story"><span class="cn">召见御史·演今日剧</span></button>
+    </div>
+  </div>
+
+  <!-- =================== STORY INTAKE =================== -->
+  <div class="screen" id="screen-story-intake">
+    <div class="statusbar"><span>9:41</span><span style="font-family:var(--mono);font-size:11px">●●●●● 5G</span></div>
+    <div class="edit-topbar">
+      <button class="back-btn" id="btn-story-back">←</button>
+      <div class="edit-title">
+        <div class="cn">召见御史 · 入梦</div>
+        <div class="en">PART II · DREAMSCAPE</div>
+      </div>
+      <div style="width:32px"></div>
+    </div>
+    <div class="scroll">
+      <div class="story-content">
+        <div class="meta-row">
+          <span>Part 2</span><span class="sep">/</span>
+          <span>4 节点 · ABC 三选</span><span class="sep">/</span>
+          <span>1 终幕</span>
+        </div>
+        <div class="story-photo-preview" id="story-photo">
+          <div class="placeholder">无照片<br/><span style="font-size:9px">从 PART 1 带入</span></div>
+        </div>
+        <div class="story-field">
+          <div class="lab">主角称呼 · NAME</div>
+          <input class="story-input" id="story-name-input" value="卿" maxlength="12" placeholder="卿 / 小李 / 阿黎">
+        </div>
+        <div class="story-field">
+          <div class="lab">主题 · THEME</div>
+          <div class="story-chips" id="story-theme-chips"></div>
+        </div>
+        <div class="story-field">
+          <div class="lab">画风 · ART STYLE</div>
+          <div class="story-chips" id="story-artstyle-chips"></div>
+        </div>
+        <div class="cta-group" style="margin-top:8px">
+          <button class="btn fill" id="btn-story-start"><span class="cn">咔嚓 · 入梦</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =================== STORY LOADING =================== -->
+  <div class="screen" id="screen-story-loading">
+    <div class="statusbar"><span>9:41</span><span style="font-family:var(--mono);font-size:11px">●●●●● 5G</span></div>
+    <div class="edit-topbar">
+      <div style="width:32px"></div>
+      <div class="edit-title">
+        <div class="cn">梦境生成中</div>
+        <div class="en">DREAMING</div>
+      </div>
+      <div style="width:32px"></div>
+    </div>
+    <div class="load-wrap">
+      <div class="scroll-stage">
+        <img class="load-illust active" data-frame="0" src="_assets/kacha-loading-p2-1.png" alt="" />
+        <img class="load-illust"        data-frame="1" src="_assets/kacha-loading-p2-2.png" alt="" />
+        <img class="load-illust"        data-frame="2" src="_assets/kacha-loading-p2-3.png" alt="" />
+      </div>
+      <div class="load-title" id="story-loading-title">御史演义中</div>
+      <div class="load-sub">A DREAM BEING DRAWN</div>
+      <div class="load-dots">起卷拟稿</div>
+      <div class="progress" id="p2-progress"><div class="fill"></div><div class="pct">0%</div></div>
+    </div>
+  </div>
+
+  <!-- =================== STORY NODE =================== -->
+  <div class="screen" id="screen-story-node">
+    <div class="statusbar"><span>9:41</span><span style="font-family:var(--mono);font-size:11px">●●●●● 5G</span></div>
+    <div class="edit-topbar">
+      <button class="back-btn" id="btn-node-restart" title="重梦">↻</button>
+      <div class="edit-title">
+        <div class="cn" id="node-title">第一幕</div>
+        <div class="en" id="node-subtitle">ACT I · CHOICE</div>
+      </div>
+      <div class="tier-chip" id="node-depth-chip">1/4</div>
+    </div>
+    <div class="scroll">
+      <div class="node-content">
+        <div class="node-meta">
+          <span id="node-theme-meta">宫斗剧</span>
+          <span style="margin:0 6px;opacity:.4">/</span>
+          <span id="node-art-meta">恋与深空</span>
+        </div>
+        <div class="node-image" id="node-image">
+          <div class="loading-stub">画卷未至…</div>
+        </div>
+        <div class="node-narration" id="node-narration">—</div>
+        <div class="node-character-line" id="node-character-line" style="display:none">—</div>
+        <div class="node-choices" id="node-choices"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =================== STORY ENDING =================== -->
+  <div class="screen" id="screen-story-ending">
+    <div class="statusbar"><span>9:41</span><span style="font-family:var(--mono);font-size:11px">●●●●● 5G</span></div>
+    <div class="edit-topbar">
+      <button class="back-btn" id="btn-ending-back">←</button>
+      <div class="edit-title">
+        <div class="cn">终幕裁决</div>
+        <div class="en">FINAL VERDICT</div>
+      </div>
+      <div style="width:32px"></div>
+    </div>
+    <div class="scroll">
+      <div class="ending-content">
+        <div class="meta-row">
+          <span>Part 2 · 终幕</span><span class="sep">/</span>
+          <span id="ending-theme-meta">—</span><span class="sep">/</span>
+          <span id="ending-art-meta">—</span>
+        </div>
+        <h1 class="ending-headline" id="ending-type">—</h1>
+        <div class="ending-sub" id="ending-sub-en">AN ENDING</div>
+        <div class="ending-divider"><div class="line"></div><div class="glyph">御史宣判</div><div class="line"></div></div>
+        <div class="node-image" style="max-height:280px" id="ending-image">
+          <div class="loading-stub">画卷未至…</div>
+        </div>
+        <div class="ending-verdict" id="ending-verdict">—</div>
+        <div class="ending-wins">
+          <span class="lab">主角胜负</span>
+          <span class="v" id="ending-awins-v">—</span>
+        </div>
+        <div class="cta-group">
+          <button class="btn fill" id="btn-ending-restart"><span class="cn">再演一遍</span></button>
+          <div class="cta-row">
+            <button class="btn" id="btn-ending-export"><span class="cn">连环画长图</span></button>
+            <button class="btn subtle" id="btn-ending-home"><span class="cn">回奏折</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- shutter overlay -->
+  <div class="shutter-overlay" id="shutter-overlay">
+    <div class="shutter-flash"></div>
+    <div class="shutter-text">咔嚓</div>
+  </div>
+
+  <div class="exporting" id="exporting">
+    <div class="scroll-stage">
+      <img class="load-illust active" data-frame="0" src="_assets/kacha-exporting-1.png" alt="" />
+      <img class="load-illust"        data-frame="1" src="_assets/kacha-exporting-2.png" alt="" />
+      <img class="load-illust"        data-frame="2" src="_assets/kacha-exporting-3.png" alt="" />
+    </div>
+    <div class="lbl">内阁学士奉诏摹印中</div>
+    <div class="progress" id="export-progress"><div class="fill"></div><div class="pct">0%</div></div>
+  </div>
+</div>
+
+<script type="module">
+import { analyzeImage, makeDemoImageDataURL } from './_shared/api.js';
+import { createStage } from './_shared/sticker-engine.js';
+import { exportNodeToPNG, showSaveModal, copyShareLink } from './_shared/export.js';
+import { toast } from './_shared/toast.js';
+import { loadCleanImage } from './_shared/bg-clean.js';
+
+// background-clean asset list (subset of guofeng's — drop decorative chrome)
+const CLEAN_URL = new Map();
+const cleanedOf = (raw) => CLEAN_URL.get(raw) || raw;
+const ASSET_LIST = [
+  ['_assets/seal-zhunzou.png',   null],
+  ['_assets/seal-bohui.png',     null],
+  ['_assets/seal-shenyou.png',   null],
+  ['_assets/seal-daji.png',      null],
+  ['_assets/seal-moyu.png',      null],
+  ['_assets/seal-fengtian.png',  null],
+  ['_assets/tier-1-dagongxinding.png',  null],
+  ['_assets/tier-2-huashui-xuetu.png',  null],
+  ['_assets/tier-3-moyu-xiushi.png',    null],
+  ['_assets/tier-4-huashui-shilang.png',null],
+  ['_assets/tier-5-moyu-dajiangjun.png',null],
+  ['_assets/tier-6-jiamei-tianzun.png', null],
+  ['_assets/score-ticket-template.png', null],
+  ['_assets/face-seal.png', null],
+  ['_assets/loading-scroll.png', null],
+  ['_assets/loading-yubi.png',   null],
+  ['_assets/loading-stamp.png',  null],
+  ['_assets/kacha-loading-p2-1.png', null],
+  ['_assets/kacha-loading-p2-2.png', null],
+  ['_assets/kacha-loading-p2-3.png', null],
+  ['_assets/kacha-exporting-1.png', null],
+  ['_assets/kacha-exporting-2.png', null],
+  ['_assets/kacha-exporting-3.png', null],
+];
+const ASSETS_READY = (async () => {
+  const results = await Promise.allSettled(ASSET_LIST.map(([url]) => loadCleanImage(url, { tol: 30, fade: 1.6 })));
+  ASSET_LIST.forEach(([raw], i) => {
+    const cleaned = results[i].status === 'fulfilled' ? results[i].value : raw;
+    CLEAN_URL.set(raw, cleaned);
+  });
+  // loading 帧图：替换 <img src> 为扒底后的 dataURL
+  document.querySelectorAll('.load-illust').forEach(img => {
+    const m = img.getAttribute('src')?.match(/_assets\/[^?#]+\.png/);
+    if (m) img.src = cleanedOf(m[0]);
+  });
+})();
+
+const TOAST_THEME = { bg:'rgba(26,20,16,.92)', color:'#f4ecd8', accent:'#b8252a' };
+const t = (msg) => toast(msg, TOAST_THEME);
+
+const STAGE_W = 343, STAGE_H = 430;
+const KAI = '"STKaiti","KaiTi","楷体","Noto Serif SC",serif';
+
+const state = {
+  screen: 'home',
+  result: null,
+  reportId: '00000000',
+  activeTitleIdx: 0,
+  bgDataURL: null,
+  stage: null,
+  capturedURL: null,
+  textFont: KAI,
+  textColor: '#b8252a',
+};
+
+const screens = {
+  home: document.getElementById('screen-home'),
+  loading: document.getElementById('screen-loading'),
+  edit: document.getElementById('screen-edit'),
+  poster: document.getElementById('screen-poster'),
+};
+function go(name){
+  state.screen = name;
+  for (const k in screens) screens[k].classList.toggle('active', k===name);
+  const isLoading = (name === 'loading' || name === 'story-loading');
+  if (isLoading) startLoadingFrames(name); else stopLoadingFrames();
+}
+
+let _loadingTimer = null;
+function startLoadingFrames(screenName){
+  stopLoadingFrames();
+  const root = screenName === 'story-loading'
+    ? document.getElementById('screen-story-loading')
+    : document.getElementById('screen-loading');
+  const frames = root.querySelectorAll('.load-illust');
+  if (frames.length < 2) return;
+  let i = 0;
+  frames.forEach((f, idx) => f.classList.toggle('active', idx === 0));
+  _loadingTimer = setInterval(() => {
+    frames.forEach(f => f.classList.remove('active'));
+    i = (i + 1) % frames.length;
+    frames[i].classList.add('active');
+  }, 1200);
+}
+function stopLoadingFrames(){
+  if (_loadingTimer) { clearInterval(_loadingTimer); _loadingTimer = null; }
+}
+
+// exporting overlay 自带一组帧循环
+let _exportingTimer = null;
+function startExportingFrames(){
+  stopExportingFrames();
+  const frames = document.querySelectorAll('#exporting .load-illust');
+  if (frames.length < 2) return;
+  let i = 0;
+  frames.forEach((f, idx) => f.classList.toggle('active', idx === 0));
+  _exportingTimer = setInterval(() => {
+    frames.forEach(f => f.classList.remove('active'));
+    i = (i + 1) % frames.length;
+    frames[i].classList.add('active');
+  }, 1200);
+}
+function stopExportingFrames(){
+  if (_exportingTimer) { clearInterval(_exportingTimer); _exportingTimer = null; }
+}
+
+// 假进度条：渐近 90%，完成时跳 100%。tau 单位 ms，对应"预期耗时"的时间常数
+function makeProgress(barId, tau){
+  const bar = document.getElementById(barId);
+  const fillEl = bar.querySelector('.fill');
+  const pctEl = bar.querySelector('.pct');
+  let t0 = 0, timer = null;
+  function set(p){
+    const c = Math.max(0, Math.min(1, p));
+    fillEl.style.width = (c*100).toFixed(1)+'%';
+    pctEl.textContent = Math.round(c*100)+'%';
+  }
+  return {
+    start(){
+      t0 = Date.now();
+      set(0);
+      if (timer) clearInterval(timer);
+      timer = setInterval(()=>{
+        const dt = Date.now() - t0;
+        set(0.9 * (1 - Math.exp(-dt / tau)));
+      }, 120);
+    },
+    finish(){
+      if (timer) { clearInterval(timer); timer = null; }
+      set(1);
+    },
+    reset(){
+      if (timer) { clearInterval(timer); timer = null; }
+      set(0);
+    },
+  };
+}
+const progressP1 = makeProgress('p1-progress', 4000);
+const progressP2 = makeProgress('p2-progress', 12000);
+const progressExport = makeProgress('export-progress', 2000);
+
+function hash8(s){
+  let h=2166136261>>>0;
+  for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)>>>0;}
+  return ('0000000'+h.toString(16)).slice(-8).toUpperCase();
+}
+function fileToDataURL(file){
+  return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file);});
+}
+function showExporting(show){
+  document.getElementById('exporting').classList.toggle('show', !!show);
+  if (show) { startExportingFrames(); progressExport.start(); }
+  else { progressExport.finish(); stopExportingFrames(); }
+}
+
+const STICKER_LIBRARY = [
+  { name:'准奏',     url:'_assets/seal-zhunzou.png'  },
+  { name:'驳回',     url:'_assets/seal-bohui.png'    },
+  { name:'神游太虚', url:'_assets/seal-shenyou.png'  },
+  { name:'大吉',     url:'_assets/seal-daji.png'     },
+  { name:'摸鱼有理', url:'_assets/seal-moyu.png'     },
+  { name:'奉天承运', url:'_assets/seal-fengtian.png' },
+];
+
+const TIER_IMG = {
+  '打工新丁':   '_assets/tier-1-dagongxinding.png',
+  '划水学徒':   '_assets/tier-2-huashui-xuetu.png',
+  '摸鱼修士':   '_assets/tier-3-moyu-xiushi.png',
+  '划水侍郎':   '_assets/tier-4-huashui-shilang.png',
+  '摸鱼大将军': '_assets/tier-5-moyu-dajiangjun.png',
+  '假寐天尊':   '_assets/tier-6-jiamei-tianzun.png',
+};
+
+function resolveStickerAsset(id) {
+  if (!id) return null;
+  const m = id.match(/^(yellow_tag|bubble|seal_red|tier_seal)_(\d{2})$/);
+  if (!m) return null;
+  const [, kind, nStr] = m;
+  const n = parseInt(nStr, 10);
+  if (kind === 'seal_red') return STICKER_LIBRARY[(n - 1) % STICKER_LIBRARY.length]?.url || null;
+  if (kind === 'tier_seal') {
+    const tiers = ['打工新丁', '划水学徒', '摸鱼修士', '划水侍郎', '摸鱼大将军', '假寐天尊'];
+    return TIER_IMG[tiers[(n - 1) % 6]] || null;
+  }
+  return null;
+}
+
+function mapInitialStickersFromVLM(r) {
+  const list = Array.isArray(r.initial_stickers) ? r.initial_stickers : [];
+  if (list.length === 0) return [];
+  const SIZE = 85;
+  const faceObstacles = (r.face_boxes || []).map(b => ({
+    x: (b.x + b.w / 2) * STAGE_W, y: (b.y + b.h / 2) * STAGE_H,
+    r: Math.max(b.w * STAGE_W, b.h * STAGE_H) * 0.9 + 20,
+  }));
+  const hardOccupied = [
+    { x: STAGE_W - 65, y: 80, r: 80 },
+    { x: 100, y: STAGE_H - 60, r: 70 },
+  ];
+  const safeAnchors = [
+    { x: 60, y: 90, rot: -8 },
+    { x: STAGE_W - 55, y: STAGE_H / 2, rot: 6 },
+    { x: 55, y: STAGE_H / 2 + 30, rot: 4 },
+    { x: STAGE_W - 60, y: STAGE_H - 70, rot: -10 },
+  ];
+  const out = [];
+  for (const s of list.slice(0, 2)) {
+    const url = resolveStickerAsset(s.id);
+    if (!url) return [];
+    let x = s.x * STAGE_W, y = s.y * STAGE_H;
+    const rot = typeof s.rot === 'number' ? s.rot : 0;
+    const allObstacles = [...hardOccupied, ...faceObstacles];
+    const hit = allObstacles.some(o => Math.hypot(o.x - x, o.y - y) < o.r + SIZE / 2 - 8);
+    if (hit) {
+      const best = safeAnchors
+        .map(a => ({ a, d: Math.min(...allObstacles.map(o => Math.hypot(o.x - a.x, o.y - a.y))) }))
+        .sort((u, v) => v.d - u.d)[0]?.a;
+      if (best) { x = best.x; y = best.y; }
+    }
+    out.push({ url, x, y, size: SIZE, rotation: rot });
+  }
+  return out;
+}
+
+function autoPickSeals(r) {
+  const fromVLM = mapInitialStickersFromVLM(r);
+  if (fromVLM.length > 0) return fromVLM;
+  const yi = (r.report?.yi || []).join('|');
+  const ji = (r.report?.ji || []).join('|');
+  const pose = r.pose_type || '';
+  const score = r.moyu_score ?? 50;
+  const picked = [];
+  const push = (name) => {
+    if (picked.includes(name)) return;
+    if (STICKER_LIBRARY.find(s => s.name === name)) picked.push(name);
+  };
+  if (score >= 80)       push('神游太虚');
+  else if (score >= 55)  push('摸鱼有理');
+  else if (score >= 30)  push('奉天承运');
+  else                   push('驳回');
+  if (/睡|趴|瘫|假寐|瞌睡/.test(pose) || /神游|养神|闭目/.test(yi)) push('神游太虚');
+  else if (/会议|汇报|开会|对齐|催|急|DDL/i.test(ji))                  push('驳回');
+  else if (score >= 70)                                                  push('大吉');
+  else if (/摸鱼|划水/.test(yi))                                         push('摸鱼有理');
+  else                                                                   push('准奏');
+  for (const fallback of ['大吉','准奏','摸鱼有理','奉天承运']) {
+    if (picked.length >= 2) break;
+    push(fallback);
+  }
+  const chosen = picked.slice(0, 2).map(name => STICKER_LIBRARY.find(s => s.name === name));
+  const SIZE = 85;
+  const anchors = [
+    { x: 60, y: 90, rot: -8 },
+    { x: STAGE_W - 55, y: STAGE_H/2, rot: 6 },
+    { x: 55, y: STAGE_H/2 + 30, rot: 4 },
+    { x: STAGE_W - 60, y: STAGE_H - 70, rot: -10 },
+  ];
+  const occupied = [
+    { x: STAGE_W - 65, y: 80, r: 80 },
+    { x: 100, y: STAGE_H - 60, r: 70 },
+  ];
+  (r.face_boxes||[]).forEach(b => {
+    occupied.push({
+      x: (b.x + b.w/2) * STAGE_W,
+      y: (b.y + b.h/2) * STAGE_H,
+      r: Math.max(b.w*STAGE_W, b.h*STAGE_H) * 0.9 + 20,
+    });
+  });
+  const minSep = SIZE * 0.9;
+  const out = [];
+  for (const a of anchors) {
+    if (out.length >= chosen.length) break;
+    const hit = occupied.some(o => Math.hypot(o.x - a.x, o.y - a.y) < o.r + SIZE/2 - 8);
+    if (hit) continue;
+    const tooClose = out.some(u => Math.hypot(u.x - a.x, u.y - a.y) < minSep);
+    if (tooClose) continue;
+    out.push(a);
+  }
+  while (out.length < chosen.length) out.push(anchors[out.length % anchors.length]);
+  return chosen.map((s, i) => ({
+    url: s.url, x: out[i].x, y: out[i].y, size: SIZE, rotation: out[i].rot,
+  }));
+}
+
+async function composeText(imgUrl, text, opts={}) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onerror = reject;
+    img.onload = () => {
+      const c = document.createElement('canvas');
+      c.width = img.width; c.height = img.height;
+      const ctx = c.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+      ctx.fillStyle = opts.color || '#b8252a';
+      ctx.font = `${opts.weight||900} ${opts.size||140}px ${opts.font || '"STKaiti","KaiTi","Noto Serif SC",serif'}`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      const cx = opts.cx ?? img.width/2;
+      const cy = opts.cy ?? img.height/2;
+      ctx.fillText(text, cx, cy);
+      resolve(c.toDataURL('image/png'));
+    };
+    img.src = imgUrl;
+  });
+}
+
+// ============ flow ============
+async function runAnalyze(dataUrl){
+  go('loading');
+  progressP1.start();
+  state.bgDataURL = dataUrl;
+  state.reportId = hash8(dataUrl.slice(0,200) + Date.now());
+  try{
+    const [result] = await Promise.all([analyzeImage(dataUrl), ASSETS_READY]);
+    state.result = result;
+    state.activeTitleIdx = 0;
+    state.capturedURL = null;
+    progressP1.finish();
+    enterEdit();
+  }catch(err){
+    console.error(err);
+    progressP1.reset();
+    t('御史走神了，请稍后重试');
+    go('home');
+  }
+}
+
+function enterEdit(){
+  const r = state.result;
+  if(!r) return;
+  const sumEl = document.getElementById('edit-summary');
+  sumEl.querySelector('.score .num').textContent = r.moyu_score;
+  const sign = r.sign_type || '';
+  sumEl.querySelector('.sign .tier').innerHTML = `${r.level_tier}<span class="sign-chip" data-sign="${sign}">${sign || '—'}</span>`;
+  sumEl.querySelector('.title .badge').textContent = (r.title_candidates||[])[state.activeTitleIdx]||'—';
+  document.getElementById('edit-tier-badge').textContent = r.level_tier;
+
+  const stageEl = document.getElementById('stage');
+  stageEl.innerHTML = '';
+  state.stage = createStage(stageEl, {
+    width: STAGE_W, height: STAGE_H,
+    bgImageDataURL: state.bgDataURL,
+    handleStyle: { stroke:'#b8252a', bg:'#f4ecd8', delBg:'#b8252a', outline:'rgba(184,37,42,.7)' }
+  });
+  state.stage.setOnChange(()=>{
+    document.getElementById('btn-undo').disabled = !state.stage.canUndo() || state.stage.getItems().length===0;
+  });
+
+  state.stage.addSticker({
+    type:'image', imageUrl: cleanedOf(TIER_IMG[r.level_tier] || TIER_IMG['摸鱼修士']),
+    x: STAGE_W-65, y: 80, w:130, h:130, rotation:-12,
+  });
+  composeText(cleanedOf('_assets/score-ticket-template.png'), `+${r.moyu_score}`, { size:240, color:'#b8252a', weight:900 })
+    .then(url => state.stage.addSticker({
+      type:'image', imageUrl: url,
+      x: 100, y: STAGE_H-60, w:180, h:65, rotation:-4,
+    }))
+    .catch(()=>{});
+  (r.face_boxes||[]).forEach(box=>{
+    const cx = (box.x + box.w/2)*STAGE_W;
+    const cy = (box.y + box.h/2)*STAGE_H;
+    const size = Math.max(60, box.w*STAGE_W*1.4);
+    state.stage.addSticker({ type:'image', imageUrl: cleanedOf('_assets/face-seal.png'), x:cx, y:cy, w:size, h:size, rotation:0 });
+  });
+
+  autoPickSeals(r).forEach(p => {
+    state.stage.addSticker({
+      type:'image', imageUrl: cleanedOf(p.url),
+      x: p.x, y: p.y, w: p.size, h: p.size, rotation: p.rotation,
+    });
+  });
+
+  const grid = document.getElementById('sticker-grid');
+  grid.innerHTML = STICKER_LIBRARY.map((s,i)=>
+    `<div class="item" data-i="${i}" title="${s.name}"><img src="${cleanedOf(s.url)}" alt="${s.name}"></div>`
+  ).join('');
+  grid.onclick = (e)=>{
+    const it = e.target.closest('.item'); if(!it) return;
+    const s = STICKER_LIBRARY[+it.dataset.i];
+    state.stage.addSticker({ type:'image', imageUrl: cleanedOf(s.url), x:STAGE_W/2, y:STAGE_H/2, w:110, h:110, rotation:0 });
+    t(`已盖「${s.name}」印`);
+    closeDrawer();
+  };
+
+  renderTitlesPills();
+  closeDrawer();
+  go('edit');
+}
+
+function renderTitlesPills(){
+  const r = state.result;
+  const pills = (r.title_candidates||[]).map((tt,i)=>
+    `<span class="title-pill ${i===state.activeTitleIdx?'active':''}" data-idx="${i}">${tt}</span>`
+  ).join('');
+  document.getElementById('titles-pills').innerHTML = pills;
+  document.getElementById('titles-pills').onclick = (e)=>{
+    const p = e.target.closest('.title-pill'); if(!p) return;
+    state.activeTitleIdx = +p.dataset.idx;
+    document.querySelectorAll('#titles-pills .title-pill').forEach((el,i)=>el.classList.toggle('active', i===state.activeTitleIdx));
+    document.querySelector('#edit-summary .title .badge').textContent = r.title_candidates[state.activeTitleIdx];
+    t(`钦点封号「${r.title_candidates[state.activeTitleIdx]}」`);
+  };
+}
+
+function openDrawer(name){
+  const map = { stickers:'drawer-stickers', text:'drawer-text', titles:'drawer-titles' };
+  Object.values(map).forEach(id=>document.getElementById(id).classList.remove('show'));
+  document.getElementById('edit-drawer-backdrop').classList.add('show');
+  document.getElementById(map[name]).classList.add('show');
+  document.querySelectorAll('.tool-btn[data-drawer]').forEach(b=>b.classList.toggle('active', b.dataset.drawer===name));
+}
+function closeDrawer(){
+  ['drawer-stickers','drawer-text','drawer-titles'].forEach(id=>document.getElementById(id).classList.remove('show'));
+  document.getElementById('edit-drawer-backdrop').classList.remove('show');
+  document.querySelectorAll('.tool-btn[data-drawer]').forEach(b=>b.classList.remove('active'));
+}
+
+// ============ poster ============
+function renderPoster(){
+  const r = state.result;
+  if(!r) return;
+  const title = (r.title_candidates||[])[state.activeTitleIdx] || (r.title_candidates||[])[0] || '';
+  const yiArr = r.report?.yi || [];
+  const jiArr = r.report?.ji || [];
+  const yi = yiArr.map(x=>`<li><span>${x}</span><span style="font-family:var(--mono);font-size:9px;color:var(--muted)">命中</span></li>`).join('');
+  const ji = jiArr.map(x=>`<li><span>${x}</span><span style="font-family:var(--mono);font-size:9px;color:var(--muted)">—</span></li>`).join('');
+  const cap = state.capturedURL
+    ? `<img class="pcaptured" src="${state.capturedURL}" alt="奏折画像" crossorigin="anonymous" />`
+    : `<div class="pcaptured-placeholder">画像生成中…</div>`;
+  // headline 拆分：tier 名取后两字加 em
+  const tier = r.level_tier || '';
+  const tierA = tier.slice(0, tier.length-2);
+  const tierB = tier.slice(-2);
+  const dateStr = new Date().toISOString().slice(0,10).replace(/-/g,'.');
+
+  document.getElementById('poster-host').innerHTML = `
+    <div class="poster" id="poster-node">
+      <div class="meta-row">
+        <span>奏折 NO.${state.reportId}</span><span class="sep">/</span>
+        <span>御史房批阅</span><span class="sep">/</span>
+        <span>${dateStr}</span>
+      </div>
+
+      <h1 class="pheadline">${tierA}<br/><em>${tierB || tier}</em></h1>
+      <div class="psub">A FORTUNE OF THE LOAFING</div>
+
+      <div class="divider"><div class="line"></div><div class="glyph cn">御史宣判</div><div class="line"></div></div>
+
+      <div class="pcaptured-wrap">${cap}</div>
+
+      <div class="verdict-card">
+        <div class="verdict-eyebrow">第 ${state.reportId.slice(0,4)} 号 · 终章批文</div>
+        <p class="verdict-paragraph">${r.report?.paragraph || '（御史走神中…）'}</p>
+      </div>
+
+      <div class="stats">
+        <div class="stat">
+          <div class="label">摸鱼指数</div>
+          <div class="val">${r.moyu_score}</div>
+          <div class="unit">/ 100</div>
+        </div>
+        <div class="stat sign">
+          <div class="label">签型</div>
+          <div class="val">${r.sign_type || '—'}</div>
+          <div class="unit">SIGN</div>
+        </div>
+        <div class="stat">
+          <div class="label">命中</div>
+          <div class="val">${String(yiArr.length).padStart(2,'0')}</div>
+          <div class="unit">宜 / 忌 ${String(jiArr.length).padStart(2,'0')}</div>
+        </div>
+      </div>
+
+      <div class="ledger">
+        <div class="ledger-col">
+          <div class="label">宜 · MATCHED</div>
+          <div class="head">宜</div>
+          <ul>${yi || '<li><span>—</span></li>'}</ul>
+        </div>
+        <div class="ledger-col">
+          <div class="label">忌 · MATCHED</div>
+          <div class="head">忌</div>
+          <ul>${ji || '<li><span>—</span></li>'}</ul>
+        </div>
+      </div>
+
+      <div class="award">
+        <div class="label">封号 · TITLE AWARDED</div>
+        <div class="seal">
+          <div class="title">${title.length>=2 ? title.slice(0,2)+'<br/>'+title.slice(2) : title}</div>
+        </div>
+        <div class="meta">SEALED IN VERMILION</div>
+      </div>
+
+      <div class="pfoot">${r.pose_type || ''} · KACHA THEATRE · ${dateStr}</div>
+    </div>
+  `;
+}
+
+async function enterPoster(){
+  showExporting(true);
+  try{
+    state.stage.clearSelection();
+    await new Promise(r=>requestAnimationFrame(r));
+    state.capturedURL = await exportNodeToPNG(state.stage.el, { pixelRatio:2, backgroundColor:'#000' });
+  }catch(err){
+    console.error(err);
+    t('画像生成失败，仍可继续');
+  }finally{
+    showExporting(false);
+  }
+  renderPoster();
+  go('poster');
+}
+
+async function exportPoster(){
+  const node = document.getElementById('poster-node');
+  if(!node){ t('海报节点缺失'); return; }
+  showExporting(true);
+  try{
+    const dataUrl = await exportNodeToPNG(node, { pixelRatio:2.5, backgroundColor:'#f4ecd8' });
+    showSaveModal(dataUrl, {
+      theme: { bg:'rgba(26,20,16,.92)', accent:'#b8252a', btnBg:'#b8252a', btnText:'#f4ecd8', closeBg:'rgba(244,236,216,.15)' },
+      title: '电子诏书 · 已成',
+      hint: '请<b style="background:#f4ecd8;color:#b8252a;padding:1px 6px;border-radius:2px">长按图片</b>保存到本地相册'
+    });
+  }catch(err){
+    console.error(err);
+    t('御笔卡墨，请重试');
+  }finally{
+    showExporting(false);
+  }
+}
+
+// ============ events ============
+document.getElementById('btn-camera').addEventListener('click', ()=> document.getElementById('file-camera').click());
+document.getElementById('btn-album').addEventListener('click', ()=> document.getElementById('file-album').click());
+document.getElementById('btn-demo').addEventListener('click', ()=> runAnalyze(makeDemoImageDataURL()));
+['file-camera','file-album'].forEach(id=>{
+  document.getElementById(id).addEventListener('change', async (e)=>{
+    const f = e.target.files?.[0]; if(!f) return;
+    try{ runAnalyze(await fileToDataURL(f)); }
+    catch{ t('读取图片失败'); }
+    finally{ e.target.value=''; }
+  });
+});
+
+document.querySelectorAll('.tool-btn[data-drawer]').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    const cur = b.classList.contains('active');
+    if(cur) closeDrawer(); else openDrawer(b.dataset.drawer);
+  });
+});
+document.querySelectorAll('.drawer .close').forEach(b=> b.addEventListener('click', closeDrawer));
+document.getElementById('edit-drawer-backdrop').addEventListener('click', closeDrawer);
+document.getElementById('btn-undo').addEventListener('click', ()=>{
+  if(state.stage?.undo()){ t('已撤销一步'); }
+});
+document.getElementById('btn-finish').addEventListener('click', enterPoster);
+document.getElementById('btn-edit-back').addEventListener('click', ()=>{
+  if(confirm('确定要返回吗？画布上的二创会清空。')) go('home');
+});
+
+document.getElementById('font-chips').addEventListener('click', (e)=>{
+  const c = e.target.closest('.chip'); if(!c) return;
+  document.querySelectorAll('#font-chips .chip').forEach(el=>el.classList.remove('active'));
+  c.classList.add('active');
+  state.textFont = c.dataset.font;
+});
+document.getElementById('color-chips').addEventListener('click', (e)=>{
+  const c = e.target.closest('.color-chip'); if(!c) return;
+  document.querySelectorAll('#color-chips .color-chip').forEach(el=>el.classList.remove('active'));
+  c.classList.add('active');
+  state.textColor = c.dataset.color;
+});
+document.getElementById('text-add-btn').addEventListener('click', ()=>{
+  const txt = document.getElementById('text-input').value.trim();
+  if(!txt){ t('请先写内容'); return; }
+  state.stage.addSticker({
+    type:'text', text: txt, fontFamily: state.textFont, color: state.textColor,
+    fontSize: 32, x: STAGE_W/2, y: STAGE_H/2, w: Math.max(120, txt.length*36), h: 60, rotation:-2
+  });
+  t('已加御批');
+  closeDrawer();
+});
+
+document.getElementById('btn-back-edit').addEventListener('click', ()=> go('edit'));
+document.getElementById('btn-share').addEventListener('click', async ()=>{
+  const ok = await copyShareLink();
+  t(ok ? '链接已复制' : '请手动复制 URL');
+});
+document.getElementById('btn-export-poster').addEventListener('click', exportPoster);
+
+// ============ PART 2 · STORY ============
+const STORY_THEMES = ['宫斗剧', '穿越重生', '悬疑探案', '打脸', '爽文'];
+const STORY_ART_STYLES = ['恋与深空', '蓝色监狱', '仙逆'];
+const ENDING_TYPE_EN = {
+  '天降祥瑞':'A FORTUNE BESTOWED','御史降罚':'PUNISHED','逆天改命':'AGAINST THE FATE',
+  '贵人相助':'AIDED BY GRACE','天命应验':'FATE FULFILLED','哭笑不得':'TRAGICOMEDY',
+};
+const ACT_CN = ['第一幕','第二幕','第三幕','第四幕','终幕'];
+const ACT_EN = ['ACT I','ACT II','ACT III','ACT IV','FINALE'];
+
+const story = {
+  theme: '宫斗剧',
+  artStyle: '恋与深空',
+  characterAName: '卿',
+  model: 'claude-sonnet-4-6',
+  imageHash: null,
+  steps: [],          // [{ pathKey, node, chosen? }]
+};
+
+screens['story-intake'] = document.getElementById('screen-story-intake');
+screens['story-loading'] = document.getElementById('screen-story-loading');
+screens['story-node'] = document.getElementById('screen-story-node');
+screens['story-ending'] = document.getElementById('screen-story-ending');
+
+async function sha256OfDataUrl(dataUrl) {
+  const b64 = dataUrl.includes(',') ? dataUrl.split(',')[1] : dataUrl;
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  const hashBuf = await crypto.subtle.digest('SHA-256', bytes);
+  return Array.from(new Uint8Array(hashBuf))
+    .map(b => b.toString(16).padStart(2,'0')).join('').slice(0,16);
+}
+
+function renderStoryChips(){
+  document.getElementById('story-theme-chips').innerHTML = STORY_THEMES.map(s =>
+    `<button class="story-chip ${s===story.theme?'active':''}" data-v="${s}">${s}</button>`
+  ).join('');
+  document.getElementById('story-artstyle-chips').innerHTML = STORY_ART_STYLES.map(s =>
+    `<button class="story-chip ${s===story.artStyle?'active':''}" data-v="${s}">${s}</button>`
+  ).join('');
+}
+function bindChipGroup(containerId, onPick){
+  document.getElementById(containerId).addEventListener('click', e => {
+    const c = e.target.closest('.story-chip'); if(!c) return;
+    onPick(c.dataset.v);
+    document.querySelectorAll('#'+containerId+' .story-chip').forEach(el =>
+      el.classList.toggle('active', el.dataset.v === c.dataset.v));
+  });
+}
+
+function enterStoryIntake(){
+  // 复用 Part 1 上传的照片
+  const ph = document.getElementById('story-photo');
+  if (state.bgDataURL) {
+    ph.innerHTML = `<img src="${state.bgDataURL}" alt=""/>`;
+  } else {
+    ph.innerHTML = `<div class="placeholder">无照片<br/><span style="font-size:9px">请先在 PART 1 上传</span></div>`;
+  }
+  renderStoryChips();
+  go('story-intake');
+}
+
+async function fetchStoryNode(pathKey){
+  const body = {
+    theme: story.theme,
+    artStyle: story.artStyle,
+    pathKey,
+    model: story.model,
+    characterAName: story.characterAName,
+  };
+  if (pathKey === 'root') body.image = state.bgDataURL;
+  if (story.imageHash) body.imageHash = story.imageHash;
+
+  const r = await fetch('/api/plot/v2/node', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify(body), signal: AbortSignal.timeout(120000),
+  });
+  if (!r.ok) {
+    const txt = await r.text().catch(()=>'');
+    throw new Error(`HTTP ${r.status} ${txt.slice(0,200)}`);
+  }
+  return r.json();
+}
+
+async function startStory(){
+  if (!state.bgDataURL) { t('请先在 PART 1 上传照片'); return; }
+  // 计算 hash（首次）
+  if (!story.imageHash) {
+    try { story.imageHash = await sha256OfDataUrl(state.bgDataURL); }
+    catch { /* 后端会自己算 */ }
+  }
+  story.steps = [];
+  // shutter 动画然后拉 root 节点
+  playShutter();
+  setTimeout(()=> loadStoryNode('root'), 800);
+}
+
+function playShutter(){
+  const ov = document.getElementById('shutter-overlay');
+  // 重置动画
+  ov.classList.remove('show');
+  void ov.offsetWidth;
+  ov.classList.add('show');
+  // 重新触发 flash + text 动画
+  ov.querySelector('.shutter-flash').style.animation = 'none';
+  ov.querySelector('.shutter-text').style.animation = 'none';
+  void ov.offsetWidth;
+  ov.querySelector('.shutter-flash').style.animation = '';
+  ov.querySelector('.shutter-text').style.animation = '';
+  setTimeout(()=> ov.classList.remove('show'), 1200);
+}
+
+async function loadStoryNode(pathKey){
+  document.getElementById('story-loading-title').textContent =
+    pathKey === 'root' ? '御史演义中' : '续卷生成中';
+  go('story-loading');
+  progressP2.start();
+  try{
+    const node = await fetchStoryNode(pathKey);
+    if (!story.imageHash && node.imageHash) story.imageHash = node.imageHash;
+    story.steps.push({ pathKey, node });
+    progressP2.finish();
+    if (node.ending) renderStoryEnding(node);
+    else renderStoryNode(node);
+  } catch(err){
+    console.error(err);
+    progressP2.reset();
+    t('梦境断片：'+(err.message||'').slice(0,40));
+    go('story-intake');
+  }
+}
+
+function renderStoryNode(node){
+  const depth = story.steps.length - 1;  // 0..3
+  document.getElementById('node-title').textContent = ACT_CN[depth];
+  document.getElementById('node-subtitle').textContent = ACT_EN[depth] + ' · CHOICE';
+  document.getElementById('node-depth-chip').textContent = `${depth+1}/4`;
+  document.getElementById('node-theme-meta').textContent = story.theme;
+  document.getElementById('node-art-meta').textContent = story.artStyle;
+
+  const imgEl = document.getElementById('node-image');
+  if (node.imageUrl) {
+    imgEl.innerHTML = `<img src="${node.imageUrl}" alt="" />`;
+  } else {
+    imgEl.innerHTML = `<div class="loading-stub">画卷生成失败</div>`;
+  }
+
+  document.getElementById('node-narration').textContent = node.narration || '—';
+  const charEl = document.getElementById('node-character-line');
+  if (node.characterLine) {
+    charEl.style.display = '';
+    charEl.textContent = `「${node.characterLine}」`;
+  } else {
+    charEl.style.display = 'none';
+  }
+
+  const choicesHost = document.getElementById('node-choices');
+  choicesHost.innerHTML = (node.choices||[]).map(c =>
+    `<button class="node-choice" data-id="${c.id}"><span class="tag">${c.id}</span><span>${c.text}</span></button>`
+  ).join('');
+  choicesHost.onclick = (e) => {
+    const btn = e.target.closest('.node-choice'); if(!btn) return;
+    const id = btn.dataset.id;
+    // 标记当前 step 选了哪个
+    story.steps[story.steps.length-1].chosen = id;
+    const cur = story.steps[story.steps.length-1].pathKey;
+    const nextPath = cur === 'root' ? id : `${cur}.${id}`;
+    loadStoryNode(nextPath);
+  };
+
+  go('story-node');
+}
+
+function renderStoryEnding(node){
+  const e = node.ending;
+  document.getElementById('ending-theme-meta').textContent = story.theme;
+  document.getElementById('ending-art-meta').textContent = story.artStyle;
+  document.getElementById('ending-type').textContent = e.type || '—';
+  document.getElementById('ending-sub-en').textContent = ENDING_TYPE_EN[e.type] || 'AN ENDING';
+  document.getElementById('ending-verdict').textContent = e.verdict || '—';
+  const wins = document.getElementById('ending-awins-v');
+  if (e.aWins) {
+    wins.textContent = `${story.characterAName} · 胜`;
+    wins.classList.remove('lose');
+  } else {
+    wins.textContent = `${story.characterAName} · 负`;
+    wins.classList.add('lose');
+  }
+  const imgEl = document.getElementById('ending-image');
+  imgEl.innerHTML = node.imageUrl
+    ? `<img src="${node.imageUrl}" alt="" />`
+    : `<div class="loading-stub">画卷生成失败</div>`;
+
+  go('story-ending');
+}
+
+async function exportComic(){
+  // 连环画长图：把所有节点 narration + image 拼起来
+  const host = document.createElement('div');
+  host.style.cssText = 'position:fixed;left:-99999px;top:0;width:720px;background:#f4ecd8;padding:32px;font-family:var(--serif);color:#1a1410';
+  const e = story.steps[story.steps.length-1]?.node?.ending;
+  const stepsHtml = story.steps.map((s, i) => {
+    const isFinal = !!s.node.ending;
+    const title = isFinal ? '终幕 · '+(s.node.ending?.type||'') : ACT_CN[i];
+    const img = s.node.imageUrl ? `<img src="${s.node.imageUrl}" style="width:100%;display:block;margin:14px 0;border:1px solid #d4c4a0"/>` : '';
+    const text = isFinal ? (s.node.ending?.verdict||'') : (s.node.narration||'');
+    const chose = s.chosen ? `<div style="margin-top:8px;color:#b8252a;font-size:14px;letter-spacing:2px">选：${s.chosen}</div>` : '';
+    return `<div style="margin-bottom:28px;padding-bottom:20px;border-bottom:1px solid #d4c4a0">
+      <div style="font-family:var(--display-cn);font-size:24px;letter-spacing:3px;color:#b8252a;margin-bottom:6px">${title}</div>
+      ${img}
+      <div style="font-size:14px;line-height:1.8">${text}</div>
+      ${chose}
+    </div>`;
+  }).join('');
+  host.innerHTML = `
+    <div style="font-family:var(--display-cn);font-size:36px;letter-spacing:6px;text-align:center;color:#1a1410;margin-bottom:8px">咔嚓剧场 · 全卷</div>
+    <div style="font-family:var(--mono);font-size:11px;letter-spacing:2px;text-transform:uppercase;text-align:center;color:#8a7d68;margin-bottom:24px">${story.theme} · ${story.artStyle}</div>
+    ${stepsHtml}
+    <div style="text-align:center;font-family:var(--mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#8a7d68;margin-top:20px">KACHA THEATRE · ${new Date().toISOString().slice(0,10)}</div>
+  `;
+  document.body.appendChild(host);
+  showExporting(true);
+  try{
+    const dataUrl = await exportNodeToPNG(host, { pixelRatio:2, backgroundColor:'#f4ecd8' });
+    showSaveModal(dataUrl, {
+      theme: { bg:'rgba(26,20,16,.92)', accent:'#b8252a', btnBg:'#b8252a', btnText:'#f4ecd8', closeBg:'rgba(244,236,216,.15)' },
+      title: '连环画 · 已成',
+      hint: '请<b style="background:#f4ecd8;color:#b8252a;padding:1px 6px;border-radius:2px">长按图片</b>保存到本地相册'
+    });
+  }catch(err){
+    console.error(err);
+    t('长图生成失败');
+  }finally{
+    showExporting(false);
+    host.remove();
+  }
+}
+
+// 事件接线
+document.getElementById('btn-enter-story').addEventListener('click', enterStoryIntake);
+document.getElementById('btn-story-back').addEventListener('click', ()=> go('poster'));
+document.getElementById('btn-story-start').addEventListener('click', ()=>{
+  story.characterAName = (document.getElementById('story-name-input').value || '卿').slice(0,12);
+  startStory();
+});
+document.getElementById('btn-node-restart').addEventListener('click', ()=>{
+  if(confirm('重梦一次？当前剧情会作废。')) enterStoryIntake();
+});
+document.getElementById('btn-ending-back').addEventListener('click', ()=> {
+  // 回上一节点（即倒数第二步），简化：直接回 intake
+  enterStoryIntake();
+});
+document.getElementById('btn-ending-restart').addEventListener('click', enterStoryIntake);
+document.getElementById('btn-ending-home').addEventListener('click', ()=> go('poster'));
+document.getElementById('btn-ending-export').addEventListener('click', exportComic);
+bindChipGroup('story-theme-chips', v => story.theme = v);
+bindChipGroup('story-artstyle-chips', v => story.artStyle = v);
+
+go('home');
+</script>
+</body>
+</html>

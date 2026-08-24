@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>咔嚓剧场 · 三套设计原型入口</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:#0e0e0e;color:#eee;min-height:100vh;padding:32px 20px}
+.wrap{max-width:920px;margin:0 auto}
+h1{font-size:28px;margin-bottom:6px;font-weight:600}
+.sub{color:#888;font-size:13px;line-height:1.6;margin-bottom:24px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;margin-bottom:32px}
+.card{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:16px;padding:24px;text-decoration:none;color:inherit;transition:all .2s}
+.card:hover{border-color:#5db8a6;transform:translateY(-2px)}
+.card .tag{font-family:ui-monospace,monospace;font-size:11px;letter-spacing:1.5px;color:#5db8a6;text-transform:uppercase;margin-bottom:10px}
+.card h2{font-size:20px;margin-bottom:6px}
+.card p{font-size:13px;color:#aaa;line-height:1.6;margin-bottom:12px}
+.card .link{font-family:ui-monospace,monospace;font-size:11px;color:#5db8a6}
+.card .link b{color:#fff;background:#5db8a6;color:#000;padding:2px 8px;border-radius:4px;margin-right:6px}
+.tip{background:#1a1a1a;border-left:3px solid #5db8a6;padding:16px 20px;border-radius:6px;font-size:13px;line-height:1.7;color:#ccc}
+.tip code{background:#0e0e0e;padding:2px 6px;border-radius:4px;font-family:ui-monospace,monospace;color:#e8a55a}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>咔嚓剧场 · 四套设计原型</h1>
+  <p class="sub">移动端为主，每套都接真实 <code>/api/analyze</code>。后端跑不通也会自动回退到 <code>_shared/sample.json</code>。</p>
+
+  <div class="grid">
+    <a class="card" href="claude.html">
+      <div class="tag">① CLAUDE STYLE</div>
+      <h2>米黄奏折</h2>
+      <p>羊皮纸底 + 衬线大字 + 珊瑚 CTA。和"御史奏折"主题最贴。</p>
+      <div class="link"><b>OPEN</b> claude.html</div>
+    </a>
+    <a class="card" href="verge.html">
+      <div class="tag">② THE VERGE STYLE</div>
+      <h2>黑底酸性</h2>
+      <p>近黑画布 + 酸性薄荷 + 巨型标题。截图传播力最强。</p>
+      <div class="link"><b>OPEN</b> verge.html</div>
+    </a>
+    <a class="card" href="bugatti.html">
+      <div class="tag">③ BUGATTI STYLE</div>
+      <h2>暗夜仪式</h2>
+      <p>纯黑 + 宽字距大写 + 大留白。终章裁决仪式感。</p>
+      <div class="link"><b>OPEN</b> bugatti.html</div>
+    </a>
+    <a class="card" href="guofeng.html">
+      <div class="tag">④ GUOFENG STYLE</div>
+      <h2>古风奏折</h2>
+      <p>米黄宣纸 + 朱红印章 + 卷轴竖排 + 紫禁城水印。最东方。</p>
+      <div class="link"><b>OPEN</b> guofeng.html</div>
+    </a>
+  </div>
+
+  <div class="tip">
+    <b style="color:#5db8a6">使用说明</b><br/>
+    1. 启动后端：<code>cd server &amp;&amp; npm run dev:local</code>（默认 :3001）<br/>
+    2. 启动原型服务器：<code>cd design/style-mockups/apps &amp;&amp; node dev-server.mjs</code>（默认 :4000）<br/>
+    3. 浏览器（建议手机模式）打开 <code>http://localhost:4000/</code><br/>
+    4. 不想跑后端？任一原型加 <code>?mock=1</code> → 走本地样本数据
+  </div>
+</div>
+</body>
+</html>

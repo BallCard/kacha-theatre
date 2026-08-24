@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=375,initial-scale=1,maximum-scale=1,user-scalable=no" />
+<title>咔嚓剧场 · the verge · 移动端</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Grotesk:wght@300;400;500;700&family=Space+Mono:wght@400;700&family=Noto+Sans+SC:wght@400;500;700;900&family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+<style>
+:root{
+  --mint:#3cffd0;--mint-border:#309875;
+  --uv:#5200ff;--uv-dark:#3d00bf;
+  --black:#131313;--slate:#2d2d2d;--frame:#313131;
+  --white:#fff;--abs-black:#000;--txt-2:#949494;
+  --display:"Anton","Noto Sans SC",sans-serif;
+  --display-cn:"ZCOOL KuaiLe","Noto Sans SC",sans-serif;
+  --sans:"Space Grotesk","Noto Sans SC",sans-serif;
+  --mono:"Space Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{background:#1a1a1a;font-family:var(--sans)}
+body{display:flex;justify-content:center;padding:24px 0}
+.phone{width:375px;background:var(--black);color:var(--white);min-height:812px;border-radius:36px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.6);position:relative}
+
+.statusbar{height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;font-family:var(--mono);font-size:13px;font-weight:700;color:var(--white)}
+
+.topbar{padding:0 16px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--frame)}
+.wordmark{font-family:var(--display);font-size:32px;font-weight:900;line-height:.8;letter-spacing:.5px;text-transform:uppercase}
+.wordmark .slash{color:var(--mint)}
+.btn-mint-sm{background:var(--mint);color:#000;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;padding:8px 14px;border:0;border-radius:20px}
+
+.content{padding:18px 16px 100px}
+
+.kicker{font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--mint);margin-bottom:10px}
+.hero h1{font-family:var(--display-cn);font-size:42px;font-weight:900;line-height:.95;letter-spacing:-.5px;margin-bottom:14px}
+.hero h1 .uv{color:var(--mint)}
+.hero .deck{font-family:var(--sans);font-size:13px;font-weight:500;line-height:1.55;color:var(--white);margin-bottom:18px}
+
+.score-banner{background:var(--mint);color:var(--abs-black);border-radius:24px;padding:20px;display:grid;grid-template-columns:1fr auto;gap:12px;align-items:end;margin-bottom:14px}
+.score-banner .tag{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px}
+.score-banner h2{font-family:var(--display);font-size:64px;font-weight:900;line-height:.85;letter-spacing:-1px}
+.score-banner h2 small{font-size:22px;color:rgba(0,0,0,.5)}
+.score-banner .tier{font-family:var(--display-cn);font-size:24px;font-weight:900;line-height:1;text-align:right}
+.score-banner .meta{font-family:var(--mono);font-size:9px;letter-spacing:1.2px;text-transform:uppercase;color:rgba(0,0,0,.7);text-align:right;margin-bottom:4px}
+
+.yiji-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+.yiji-tile{border-radius:18px;padding:18px 14px}
+.yiji-tile.yi{background:var(--mint);color:#000}
+.yiji-tile.ji{background:var(--uv);color:#fff}
+.yiji-tile .label{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;opacity:.65}
+.yiji-tile h3{font-family:var(--display-cn);font-size:36px;font-weight:900;line-height:.9;margin-bottom:10px}
+.yiji-tile ul{list-style:none}
+.yiji-tile li{font-family:var(--sans);font-size:14px;font-weight:700;padding:5px 0;border-top:1px solid currentColor;opacity:.95}
+.yiji-tile li:first-child{border-top:0}
+
+.section-title{font-family:var(--display);font-size:22px;font-weight:900;letter-spacing:.5px;text-transform:uppercase;margin:18px 0 14px}
+
+.stream{position:relative;padding-left:18px}
+.stream::before{content:"";position:absolute;left:0;top:6px;bottom:0;border-left:1px dashed var(--uv-dark)}
+.stream-item{position:relative;background:var(--black);border:1px solid var(--white);border-radius:18px;padding:16px 18px;margin-bottom:10px}
+.stream-item::before{content:"";position:absolute;left:-22px;top:22px;width:7px;height:7px;border-radius:50%;background:var(--mint)}
+.stream-item .ts{font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:var(--txt-2);margin-bottom:4px}
+.stream-item h3{font-family:var(--display-cn);font-size:18px;font-weight:900;line-height:1.1;margin-bottom:6px}
+.stream-item p{font-family:var(--sans);font-size:12px;font-weight:500;line-height:1.55;color:var(--white)}
+.stream-item.fill-uv{background:var(--uv);border-color:var(--uv)}
+.stream-item.fill-uv .ts{color:rgba(255,255,255,.7)}
+.stream-item.fill-yellow{background:#ffd400;border-color:#ffd400;color:#000}
+.stream-item.fill-yellow h3,.stream-item.fill-yellow p{color:#000}
+.stream-item.fill-yellow .ts{color:rgba(0,0,0,.6)}
+
+.titles-row{margin-top:14px;display:flex;gap:6px;flex-wrap:wrap}
+.title-pill{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;background:transparent;color:var(--mint);border:1px solid var(--mint);border-radius:30px;padding:8px 12px}
+.title-pill.active{background:var(--mint);color:#000}
+
+.bottom-bar{position:absolute;left:0;right:0;bottom:0;background:var(--black);border-top:1px solid var(--frame);padding:12px 16px 26px;display:flex;gap:8px}
+.btn{flex:1;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;height:42px;border-radius:24px;border:0}
+.btn-primary{background:var(--mint);color:#000}
+.btn-secondary{background:var(--slate);color:var(--white)}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="statusbar">
+    <span>9:41</span>
+    <span style="font-family:var(--mono);font-size:11px">●●●●● 5G</span>
+  </div>
+  <div class="topbar">
+    <div class="wordmark">摸鱼<span class="slash">/</span>御史</div>
+    <button class="btn-mint-sm">导出</button>
+  </div>
+
+  <div class="content">
+    <div class="kicker">SCROLL NO.0023 · 辰时入呈</div>
+    <div class="hero">
+      <h1>案上美式已凉，<br/>紫微星偏<span class="uv">三度</span>。</h1>
+      <p class="deck">趴桌型 · 中正姿态。卿之神色介乎入定与出神之间。</p>
+    </div>
+
+    <div class="score-banner">
+      <div>
+        <div class="tag">MOYU SCORE</div>
+        <h2>87<small>/100</small></h2>
+      </div>
+      <div>
+        <div class="meta">LEVEL TIER</div>
+        <div class="tier">摸鱼<br/>大将军</div>
+      </div>
+    </div>
+
+    <div class="yiji-row">
+      <div class="yiji-tile yi">
+        <div class="label">YI · 今日宜</div>
+        <h3>宜</h3>
+        <ul><li>摸鱼</li><li>划水</li><li>假装思考</li></ul>
+      </div>
+      <div class="yiji-tile ji">
+        <div class="label">JI · 今日忌</div>
+        <h3>忌</h3>
+        <ul><li>开会</li><li>改 PPT</li><li>接电话</li></ul>
+      </div>
+    </div>
+
+    <h2 class="section-title">PLOT STREAM</h2>
+
+    <div class="stream">
+      <div class="stream-item">
+        <div class="ts">07:42 · NODE 01</div>
+        <h3>领导踱步而过</h3>
+        <p>切到短视频，企业微信突然亮起。装作专注，还是切回文档？</p>
+      </div>
+      <div class="stream-item fill-uv">
+        <div class="ts">10:18 · NODE 02</div>
+        <h3>「@所有人 临时复盘」</h3>
+        <p>三个分支：顺应天命 / 逆天而行 / 中立观望。</p>
+      </div>
+      <div class="stream-item">
+        <div class="ts">14:05 · NODE 03</div>
+        <h3>茶水间偶遇</h3>
+        <p>小李端着保温杯出现，套点情报，还是回工位假装看注释？</p>
+      </div>
+      <div class="stream-item fill-yellow">
+        <div class="ts">16:30 · NODE 04</div>
+        <h3>"再改一版就好"</h3>
+        <p>—— AI 时代仍然成立的一句谎言。</p>
+      </div>
+      <div class="stream-item">
+        <div class="ts">18:00 · NODE 05</div>
+        <h3>御史降罚 · 待你抉择</h3>
+        <p>5 节跑完后按宜忌命中数算结局。</p>
+      </div>
+    </div>
+
+    <div class="titles-row">
+      <span class="title-pill active">划水大将军</span>
+      <span class="title-pill">假寐侍郎</span>
+      <span class="title-pill">摸鱼世家</span>
+    </div>
+  </div>
+
+  <div class="bottom-bar">
+    <button class="btn btn-secondary">RETRY</button>
+    <button class="btn btn-primary">START PLOT →</button>
+  </div>
+</div>
+</body>
+</html>

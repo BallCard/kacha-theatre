@@ -1,0 +1,1170 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+<title>咔嚓剧场 · 古风奏折 · App</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;700;900&family=ZCOOL+XiaoWei&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:#c8161d; --primary-active:#a01818;
+  --canvas:#f5e8c8; --surface:#ebdcb4; --surface-deep:#e0cca0;
+  --ink:#1a1612; --body:#5a4838;
+  --accent:#b89545; --stamp:#d4222b; --jade:#3f8c5a;
+  --kai:"STKaiti","KaiTi","楷体","ZCOOL XiaoWei","Noto Serif SC",serif;
+  --song:"STSong","SimSun","宋体","Noto Serif SC",serif;
+  --mono:"JetBrains Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{background:#2a1810;font-family:var(--song);color:var(--ink);min-height:100vh}
+body{display:flex;justify-content:center;align-items:flex-start}
+.phone{
+  width:375px;background:var(--canvas);color:var(--ink);
+  min-height:812px;height:812px;position:relative;overflow:hidden;
+  border-radius:36px;box-shadow:0 30px 80px rgba(0,0,0,.5);margin:24px 0;
+}
+@media (max-width:480px){
+  html,body{background:var(--canvas)}
+  body{padding:0}
+  .phone{width:100vw;height:100vh;min-height:100vh;border-radius:0;box-shadow:none;margin:0}
+}
+
+/* 宣纸粒子底 */
+.phone::before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background-image: radial-gradient(#1a1612 0.5px, transparent 0.5px);
+  background-size: 16px 16px;
+  opacity:.05;z-index:0;
+}
+/* 边角云纹（角花） */
+.corner-cloud{position:absolute;width:48px;height:48px;pointer-events:none;opacity:.5;z-index:1}
+.corner-cloud.tl{top:52px;left:14px}
+.corner-cloud.tr{top:52px;right:14px;transform:scaleX(-1)}
+.corner-cloud.bl{bottom:54px;left:14px;transform:scaleY(-1)}
+.corner-cloud.br{bottom:54px;right:14px;transform:scale(-1,-1)}
+
+/* 卷轴顶/底 —— 真实木轴贴图 */
+.scroll-rod-top, .scroll-rod-bot{
+  position:absolute;left:14px;right:14px;height:22px;z-index:5;
+  background-image:var(--img-rod-top, url('_assets/scroll-rod-top.png'));
+  background-size:100% 100%;background-repeat:no-repeat;
+  filter:drop-shadow(0 2px 4px rgba(0,0,0,.25));
+}
+.scroll-rod-top{top:10px}
+.scroll-rod-bot{bottom:10px;background-image:var(--img-rod-bot, url('_assets/scroll-rod-bot.png'))}
+/* 流苏穗子 —— 真实贴图 */
+.tassel{position:absolute;width:18px;height:64px;z-index:5;background-size:contain;background-repeat:no-repeat;background-position:center top}
+.tassel.tl{top:30px;left:24px;background-image:var(--img-tassel-left, url('_assets/tassel-left.png'))}
+.tassel.tr{top:30px;right:24px;background-image:var(--img-tassel-right, url('_assets/tassel-right.png'))}
+.tassel.bl{bottom:30px;left:24px;background-image:var(--img-tassel-left, url('_assets/tassel-left.png'));transform:scaleY(-1)}
+.tassel.br{bottom:30px;right:24px;background-image:var(--img-tassel-right, url('_assets/tassel-right.png'));transform:scaleY(-1)}
+
+/* topbar */
+.topbar{padding:10px 22px 14px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;position:relative;z-index:2;margin-top:32px}
+.brand{display:flex;align-items:center;gap:8px;font-family:var(--kai);font-size:20px;font-weight:700;color:var(--ink);letter-spacing:2px}
+.brand .mark{width:22px;height:22px;background:var(--primary);border-radius:50%;display:grid;place-items:center;color:var(--canvas);font-family:var(--kai);font-size:13px;font-weight:900}
+.icon-btn{width:36px;height:36px;background:var(--surface);border:1px solid var(--primary);border-radius:50%;display:grid;place-items:center;font-size:15px;color:var(--primary);cursor:pointer}
+
+/* screen frame */
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;background:var(--canvas);opacity:0;pointer-events:none;transition:opacity .25s ease}
+.screen.active{opacity:1;pointer-events:auto}
+.scroll{flex:1;overflow-y:auto;padding:0 20px 40px;-webkit-overflow-scrolling:touch;position:relative;z-index:2}
+
+/* ============ HOME ============ */
+.hero{padding-top:4px;padding-bottom:10px;position:relative;text-align:center}
+.eyebrow{font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--primary);margin-bottom:8px}
+
+/* 横排标题 hero */
+.hero-title{
+  font-family:var(--kai);font-size:28px;font-weight:700;color:var(--ink);
+  letter-spacing:4px;line-height:1.2;margin-bottom:8px;
+}
+.hero-title em{font-style:normal;color:var(--primary)}
+.hero .lede{font-family:var(--song);font-size:13px;color:var(--body);line-height:1.6;padding:0 8px}
+
+/* 紧凑特性条 —— 一排三 chip，代替原 bento */
+.feat-row{display:flex;justify-content:center;gap:8px;margin:14px 0 8px;flex-wrap:wrap}
+.feat-chip{
+  font-family:var(--kai);font-size:11.5px;font-weight:700;color:var(--primary);
+  letter-spacing:1.5px;padding:5px 10px;border:1px solid var(--primary);border-radius:2px;
+  background:var(--surface);
+}
+
+.cta-stack{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:6px}
+/* 朱印章 CTA —— 真实印章贴图 */
+.stamp-cta{
+  width:140px;height:140px;
+  background:var(--img-cta-shoot, url('_assets/cta-shoot-stamp.png')) center/contain no-repeat;
+  display:grid;place-items:center;cursor:pointer;border:0;
+  filter:drop-shadow(0 6px 16px rgba(200,22,29,.35));
+  position:relative;background-color:transparent;
+}
+.stamp-cta:active{transform:scale(.96);filter:drop-shadow(0 3px 8px rgba(200,22,29,.4))}
+.stamp-cta .cta-inner{display:none}
+
+.cta-secondary-row{display:flex;gap:10px;width:100%}
+.cta{flex:1;height:44px;border-radius:4px;font-family:var(--kai);font-size:14px;font-weight:700;letter-spacing:2px;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;background:var(--surface);color:var(--ink);border:1.5px solid var(--primary);position:relative}
+.cta.subtle{background:transparent;color:var(--body);border-color:var(--body)}
+.cta:active{background:var(--surface-deep)}
+
+.footnote{margin-top:14px;font-family:var(--kai);font-size:10.5px;letter-spacing:2px;color:var(--body);text-align:center;opacity:.7}
+
+/* ============ LOADING ============ */
+.load-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 32px;text-align:center;position:relative;z-index:2}
+.scroll-stage{width:200px;height:200px;position:relative;margin-bottom:24px;display:flex;align-items:center;justify-content:center;animation:breath 2.2s ease-in-out infinite}
+.load-illust{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;transition:opacity .5s ease}
+.load-illust.active{opacity:1}
+@keyframes breath{0%,100%{transform:scale(1);opacity:.92}50%{transform:scale(1.04);opacity:1}}
+.load-title{font-family:var(--kai);font-size:24px;font-weight:700;color:var(--ink);margin-bottom:10px;letter-spacing:3px}
+.load-sub{font-family:var(--song);font-size:13px;color:var(--body);line-height:1.8;max-width:260px}
+.load-dots{margin-top:18px;font-family:var(--mono);font-size:11px;color:var(--primary);letter-spacing:3px}
+
+/* ============ EDIT ============ */
+.report-top{padding:0 20px 8px;display:flex;align-items:center;gap:12px;flex-shrink:0;position:relative;z-index:2}
+.back-btn{width:36px;height:36px;border-radius:50%;border:1.5px solid var(--primary);background:var(--surface);display:grid;place-items:center;cursor:pointer;font-size:16px;color:var(--primary);font-weight:700}
+
+.edit-summary{margin:0 20px 10px;padding:12px 14px;background:var(--ink);color:var(--canvas);border-radius:4px;display:flex;align-items:center;gap:12px;border:1.5px solid var(--accent);position:relative;z-index:2}
+.edit-summary::after{content:"";position:absolute;inset:3px;border:1px dashed var(--accent);border-radius:2px;opacity:.5;pointer-events:none}
+.edit-summary .num{font-family:var(--kai);font-weight:900;font-size:32px;line-height:1;letter-spacing:-1px;color:var(--canvas)}
+.edit-summary .num small{font-size:13px;color:var(--accent);margin-left:2px}
+.edit-summary .meta{flex:1;display:flex;flex-direction:column;gap:2px}
+.edit-summary .meta .tier{font-family:var(--kai);font-size:15px;font-weight:700;color:var(--accent);letter-spacing:1px}
+.edit-summary .meta .pose{font-family:var(--mono);font-size:10px;letter-spacing:1.5px;color:#c9b88a;text-transform:uppercase}
+.edit-summary .badge{font-family:var(--kai);font-size:12px;font-weight:700;background:var(--primary);color:var(--canvas);padding:5px 10px;border-radius:2px;letter-spacing:1px}
+
+/* 签型徽章（5档配色，ADR-005 偏离 / Part1 spec §4） */
+.sign-chip{display:inline-flex;align-items:center;font-family:var(--kai);font-size:11px;font-weight:800;letter-spacing:2px;padding:2px 8px;margin-left:6px;border-radius:2px;color:#fdfaf2;background:#5b5b5b;border:1px solid rgba(255,255,255,.15);vertical-align:middle}
+.sign-chip[data-sign="下下签"]{background:#5b5b5b}
+.sign-chip[data-sign="下签"]{background:#5d6f88}
+.sign-chip[data-sign="中签"]{background:#c08a3e;color:#2a1a08}
+.sign-chip[data-sign="上签"]{background:#3f8c5a}
+.sign-chip[data-sign="上上签"]{background:#d4222b;border-color:#f0c869;box-shadow:0 0 0 1px #f0c869 inset,0 0 6px rgba(240,200,105,.5)}
+
+.edit-hint{margin:0 20px 8px;font-family:var(--kai);font-size:11px;letter-spacing:1px;color:var(--body);text-align:center;position:relative;z-index:2}
+
+.stage-wrap{margin:0 20px;border-radius:4px;overflow:hidden;background:var(--surface);border:1.5px solid var(--primary);box-shadow:0 4px 14px rgba(0,0,0,.1);position:relative;z-index:2}
+.stage-wrap::after{content:"";position:absolute;inset:3px;border:1px dashed var(--primary);border-radius:2px;opacity:.6;pointer-events:none}
+#stage{display:block;margin:0 auto;background:#000}
+
+/* edit toolbar */
+.edit-toolbar{position:absolute;left:0;right:0;bottom:0;background:var(--canvas);border-top:2px solid var(--primary);padding-bottom:env(safe-area-inset-bottom,0);z-index:6}
+.edit-tools-row{display:flex;align-items:center;gap:6px;padding:10px 14px 16px;justify-content:space-between}
+.tool-btn{flex:1;height:46px;border-radius:4px;border:1.5px solid var(--primary);background:var(--surface);color:var(--ink);font-family:var(--kai);font-size:13px;font-weight:700;letter-spacing:1px;display:flex;align-items:center;justify-content:center;gap:4px;cursor:pointer}
+.tool-btn.active{background:var(--primary);color:var(--canvas)}
+.tool-btn.warn{border-color:var(--body);color:var(--body);background:transparent}
+.tool-btn.warn[disabled]{opacity:.4;cursor:not-allowed}
+.tool-btn.done{background:var(--primary);color:var(--canvas);border-color:var(--primary)}
+.tool-btn.done:active{background:var(--primary-active)}
+
+/* drawer */
+.drawer-backdrop{position:absolute;inset:0;background:rgba(26,22,18,.4);opacity:0;pointer-events:none;transition:opacity .2s;z-index:30}
+.drawer-backdrop.show{opacity:1;pointer-events:auto}
+.drawer{position:absolute;left:0;right:0;bottom:0;background:var(--canvas);border-radius:8px 8px 0 0;box-shadow:0 -10px 30px rgba(0,0,0,.2);padding:14px 18px 22px;transform:translateY(110%);transition:transform .25s ease;z-index:40;max-height:60%;overflow-y:auto;border-top:2px solid var(--primary)}
+.drawer.show{transform:translateY(0)}
+.drawer .drawer-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-bottom:8px;border-bottom:1px dashed var(--primary)}
+.drawer .drawer-head h3{font-family:var(--kai);font-size:18px;font-weight:700;color:var(--ink);letter-spacing:2px}
+.drawer .drawer-head .close{width:30px;height:30px;border-radius:50%;background:var(--surface);border:1px solid var(--primary);font-size:18px;cursor:pointer;color:var(--primary);font-weight:700}
+
+/* sticker grid */
+.sticker-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.sticker-grid .item{aspect-ratio:1;background:var(--surface);border:1px solid var(--primary);border-radius:4px;display:grid;place-items:center;cursor:pointer;padding:6px}
+.sticker-grid .item:active{transform:scale(.95)}
+.sticker-grid .item svg{width:100%;height:100%}
+
+/* text editor */
+.text-row{display:flex;flex-direction:column;gap:12px}
+.text-row input{height:44px;border-radius:4px;border:1.5px solid var(--primary);padding:0 14px;font-family:var(--kai);font-size:16px;background:var(--surface);color:var(--ink)}
+.text-row .chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{padding:8px 14px;border-radius:2px;border:1.5px solid var(--primary);background:var(--surface);font-family:var(--kai);font-size:13px;font-weight:700;cursor:pointer;color:var(--ink);letter-spacing:1px}
+.chip.active{background:var(--primary);color:var(--canvas)}
+.color-chip{width:30px;height:30px;border-radius:50%;border:2px solid transparent;cursor:pointer;display:inline-block}
+.color-chip.active{border-color:var(--ink);box-shadow:0 0 0 2px var(--canvas) inset}
+.text-row .label{font-family:var(--kai);font-size:12px;color:var(--primary);font-weight:700;letter-spacing:2px}
+.text-add-btn{height:44px;border-radius:4px;background:var(--primary);color:var(--canvas);border:0;font-family:var(--kai);font-size:15px;font-weight:700;letter-spacing:4px;cursor:pointer}
+
+/* titles drawer */
+.titles{display:flex;gap:8px;flex-wrap:wrap}
+.title-pill{font-family:var(--kai);font-size:14px;font-weight:700;padding:10px 16px;border-radius:2px;border:1.5px solid var(--primary);background:var(--surface);color:var(--primary);cursor:pointer;letter-spacing:1px;transition:all .15s}
+.title-pill.active{background:var(--primary);color:var(--canvas)}
+
+/* ============ POSTER ============ */
+.poster-scroll{flex:1;overflow-y:auto;padding:6px 18px 40px;position:relative;z-index:2}
+.poster{
+  width:100%;background:var(--canvas);
+  border:2px solid var(--primary);border-radius:4px;
+  position:relative;overflow:hidden;padding-bottom:16px;
+}
+.poster::after{content:"";position:absolute;inset:5px;border:1px dashed var(--primary);border-radius:2px;pointer-events:none;z-index:1}
+/* 紫禁城水印 */
+.poster .pwatermark{position:absolute;left:50%;top:55%;transform:translate(-50%,-50%);width:280px;height:280px;opacity:.18;pointer-events:none;z-index:0;background:var(--img-watermark, url('_assets/forbidden-city-watermark.png')) center/contain no-repeat;mix-blend-mode:multiply}
+
+.poster .pheader{padding:12px 16px 10px;display:flex;justify-content:space-between;align-items:center;border-bottom:1.5px solid var(--primary);position:relative;z-index:2;gap:10px}
+.poster .pheader .ptitle-vert{
+  writing-mode:vertical-rl;
+  font-family:var(--kai);font-size:16px;font-weight:900;color:var(--ink);
+  letter-spacing:6px;line-height:1;padding:2px 4px;
+  border-left:2px solid var(--primary);
+  height:108px;
+}
+.poster .pheader .psub{font-family:var(--mono);font-size:8px;color:var(--primary);letter-spacing:1.5px;text-transform:uppercase;writing-mode:vertical-rl;height:44px;align-self:flex-start;margin-top:2px}
+.poster .pscore-row{text-align:right;flex:1;padding-left:8px;display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.poster .pscore-row .lab{font-family:var(--kai);font-size:10px;letter-spacing:2px;color:var(--body);font-weight:700}
+.poster .pscore-row .stamp-num{
+  width:58px;height:58px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#e02830 0%,#c8161d 50%,#9a1014 100%);
+  color:var(--canvas);
+  box-shadow:inset 0 -2px 6px rgba(0,0,0,.2),inset 0 2px 4px rgba(255,255,255,.12);
+  display:grid;place-items:center;font-family:var(--kai);font-weight:900;font-size:24px;letter-spacing:-1px;transform:rotate(-6deg);
+  position:relative;
+}
+.poster .pscore-row .stamp-num::before{content:"";position:absolute;inset:4px;border:1.2px solid var(--canvas);border-radius:50%;opacity:.6}
+.poster .pscore-row .stamp-num small{font-size:8px;display:block;margin-top:-3px;letter-spacing:0;opacity:.85}
+.poster .pscore-row .ti{font-family:var(--kai);font-size:12px;font-weight:700;color:var(--primary);letter-spacing:2px}
+
+.poster .pcaptured{width:100%;height:auto;display:block;background:#000;position:relative;z-index:2}
+.poster .pcaptured-placeholder{width:100%;aspect-ratio:335/420;background:var(--surface);display:grid;place-items:center;color:var(--body);font-family:var(--kai);font-size:13px;position:relative;z-index:2}
+
+.poster .pbody{padding:12px 18px 4px;font-family:var(--kai);font-size:12.5px;line-height:1.75;color:var(--ink);text-indent:2em;position:relative;z-index:2;max-height:88px;overflow:hidden}
+
+.poster .pyiji{padding:6px 16px 10px;display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px;position:relative;z-index:2}
+.poster .pyiji .pcol{background:var(--surface);border-radius:2px;padding:8px 10px}
+.poster .pyiji .pcol .ph{font-family:var(--kai);font-weight:900;font-size:16px;margin-bottom:4px;letter-spacing:3px}
+.poster .pyiji .pcol.yi{border:1.5px solid var(--jade)}
+.poster .pyiji .pcol.yi .ph{color:var(--jade)}
+.poster .pyiji .pcol.ji{border:1.5px solid var(--primary)}
+.poster .pyiji .pcol.ji .ph{color:var(--primary)}
+.poster .pyiji .pcol .pl{font-family:var(--song);font-size:13px;color:var(--body);line-height:1.85}
+
+.poster .pfooter{padding:8px 20px 4px;display:flex;justify-content:space-between;align-items:center;position:relative;z-index:2}
+.poster .pfooter .pno{font-family:var(--mono);font-size:10px;letter-spacing:1.5px;color:var(--body);text-transform:uppercase}
+.poster .pstamp{
+  width:72px;height:72px;
+  background:var(--img-title-stamp, url('_assets/title-stamp-template.png')) center/contain no-repeat;
+  display:grid;place-items:center;transform:rotate(-8deg);
+  position:relative;padding:0;
+  color:var(--canvas);font-family:var(--kai);font-weight:900;font-size:13px;line-height:1.05;text-align:center;letter-spacing:1px;
+}
+.poster .pstamp::before{content:none}
+.poster .pstamp small{display:none}
+
+.poster-hint{margin-top:14px;text-align:center;font-family:var(--kai);font-size:11px;color:var(--body);line-height:1.7;letter-spacing:1px;padding:0 12px}
+
+/* 海报下方动作区 —— 滚动可见 */
+.poster-actions{margin-top:18px;display:flex;flex-direction:column;gap:10px;padding:0 4px}
+.poster-actions .btn{height:48px}
+.poster-actions .btn-stamp{font-size:14px;letter-spacing:3px}
+
+/* bottom bar（保留给 edit 屏，poster 屏已弃用） */
+.bottom-bar{position:absolute;left:0;right:0;bottom:0;background:var(--canvas);border-top:2px solid var(--primary);padding:14px 14px 28px;display:flex;gap:8px;z-index:10}
+.btn{font-family:var(--kai);font-size:13px;font-weight:700;letter-spacing:1.5px;height:46px;border-radius:4px;border:0;cursor:pointer;white-space:nowrap}
+.bottom-bar .btn{flex:1}
+.btn-stamp{
+  background:radial-gradient(circle at 35% 30%,#e02830 0%,#c8161d 50%,#9a1014 100%);
+  color:var(--canvas);
+  box-shadow:inset 0 -2px 4px rgba(0,0,0,.2),inset 0 2px 3px rgba(255,255,255,.1);
+}
+.btn-stamp:active{transform:scale(.97)}
+.btn-secondary{background:var(--surface);color:var(--primary);border:1.5px solid var(--primary)}
+.btn-outline{background:transparent;color:var(--body);border:1.5px dashed var(--body)}
+
+/* exporting overlay */
+.exporting{position:fixed;inset:0;background:rgba(245,232,200,.85);backdrop-filter:blur(2px);z-index:100000;display:none;align-items:center;justify-content:center;flex-direction:column;gap:18px}
+.exporting.show{display:flex}
+.spinner{width:48px;height:48px;border:3px solid rgba(200,22,29,.2);border-top-color:var(--primary);border-radius:50%;animation:spin 1s linear infinite}
+.exporting .lbl{font-family:var(--kai);color:var(--ink);font-weight:700;font-size:16px;letter-spacing:3px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.file-input{display:none}
+</style>
+</head>
+<body>
+<div class="phone" id="phone">
+
+  <!-- 卷轴上下木轴 -->
+  <div class="scroll-rod-top"></div>
+  <div class="tassel tl"></div><div class="tassel tr"></div>
+  <div class="scroll-rod-bot"></div>
+  <div class="tassel bl"></div><div class="tassel br"></div>
+
+  <!-- 四角云纹 -->
+  <svg class="corner-cloud tl" viewBox="0 0 48 48"><path d="M4 28 Q4 18 14 18 Q14 10 24 10 Q34 10 34 18 Q44 18 44 28" fill="none" stroke="#c8161d" stroke-width="1.5"/><circle cx="14" cy="28" r="3" fill="none" stroke="#c8161d" stroke-width="1.2"/><circle cx="24" cy="22" r="3" fill="none" stroke="#c8161d" stroke-width="1.2"/><circle cx="34" cy="28" r="3" fill="none" stroke="#c8161d" stroke-width="1.2"/></svg>
+  <svg class="corner-cloud tr" viewBox="0 0 48 48"><path d="M4 28 Q4 18 14 18 Q14 10 24 10 Q34 10 34 18 Q44 18 44 28" fill="none" stroke="#c8161d" stroke-width="1.5"/><circle cx="14" cy="28" r="3" fill="none" stroke="#c8161d" stroke-width="1.2"/><circle cx="24" cy="22" r="3" fill="none" stroke="#c8161d" stroke-width="1.2"/><circle cx="34" cy="28" r="3" fill="none" stroke="#c8161d" stroke-width="1.2"/></svg>
+  <svg class="corner-cloud bl" viewBox="0 0 48 48"><path d="M4 28 Q4 18 14 18 Q14 10 24 10 Q34 10 34 18 Q44 18 44 28" fill="none" stroke="#c8161d" stroke-width="1.5"/><circle cx="14" cy="28" r="3" fill="none" stroke="#c8161d" stroke-width="1.2"/><circle cx="24" cy="22" r="3" fill="none" stroke="#c8161d" stroke-width="1.2"/><circle cx="34" cy="28" r="3" fill="none" stroke="#c8161d" stroke-width="1.2"/></svg>
+  <svg class="corner-cloud br" viewBox="0 0 48 48"><path d="M4 28 Q4 18 14 18 Q14 10 24 10 Q34 10 34 18 Q44 18 44 28" fill="none" stroke="#c8161d" stroke-width="1.5"/><circle cx="14" cy="28" r="3" fill="none" stroke="#c8161d" stroke-width="1.2"/><circle cx="24" cy="22" r="3" fill="none" stroke="#c8161d" stroke-width="1.2"/><circle cx="34" cy="28" r="3" fill="none" stroke="#c8161d" stroke-width="1.2"/></svg>
+
+  <!-- =================== HOME =================== -->
+  <div class="screen" id="screen-home">
+    <div class="topbar">
+      <div class="brand"><span class="mark">御</span>咔嚓剧场</div>
+      <div style="display:flex;gap:8px">
+        <div class="icon-btn" title="历史">⌛</div>
+        <div class="icon-btn" title="更多">⋯</div>
+      </div>
+    </div>
+    <div class="scroll">
+      <div class="hero">
+        <div class="eyebrow">奉天承运 · MOYU CENSORATE</div>
+        <h1 class="hero-title">案前一照，<em>御史替你写奏折</em></h1>
+        <p class="lede">AI 看一眼工位，按《摸鱼律》给评分、宜忌、封号。</p>
+      </div>
+
+      <div class="feat-row">
+        <span class="feat-chip">壹 · AI 评分</span>
+        <span class="feat-chip">贰 · 朱批二创</span>
+        <span class="feat-chip">叁 · 长图颁行</span>
+      </div>
+
+      <div class="cta-stack">
+        <button class="stamp-cta" id="btn-camera">
+          <span class="cta-inner">拍一张<br/>审审<small>SHOOT</small></span>
+        </button>
+        <div class="cta-secondary-row">
+          <button class="cta" id="btn-album">从相册选</button>
+          <button class="cta subtle" id="btn-demo">demo 试一下</button>
+        </div>
+      </div>
+
+      <div class="footnote">— 卷轴版 · 古风奏折 v0.2 —</div>
+    </div>
+    <input type="file" accept="image/*" capture="environment" id="file-camera" class="file-input">
+    <input type="file" accept="image/*" id="file-album" class="file-input">
+  </div>
+
+  <!-- =================== LOADING =================== -->
+  <div class="screen" id="screen-loading">
+    <div class="topbar">
+      <div class="brand"><span class="mark">御</span>咔嚓剧场</div>
+      <div></div>
+    </div>
+    <div class="load-wrap">
+      <div class="scroll-stage">
+        <img class="load-illust active" data-frame="0" src="_assets/loading-scroll.png" alt="" />
+        <img class="load-illust"        data-frame="1" src="_assets/loading-yubi.png" alt="" />
+        <img class="load-illust"        data-frame="2" src="_assets/loading-stamp.png" alt="" />
+      </div>
+      <div class="load-title">御史批阅奏折中</div>
+      <div class="load-sub">比对《摸鱼律》七十二条<br/>勘察案前器物 · 推算紫微星位</div>
+      <div class="load-dots">奉旨拟稿…</div>
+    </div>
+  </div>
+
+  <!-- =================== EDIT =================== -->
+  <div class="screen" id="screen-edit">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="back-btn" id="btn-edit-back">←</div>
+        <div>
+          <div style="font-family:var(--kai);font-size:17px;font-weight:700;color:var(--ink);letter-spacing:2px">二创神游御笔</div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--primary);letter-spacing:1.5px;text-transform:uppercase">EDIT · STAMP · TITLE</div>
+        </div>
+      </div>
+      <div id="edit-tier-badge" style="height:30px;border-radius:2px;padding:0 12px;background:var(--primary);color:var(--canvas);font-family:var(--kai);font-size:12px;font-weight:700;letter-spacing:1px;display:flex;align-items:center">—</div>
+    </div>
+
+    <div class="edit-summary" id="edit-summary">
+      <div class="num">—<small>/100</small></div>
+      <div class="meta">
+        <div class="tier">—<span class="sign-chip" data-sign="">—</span></div>
+        <div class="pose">—</div>
+      </div>
+      <div class="badge">封号 —</div>
+    </div>
+
+    <div class="edit-hint">👇 拖动朱印调位置，右下角控制点拉伸+旋转</div>
+
+    <div class="stage-wrap">
+      <div id="stage"></div>
+    </div>
+
+    <div class="drawer-backdrop" id="edit-drawer-backdrop"></div>
+
+    <div class="drawer" id="drawer-stickers">
+      <div class="drawer-head"><h3>印玺六枚</h3><button class="close" data-close>×</button></div>
+      <div class="sticker-grid" id="sticker-grid"></div>
+    </div>
+    <div class="drawer" id="drawer-text">
+      <div class="drawer-head"><h3>御笔朱批</h3><button class="close" data-close>×</button></div>
+      <div class="text-row">
+        <input id="text-input" placeholder="写一句御批…如「朕已阅」" maxlength="20" value="朕已阅"/>
+        <div class="label">字体</div>
+        <div class="chips" id="font-chips">
+          <span class="chip active" data-font='"STKaiti","KaiTi","楷体",serif' data-name="楷">楷体</span>
+          <span class="chip" data-font='"STSong","SimSun","宋体",serif' data-name="宋">宋体</span>
+          <span class="chip" data-font='"STXingkai","行楷","STKaiti",serif' data-name="行">行书</span>
+        </div>
+        <div class="label">颜色</div>
+        <div class="chips" id="color-chips">
+          <span class="color-chip active" style="background:#c8161d" data-color="#c8161d"></span>
+          <span class="color-chip" style="background:#b89545" data-color="#b89545"></span>
+          <span class="color-chip" style="background:#1a1612" data-color="#1a1612"></span>
+          <span class="color-chip" style="background:#f5e8c8;border:1px solid #999" data-color="#f5e8c8"></span>
+          <span class="color-chip" style="background:#3f8c5a" data-color="#3f8c5a"></span>
+        </div>
+        <button class="text-add-btn" id="text-add-btn">加到画布</button>
+      </div>
+    </div>
+    <div class="drawer" id="drawer-titles">
+      <div class="drawer-head"><h3>封号三选</h3><button class="close" data-close>×</button></div>
+      <p style="font-family:var(--song);font-size:12px;color:var(--body);margin-bottom:14px">钦点其一，镌于奏折之尾（仅影响海报右下朱印）</p>
+      <div class="titles" id="titles-pills"></div>
+    </div>
+
+    <div class="edit-toolbar">
+      <div class="edit-tools-row">
+        <button class="tool-btn" data-drawer="stickers">印玺</button>
+        <button class="tool-btn" data-drawer="text">御批</button>
+        <button class="tool-btn" data-drawer="titles">封号</button>
+        <button class="tool-btn warn" id="btn-undo" disabled>↶撤</button>
+        <button class="tool-btn done" id="btn-finish">完颁→</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =================== POSTER =================== -->
+  <div class="screen" id="screen-poster">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="back-btn" id="btn-back-edit">←</div>
+        <div class="brand" style="font-size:17px"><span class="mark">奏</span>奏折长图</div>
+      </div>
+      <div></div>
+    </div>
+    <div class="poster-scroll" id="poster-scroll">
+      <div id="poster-host"><!-- poster rendered by JS --></div>
+      <div class="poster-actions">
+        <button class="btn btn-stamp" id="btn-export-poster">制电子诏书 · 生成长图</button>
+        <button class="btn btn-secondary" id="btn-enter-story">入 梦 · 演绎剧情 →</button>
+        <button class="btn btn-secondary" id="btn-share">复制分享链接</button>
+        <button class="btn btn-outline" id="btn-reshoot">重审一张</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="exporting" id="exporting">
+    <div class="spinner"></div>
+    <div class="lbl">内阁学士奉诏摹印中…</div>
+  </div>
+</div>
+
+<script type="module">
+import { analyzeImage, makeDemoImageDataURL } from './_shared/api.js';
+import { createStage } from './_shared/sticker-engine.js';
+import { exportNodeToPNG, showSaveModal, copyShareLink } from './_shared/export.js';
+import { toast } from './_shared/toast.js';
+import { loadCleanImage } from './_shared/bg-clean.js';
+
+// ============ asset background cleaning ============
+// gemini-3 输出的 PNG 是"伪透明"（带浅色固定底），用 canvas chroma-key 现场扒
+const CLEAN_URL = new Map();
+const cleanedOf = (raw) => CLEAN_URL.get(raw) || raw;
+const ASSET_LIST = [
+  ['_assets/scroll-rod-top.png', '--img-rod-top'],
+  ['_assets/scroll-rod-bot.png', '--img-rod-bot'],
+  ['_assets/tassel-left.png',    '--img-tassel-left'],
+  ['_assets/tassel-right.png',   '--img-tassel-right'],
+  ['_assets/cta-shoot-stamp.png','--img-cta-shoot'],
+  ['_assets/forbidden-city-watermark.png','--img-watermark'],
+  ['_assets/title-stamp-template.png','--img-title-stamp'],
+  ['_assets/loading-yubi.png',   null],
+  ['_assets/loading-scroll.png', null],
+  ['_assets/loading-stamp.png',  null],
+  ['_assets/seal-zhunzou.png',   null],
+  ['_assets/seal-bohui.png',     null],
+  ['_assets/seal-shenyou.png',   null],
+  ['_assets/seal-daji.png',      null],
+  ['_assets/seal-moyu.png',      null],
+  ['_assets/seal-fengtian.png',  null],
+  ['_assets/tier-1-dagongxinding.png',  null],
+  ['_assets/tier-2-huashui-xuetu.png',  null],
+  ['_assets/tier-3-moyu-xiushi.png',    null],
+  ['_assets/tier-4-huashui-shilang.png',null],
+  ['_assets/tier-5-moyu-dajiangjun.png',null],
+  ['_assets/tier-6-jiamei-tianzun.png', null],
+  ['_assets/score-ticket-template.png', null],
+  ['_assets/face-seal.png', null],
+];
+const ASSETS_READY = (async () => {
+  const t0 = Date.now();
+  const results = await Promise.allSettled(ASSET_LIST.map(([url]) => loadCleanImage(url, { tol: 30, fade: 1.6 })));
+  ASSET_LIST.forEach(([raw, cssVar], i) => {
+    const cleaned = results[i].status === 'fulfilled' ? results[i].value : raw;
+    CLEAN_URL.set(raw, cleaned);
+    if (cssVar && cleaned !== raw) {
+      document.documentElement.style.setProperty(cssVar, `url(${cleaned})`);
+    }
+  });
+  const loadImgs = document.querySelectorAll('.load-illust');
+  loadImgs.forEach(img => {
+    const m = img.src.match(/_assets\/[^?#]+\.png/);
+    if (m) img.src = cleanedOf(m[0]);
+  });
+  console.log('[assets] cleaned', CLEAN_URL.size, 'in', ((Date.now()-t0)/1000).toFixed(1)+'s');
+})();
+
+const TOAST_THEME = { bg:'rgba(26,22,18,.92)', color:'#f5e8c8', accent:'#b89545' };
+const t = (msg) => toast(msg, TOAST_THEME);
+
+const STAGE_W = 335, STAGE_H = 420;
+const KAI = '"STKaiti","KaiTi","楷体","Noto Serif SC",serif';
+
+const state = {
+  screen: 'home',
+  result: null,
+  reportId: '00000000',
+  activeTitleIdx: 0,
+  bgDataURL: null,
+  stage: null,
+  capturedURL: null,
+  textFont: KAI,
+  textColor: '#c8161d',
+};
+
+const screens = {
+  home: document.getElementById('screen-home'),
+  loading: document.getElementById('screen-loading'),
+  edit: document.getElementById('screen-edit'),
+  poster: document.getElementById('screen-poster'),
+};
+function go(name){
+  state.screen = name;
+  for (const k in screens) screens[k].classList.toggle('active', k===name);
+  if (name === 'loading') startLoadingFrames();
+  else stopLoadingFrames();
+}
+
+let _loadingTimer = null;
+function startLoadingFrames(){
+  stopLoadingFrames();
+  const frames = document.querySelectorAll('.load-illust');
+  if (frames.length < 2) return;
+  let i = 0;
+  _loadingTimer = setInterval(() => {
+    frames.forEach(f => f.classList.remove('active'));
+    i = (i + 1) % frames.length;
+    frames[i].classList.add('active');
+  }, 1200);
+}
+function stopLoadingFrames(){
+  if (_loadingTimer) { clearInterval(_loadingTimer); _loadingTimer = null; }
+  const frames = document.querySelectorAll('.load-illust');
+  frames.forEach((f, idx) => f.classList.toggle('active', idx === 0));
+}
+
+function hash8(s){
+  let h=2166136261>>>0;
+  for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)>>>0;}
+  return ('0000000'+h.toString(16)).slice(-8).toUpperCase();
+}
+function fileToDataURL(file){
+  return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file);});
+}
+function showExporting(show){ document.getElementById('exporting').classList.toggle('show', !!show); }
+
+// ============ 朱印 SVG 集合（古风） ============
+const STAMP_RED = '#c8161d';
+const STAMP_BG = '#f5e8c8';
+
+// 方印（双线框 + 楷体 + 2x2 或单字）
+function stampSquare(txt, opt={}){
+  const stroke = opt.stroke || STAMP_RED;
+  const fill = opt.fill || STAMP_BG;
+  const col = opt.color || STAMP_RED;
+  let inner = '';
+  if (txt.length===4){
+    const fs = 38;
+    inner = `
+      <text x="35" y="55" font-family='${KAI}' font-weight="900" font-size="${fs}" fill="${col}" text-anchor="middle" dominant-baseline="middle">${txt[0]}</text>
+      <text x="85" y="55" font-family='${KAI}' font-weight="900" font-size="${fs}" fill="${col}" text-anchor="middle" dominant-baseline="middle">${txt[1]}</text>
+      <text x="35" y="105" font-family='${KAI}' font-weight="900" font-size="${fs}" fill="${col}" text-anchor="middle" dominant-baseline="middle">${txt[2]}</text>
+      <text x="85" y="105" font-family='${KAI}' font-weight="900" font-size="${fs}" fill="${col}" text-anchor="middle" dominant-baseline="middle">${txt[3]}</text>`;
+  } else if (txt.length<=2){
+    const fs = txt.length===1 ? 70 : 56;
+    inner = `<text x="60" y="60" font-family='${KAI}' font-weight="900" font-size="${fs}" fill="${col}" text-anchor="middle" dominant-baseline="central" letter-spacing="4">${txt}</text>`;
+  } else {
+    inner = txt.split('').map((c,i)=>`<text x="60" y="${28 + i*30}" font-family='${KAI}' font-weight="900" font-size="30" fill="${col}" text-anchor="middle" dominant-baseline="middle">${c}</text>`).join('');
+  }
+  return `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+    <rect x="5" y="5" width="110" height="110" rx="3" ry="3" fill="${fill}" stroke="${stroke}" stroke-width="5"/>
+    <rect x="11" y="11" width="98" height="98" rx="2" ry="2" fill="none" stroke="${stroke}" stroke-width="1.2" opacity=".6"/>
+    ${inner}
+  </svg>`;
+}
+
+// 圆印
+function stampCircle(txt, opt={}){
+  const stroke = opt.stroke || STAMP_RED;
+  const fill = opt.fill || STAMP_BG;
+  const col = opt.color || STAMP_RED;
+  if (txt.length>=4){
+    const chars = txt.split('');
+    const n = chars.length;
+    const R = 40;
+    const ring = chars.map((c,i)=>{
+      const a = -Math.PI/2 + i*(Math.PI*2/n);
+      const x = 60 + R*Math.cos(a);
+      const y = 60 + R*Math.sin(a);
+      const rot = (a*180/Math.PI)+90;
+      return `<text x="${x}" y="${y}" font-family='${KAI}' font-weight="900" font-size="22" fill="${col}" text-anchor="middle" dominant-baseline="central" transform="rotate(${rot} ${x} ${y})">${c}</text>`;
+    }).join('');
+    return `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="60" cy="60" r="56" fill="${fill}" stroke="${stroke}" stroke-width="5"/>
+      <circle cx="60" cy="60" r="50" fill="none" stroke="${stroke}" stroke-width="1.2" opacity=".5"/>
+      <path d="M52 52 L68 52 L68 68 L52 68 Z M55 55 L65 55 M55 60 L65 60 M55 65 L65 65" fill="${stroke}" opacity=".85"/>
+      ${ring}
+    </svg>`;
+  }
+  return `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="60" cy="60" r="56" fill="${fill}" stroke="${stroke}" stroke-width="5"/>
+    <circle cx="60" cy="60" r="48" fill="none" stroke="${stroke}" stroke-width="1.2" opacity=".55"/>
+    <text x="60" y="60" font-family='${KAI}' font-weight="900" font-size="${txt.length<=2?48:34}" fill="${col}" text-anchor="middle" dominant-baseline="central" letter-spacing="2">${txt}</text>
+  </svg>`;
+}
+
+// 圆角长方印
+function stampRound(txt, opt={}){
+  const stroke = opt.stroke || STAMP_RED;
+  const fill = opt.fill || STAMP_BG;
+  const col = opt.color || STAMP_RED;
+  return `<svg viewBox="0 0 160 80" xmlns="http://www.w3.org/2000/svg">
+    <rect x="5" y="5" width="150" height="70" rx="6" ry="6" fill="${fill}" stroke="${stroke}" stroke-width="4.5"/>
+    <rect x="11" y="11" width="138" height="58" rx="3" ry="3" fill="none" stroke="${stroke}" stroke-width="1" opacity=".5" stroke-dasharray="3 2"/>
+    <text x="80" y="42" font-family='${KAI}' font-weight="900" font-size="28" fill="${col}" text-anchor="middle" dominant-baseline="central" letter-spacing="5">${txt}</text>
+  </svg>`;
+}
+
+// 双线大方框（奉天承运专用）
+function stampDouble(txt){
+  return `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+    <rect x="3" y="3" width="114" height="114" fill="${STAMP_BG}" stroke="${STAMP_RED}" stroke-width="2.5"/>
+    <rect x="9" y="9" width="102" height="102" fill="none" stroke="${STAMP_RED}" stroke-width="2.5"/>
+    <rect x="14" y="14" width="92" height="92" fill="none" stroke="${STAMP_RED}" stroke-width="1" opacity=".5"/>
+    <text x="35" y="50" font-family='${KAI}' font-weight="900" font-size="32" fill="${STAMP_RED}" text-anchor="middle" dominant-baseline="middle">${txt[0]||''}</text>
+    <text x="85" y="50" font-family='${KAI}' font-weight="900" font-size="32" fill="${STAMP_RED}" text-anchor="middle" dominant-baseline="middle">${txt[1]||''}</text>
+    <text x="35" y="92" font-family='${KAI}' font-weight="900" font-size="32" fill="${STAMP_RED}" text-anchor="middle" dominant-baseline="middle">${txt[2]||''}</text>
+    <text x="85" y="92" font-family='${KAI}' font-weight="900" font-size="32" fill="${STAMP_RED}" text-anchor="middle" dominant-baseline="middle">${txt[3]||''}</text>
+  </svg>`;
+}
+
+// 票据：摸鱼 +87 厘
+function scoreReceipt(score){
+  return `<svg viewBox="0 0 160 60" xmlns="http://www.w3.org/2000/svg">
+    <rect x="3" y="3" width="154" height="54" rx="2" ry="2" fill="${STAMP_BG}" stroke="${STAMP_RED}" stroke-width="3"/>
+    <rect x="8" y="8" width="144" height="44" rx="1" ry="1" fill="none" stroke="${STAMP_RED}" stroke-width="1" opacity=".5" stroke-dasharray="2 2"/>
+    <text x="12" y="36" font-family='${KAI}' font-weight="900" font-size="18" fill="${STAMP_RED}" letter-spacing="1">摸鱼</text>
+    <text x="148" y="40" font-family='${KAI}' font-weight="900" font-size="28" fill="${STAMP_RED}" text-anchor="end" dominant-baseline="central">+${score}厘</text>
+  </svg>`;
+}
+
+// 人脸封印
+function faceSeal(){
+  return `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <pattern id="gf-stripes" patternUnits="userSpaceOnUse" width="10" height="10" patternTransform="rotate(45)">
+        <line x1="0" y1="0" x2="0" y2="10" stroke="rgba(200,22,29,.2)" stroke-width="4"/>
+      </pattern>
+    </defs>
+    <circle cx="60" cy="60" r="56" fill="url(#gf-stripes)" />
+    <circle cx="60" cy="60" r="56" fill="rgba(245,232,200,.5)" stroke="${STAMP_RED}" stroke-width="4"/>
+    <circle cx="60" cy="60" r="48" fill="none" stroke="${STAMP_RED}" stroke-width="1.2" opacity=".55"/>
+    <text x="60" y="48" font-family='${KAI}' font-weight="900" font-size="20" fill="${STAMP_RED}" text-anchor="middle">御史</text>
+    <text x="60" y="76" font-family='${KAI}' font-weight="900" font-size="20" fill="${STAMP_RED}" text-anchor="middle">封脸</text>
+  </svg>`;
+}
+
+const STICKER_LIBRARY = [
+  { name:'准奏',     url:'_assets/seal-zhunzou.png',  shape:'sq' },
+  { name:'驳回',     url:'_assets/seal-bohui.png',    shape:'sq' },
+  { name:'神游太虚', url:'_assets/seal-shenyou.png',  shape:'sq' },
+  { name:'大吉',     url:'_assets/seal-daji.png',     shape:'sq' },
+  { name:'摸鱼有理', url:'_assets/seal-moyu.png',     shape:'sq' },
+  { name:'奉天承运', url:'_assets/seal-fengtian.png', shape:'sq' },
+];
+
+// AI 自动垫印规则（ADR-005 偏离 6）：
+// 优先消费 VLM 返回的 initial_stickers（归一化坐标 → 像素 + 避脸兜底）；
+// 字段缺失或全部不可映射时走 heuristic（根据 score / yi / ji 选 2 枚朱红小印，避开右上段位印 + 左下分数票 + 人脸框）。
+// 候选锚点（中心点）：左上 / 右中 / 左中 / 右下，按"远离硬占位 + 远离人脸"挑前 2 个。
+
+// VLM id → 本地资源 url 的映射（guofeng 当前只有 seal_red 与 tier_seal 两类 PNG）
+function resolveStickerAsset(id) {
+  if (!id) return null;
+  const m = id.match(/^(yellow_tag|bubble|seal_red|tier_seal)_(\d{2})$/);
+  if (!m) return null;
+  const [, kind, nStr] = m;
+  const n = parseInt(nStr, 10);
+  if (kind === 'seal_red') {
+    return STICKER_LIBRARY[(n - 1) % STICKER_LIBRARY.length]?.url || null;
+  }
+  if (kind === 'tier_seal') {
+    const tiers = ['打工新丁', '划水学徒', '摸鱼修士', '划水侍郎', '摸鱼大将军', '假寐天尊'];
+    return TIER_IMG[tiers[(n - 1) % 6]] || null;
+  }
+  // yellow_tag / bubble 暂无 PNG 资源，返回 null 让上层走 heuristic
+  return null;
+}
+
+// 把 VLM 给的归一化贴纸映射成 stage 像素坐标 + 避脸兜底
+function mapInitialStickersFromVLM(r) {
+  const list = Array.isArray(r.initial_stickers) ? r.initial_stickers : [];
+  if (list.length === 0) return [];
+  const SIZE = 85;
+  const faceObstacles = (r.face_boxes || []).map(b => ({
+    x: (b.x + b.w / 2) * STAGE_W,
+    y: (b.y + b.h / 2) * STAGE_H,
+    r: Math.max(b.w * STAGE_W, b.h * STAGE_H) * 0.9 + 20,
+  }));
+  const hardOccupied = [
+    { x: STAGE_W - 65, y: 80, r: 80 },                  // 右上段位印
+    { x: 100,          y: STAGE_H - 60, r: 70 },        // 左下分数票
+  ];
+  const safeAnchors = [
+    { x: 60,           y: 90,             rot: -8 },
+    { x: STAGE_W - 55, y: STAGE_H / 2,    rot: 6  },
+    { x: 55,           y: STAGE_H / 2+30, rot: 4  },
+    { x: STAGE_W - 60, y: STAGE_H - 70,   rot: -10 },
+  ];
+  const out = [];
+  for (const s of list.slice(0, 2)) {
+    const url = resolveStickerAsset(s.id);
+    if (!url) return []; // 任一 id 不可映射，整体走 heuristic（保持视觉一致）
+    let x = s.x * STAGE_W;
+    let y = s.y * STAGE_H;
+    const rot = typeof s.rot === 'number' ? s.rot : 0;
+    // 避脸/避占位：与任一障碍重叠则就近换最远 safeAnchor
+    const allObstacles = [...hardOccupied, ...faceObstacles];
+    const hit = allObstacles.some(o => Math.hypot(o.x - x, o.y - y) < o.r + SIZE / 2 - 8);
+    if (hit) {
+      const best = safeAnchors
+        .map(a => ({ a, d: Math.min(...allObstacles.map(o => Math.hypot(o.x - a.x, o.y - a.y))) }))
+        .sort((u, v) => v.d - u.d)[0]?.a;
+      if (best) { x = best.x; y = best.y; }
+    }
+    out.push({ url, x, y, size: SIZE, rotation: rot });
+  }
+  return out;
+}
+
+function autoPickSeals(r) {
+  // 0) 优先消费 VLM 返回的 initial_stickers
+  const fromVLM = mapInitialStickersFromVLM(r);
+  if (fromVLM.length > 0) return fromVLM;
+
+  // 1) 选两枚印章名（从 STICKER_LIBRARY 中按规则挑）
+  const yi = (r.report?.yi || []).join('|');
+  const ji = (r.report?.ji || []).join('|');
+  const pose = r.pose_type || '';
+  const score = r.moyu_score ?? 50;
+  const picked = [];
+  const push = (name) => {
+    if (picked.includes(name)) return;
+    if (STICKER_LIBRARY.find(s => s.name === name)) picked.push(name);
+  };
+  if (score >= 80)       push('神游太虚');
+  else if (score >= 55)  push('摸鱼有理');
+  else if (score >= 30)  push('奉天承运');
+  else                   push('驳回');
+  if (/睡|趴|瘫|假寐|瞌睡/.test(pose) || /神游|养神|闭目/.test(yi))      push('神游太虚');
+  else if (/会议|汇报|开会|对齐|催|急|DDL/i.test(ji))                       push('驳回');
+  else if (score >= 70)                                                       push('大吉');
+  else if (/摸鱼|划水/.test(yi))                                              push('摸鱼有理');
+  else                                                                        push('准奏');
+  // 兜底补齐到 2 张
+  for (const fallback of ['大吉','准奏','摸鱼有理','奉天承运']) {
+    if (picked.length >= 2) break;
+    push(fallback);
+  }
+  const chosen = picked.slice(0, 2).map(name => STICKER_LIBRARY.find(s => s.name === name));
+
+  // 2) 候选锚点（中心点；size=85）
+  const SIZE = 85;
+  const anchors = [
+    { x: 60,           y: 90,            rot: -8 },   // 左上
+    { x: STAGE_W - 55, y: STAGE_H/2,     rot: 6  },   // 右中
+    { x: 55,           y: STAGE_H/2 + 30,rot: 4  },   // 左中
+    { x: STAGE_W - 60, y: STAGE_H - 70,  rot: -10 },  // 右下
+  ];
+
+  // 3) 标出"已占"区域（右上段位印 + 左下分数票 + 人脸框）
+  const occupied = [
+    { x: STAGE_W - 65, y: 80, r: 80 },              // 段位大印（半径放大避撞）
+    { x: 100,          y: STAGE_H - 60, r: 70 },    // 分数票
+  ];
+  (r.face_boxes||[]).forEach(b => {
+    occupied.push({
+      x: (b.x + b.w/2) * STAGE_W,
+      y: (b.y + b.h/2) * STAGE_H,
+      r: Math.max(b.w*STAGE_W, b.h*STAGE_H) * 0.9 + 20,
+    });
+  });
+
+  // 4) 选前 2 个不与占位冲突的锚点；不够就强塞剩余 anchors
+  const minSep = SIZE * 0.9;
+  const out = [];
+  for (const a of anchors) {
+    if (out.length >= chosen.length) break;
+    const hit = occupied.some(o => Math.hypot(o.x - a.x, o.y - a.y) < o.r + SIZE/2 - 8);
+    if (hit) continue;
+    const tooClose = out.some(u => Math.hypot(u.x - a.x, u.y - a.y) < minSep);
+    if (tooClose) continue;
+    out.push(a);
+  }
+  while (out.length < chosen.length) out.push(anchors[out.length % anchors.length]);
+
+  return chosen.map((s, i) => ({
+    url: s.url,
+    x: out[i].x, y: out[i].y,
+    size: SIZE,
+    rotation: out[i].rot,
+  }));
+}
+
+// 段位印章映射
+const TIER_IMG = {
+  '打工新丁':   '_assets/tier-1-dagongxinding.png',
+  '划水学徒':   '_assets/tier-2-huashui-xuetu.png',
+  '摸鱼修士':   '_assets/tier-3-moyu-xiushi.png',
+  '划水侍郎':   '_assets/tier-4-huashui-shilang.png',
+  '摸鱼大将军': '_assets/tier-5-moyu-dajiangjun.png',
+  '假寐天尊':   '_assets/tier-6-jiamei-tianzun.png',
+};
+
+// 在 PNG 模板上叠中文字（用于分数票券 / 封号印）
+async function composeText(imgUrl, text, opts={}) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onerror = reject;
+    img.onload = () => {
+      const c = document.createElement('canvas');
+      c.width = img.width; c.height = img.height;
+      const ctx = c.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+      ctx.fillStyle = opts.color || '#c8161d';
+      ctx.font = `${opts.weight||900} ${opts.size||140}px ${opts.font || '"STKaiti","KaiTi","Noto Serif SC",serif'}`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      const cx = opts.cx ?? img.width/2;
+      const cy = opts.cy ?? img.height/2;
+      ctx.fillText(text, cx, cy);
+      resolve(c.toDataURL('image/png'));
+    };
+    img.src = imgUrl;
+  });
+}
+
+// 紫禁城水印 SVG（简化版）
+const FORBIDDEN_CITY_SVG = `<svg viewBox="0 0 280 280" xmlns="http://www.w3.org/2000/svg">
+  <g fill="none" stroke="#1a1612" stroke-width="2">
+    <!-- 城墙底座 -->
+    <rect x="20" y="200" width="240" height="60"/>
+    <line x1="20" y1="220" x2="260" y2="220"/>
+    <!-- 城门 -->
+    <rect x="120" y="225" width="40" height="35"/>
+    <path d="M120 235 Q140 220 160 235" />
+    <!-- 主屋顶 (歇山顶) -->
+    <path d="M40 200 L60 140 L220 140 L240 200 Z"/>
+    <path d="M50 170 L230 170"/>
+    <!-- 屋脊翘檐 -->
+    <path d="M60 140 Q50 130 45 145"/>
+    <path d="M220 140 Q230 130 235 145"/>
+    <!-- 二层 -->
+    <path d="M70 140 L90 95 L190 95 L210 140 Z"/>
+    <path d="M90 95 Q82 88 78 100"/>
+    <path d="M190 95 Q198 88 202 100"/>
+    <!-- 顶 -->
+    <path d="M105 95 L140 55 L175 95 Z"/>
+    <line x1="140" y1="55" x2="140" y2="40"/>
+    <circle cx="140" cy="35" r="4"/>
+    <!-- 旁柱 -->
+    <line x1="80" y1="140" x2="80" y2="200"/>
+    <line x1="200" y1="140" x2="200" y2="200"/>
+    <line x1="100" y1="140" x2="100" y2="200"/>
+    <line x1="180" y1="140" x2="180" y2="200"/>
+    <!-- 旁翼楼 -->
+    <path d="M20 200 L35 175 L60 175 L60 200"/>
+    <path d="M220 200 L220 175 L245 175 L260 200"/>
+  </g>
+</svg>`;
+
+// ============ flow ============
+async function runAnalyze(dataUrl){
+  go('loading');
+  state.bgDataURL = dataUrl;
+  state.reportId = hash8(dataUrl.slice(0,200) + Date.now());
+  try{
+    const [result] = await Promise.all([analyzeImage(dataUrl), ASSETS_READY]);
+    state.result = result;
+    state.activeTitleIdx = 0;
+    state.capturedURL = null;
+    enterEdit();
+  }catch(err){
+    console.error(err);
+    t('御史走神了，请稍后重试');
+    go('home');
+  }
+}
+
+function enterEdit(){
+  const r = state.result;
+  if(!r) return;
+  const sumEl = document.getElementById('edit-summary');
+  sumEl.querySelector('.num').innerHTML = `${r.moyu_score}<small>/100</small>`;
+  // 段位 + 签型徽章（5档配色）
+  const sign = r.sign_type || '';
+  sumEl.querySelector('.tier').innerHTML = `${r.level_tier}<span class="sign-chip" data-sign="${sign}">${sign || '—'}</span>`;
+  sumEl.querySelector('.pose').textContent = `${r.pose_type} · NO.${state.reportId.slice(0,6)}`;
+  sumEl.querySelector('.badge').textContent = `封号 · ${(r.title_candidates||[])[state.activeTitleIdx]||'—'}`;
+  document.getElementById('edit-tier-badge').innerHTML = `${r.level_tier}<span class="sign-chip" data-sign="${sign}" style="margin-left:8px">${sign || '—'}</span>`;
+
+  const stageEl = document.getElementById('stage');
+  stageEl.innerHTML = '';
+  state.stage = createStage(stageEl, {
+    width: STAGE_W, height: STAGE_H,
+    bgImageDataURL: state.bgDataURL,
+    handleStyle: { stroke:'#c8161d', bg:'#f5e8c8', delBg:'#c8161d', outline:'rgba(200,22,29,.7)' }
+  });
+  state.stage.setOnChange(()=>{
+    document.getElementById('btn-undo').disabled = !state.stage.canUndo() || state.stage.getItems().length===0;
+  });
+
+  // 段位印章 —— 真实印章贴图（已扒透明）
+  state.stage.addSticker({
+    type:'image', imageUrl: cleanedOf(TIER_IMG[r.level_tier] || TIER_IMG['摸鱼修士']),
+    x: STAGE_W-65, y: 80, w:130, h:130, rotation:-12,
+  });
+  // 分数票据 —— 模板叠数字
+  composeText(cleanedOf('_assets/score-ticket-template.png'), `+${r.moyu_score}`, { size:240, color:'#c8161d', weight:900 })
+    .then(url => state.stage.addSticker({
+      type:'image', imageUrl: url,
+      x: 100, y: STAGE_H-60, w:180, h:65, rotation:-4,
+    }))
+    .catch(()=>{});
+  // 人脸封印 —— 真实印章贴图
+  (r.face_boxes||[]).forEach(box=>{
+    const cx = (box.x + box.w/2)*STAGE_W;
+    const cy = (box.y + box.h/2)*STAGE_H;
+    const size = Math.max(60, box.w*STAGE_W*1.4);
+    state.stage.addSticker({ type:'image', imageUrl: cleanedOf('_assets/face-seal.png'), x:cx, y:cy, w:size, h:size, rotation:0 });
+  });
+
+  // AI 自动垫 2 枚朱红小印 —— 按 score / yi / ji 选印 + 避开人脸 + 避开已占的右上段位印 / 左下分数票（ADR-005 偏离 6）
+  autoPickSeals(r).forEach(p => {
+    state.stage.addSticker({
+      type:'image',
+      imageUrl: cleanedOf(p.url),
+      x: p.x, y: p.y, w: p.size, h: p.size, rotation: p.rotation,
+    });
+  });
+
+  const grid = document.getElementById('sticker-grid');
+  grid.innerHTML = STICKER_LIBRARY.map((s,i)=>
+    `<div class="item" data-i="${i}" title="${s.name}"><img src="${cleanedOf(s.url)}" alt="${s.name}" style="width:100%;height:100%;object-fit:contain"></div>`
+  ).join('');
+  grid.onclick = (e)=>{
+    const it = e.target.closest('.item'); if(!it) return;
+    const s = STICKER_LIBRARY[+it.dataset.i];
+    state.stage.addSticker({ type:'image', imageUrl: cleanedOf(s.url), x:STAGE_W/2, y:STAGE_H/2, w:110, h:110, rotation:0 });
+    t(`已盖「${s.name}」印`);
+    closeDrawer();
+  };
+
+  renderTitlesPills();
+  closeDrawer();
+  go('edit');
+}
+
+function renderTitlesPills(){
+  const r = state.result;
+  const pills = (r.title_candidates||[]).map((tt,i)=>
+    `<span class="title-pill ${i===state.activeTitleIdx?'active':''}" data-idx="${i}">${tt}</span>`
+  ).join('');
+  document.getElementById('titles-pills').innerHTML = pills;
+  document.getElementById('titles-pills').onclick = (e)=>{
+    const p = e.target.closest('.title-pill'); if(!p) return;
+    state.activeTitleIdx = +p.dataset.idx;
+    document.querySelectorAll('#titles-pills .title-pill').forEach((el,i)=>el.classList.toggle('active', i===state.activeTitleIdx));
+    document.querySelector('#edit-summary .badge').textContent = `封号 · ${r.title_candidates[state.activeTitleIdx]}`;
+    t(`钦点封号「${r.title_candidates[state.activeTitleIdx]}」`);
+  };
+}
+
+function openDrawer(name){
+  const map = { stickers:'drawer-stickers', text:'drawer-text', titles:'drawer-titles' };
+  Object.values(map).forEach(id=>document.getElementById(id).classList.remove('show'));
+  document.getElementById('edit-drawer-backdrop').classList.add('show');
+  document.getElementById(map[name]).classList.add('show');
+  document.querySelectorAll('.tool-btn[data-drawer]').forEach(b=>b.classList.toggle('active', b.dataset.drawer===name));
+}
+function closeDrawer(){
+  ['drawer-stickers','drawer-text','drawer-titles'].forEach(id=>document.getElementById(id).classList.remove('show'));
+  document.getElementById('edit-drawer-backdrop').classList.remove('show');
+  document.querySelectorAll('.tool-btn[data-drawer]').forEach(b=>b.classList.remove('active'));
+}
+
+// ============ poster ============
+function renderPoster(){
+  const r = state.result;
+  if(!r) return;
+  const title = (r.title_candidates||[])[state.activeTitleIdx] || (r.title_candidates||[])[0] || '';
+  const yi = (r.report?.yi||[]).map(x=>`<div class="pl">· ${x}</div>`).join('');
+  const ji = (r.report?.ji||[]).map(x=>`<div class="pl">· ${x}</div>`).join('');
+  const cap = state.capturedURL
+    ? `<img class="pcaptured" src="${state.capturedURL}" alt="奏折画像" crossorigin="anonymous" />`
+    : `<div class="pcaptured-placeholder">（画像生成中…）</div>`;
+
+  // 截短标题用于朱印
+  const tShort = title.length>4 ? title.slice(0,4) : title;
+
+  document.getElementById('poster-host').innerHTML = `
+    <div class="poster" id="poster-node">
+      <div class="pwatermark"></div>
+      <div class="pheader">
+        <div style="display:flex;gap:8px">
+          <div class="ptitle-vert">咔嚓剧场奏折</div>
+          <div class="psub">MOYU CENSORATE</div>
+        </div>
+        <div class="pscore-row">
+          <div class="lab">摸鱼指数</div>
+          <div class="stamp-num">${r.moyu_score}<small>/100</small></div>
+          <div class="ti">${r.level_tier}<span class="sign-chip" data-sign="${r.sign_type||''}" style="margin-left:6px">${r.sign_type||''}</span></div>
+        </div>
+      </div>
+      ${cap}
+      <div class="pbody">${r.report?.paragraph||''}</div>
+      <div class="pyiji">
+        <div class="pcol yi"><div class="ph">宜</div>${yi}</div>
+        <div class="pcol ji"><div class="ph">忌</div>${ji}</div>
+      </div>
+      <div class="pfooter">
+        <div class="pno">奏折 NO.${state.reportId} · ${r.pose_type}</div>
+        <div class="pstamp">${tShort}<small>NO.${state.reportId.slice(0,6)}</small></div>
+      </div>
+    </div>
+    <div class="poster-hint">点下方「制电子诏书」即出大图<br/>或复制链接，颁至群聊以弹劾汝之同僚</div>
+  `;
+}
+
+async function enterPoster(){
+  showExporting(true);
+  try{
+    state.stage.clearSelection();
+    await new Promise(r=>requestAnimationFrame(r));
+    state.capturedURL = await exportNodeToPNG(state.stage.el, { pixelRatio:2, backgroundColor:'#000' });
+  }catch(err){
+    console.error(err);
+    t('画像生成失败，仍可继续');
+  }finally{
+    showExporting(false);
+  }
+  renderPoster();
+  go('poster');
+}
+
+async function exportPoster(){
+  const node = document.getElementById('poster-node');
+  if(!node){ t('海报节点缺失'); return; }
+  showExporting(true);
+  try{
+    const dataUrl = await exportNodeToPNG(node, { pixelRatio:2.5, backgroundColor:'#f5e8c8' });
+    showSaveModal(dataUrl, {
+      theme: { bg:'rgba(26,22,18,.92)', accent:'#b89545', btnBg:'#c8161d', btnText:'#f5e8c8', closeBg:'rgba(245,232,200,.15)' },
+      title: '电子诏书 · 已成',
+      hint: '请<b style="background:#f5e8c8;color:#c8161d;padding:1px 6px;border-radius:2px">长按图片</b>保存到本地相册'
+    });
+  }catch(err){
+    console.error(err);
+    t('御笔卡墨，请重试');
+  }finally{
+    showExporting(false);
+  }
+}
+
+// ============ events ============
+document.getElementById('btn-camera').addEventListener('click', ()=> document.getElementById('file-camera').click());
+document.getElementById('btn-album').addEventListener('click', ()=> document.getElementById('file-album').click());
+document.getElementById('btn-demo').addEventListener('click', ()=> runAnalyze(makeDemoImageDataURL()));
+['file-camera','file-album'].forEach(id=>{
+  document.getElementById(id).addEventListener('change', async (e)=>{
+    const f = e.target.files?.[0]; if(!f) return;
+    try{ runAnalyze(await fileToDataURL(f)); }
+    catch{ t('读取图片失败'); }
+    finally{ e.target.value=''; }
+  });
+});
+
+document.querySelectorAll('.tool-btn[data-drawer]').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    const cur = b.classList.contains('active');
+    if(cur) closeDrawer(); else openDrawer(b.dataset.drawer);
+  });
+});
+document.querySelectorAll('.drawer .close').forEach(b=> b.addEventListener('click', closeDrawer));
+document.getElementById('edit-drawer-backdrop').addEventListener('click', closeDrawer);
+document.getElementById('btn-undo').addEventListener('click', ()=>{
+  if(state.stage?.undo()){ t('已撤销一步'); }
+});
+document.getElementById('btn-finish').addEventListener('click', enterPoster);
+document.getElementById('btn-edit-back').addEventListener('click', ()=>{
+  if(confirm('确定要返回吗？画布上的二创会清空。')) go('home');
+});
+
+document.getElementById('font-chips').addEventListener('click', (e)=>{
+  const c = e.target.closest('.chip'); if(!c) return;
+  document.querySelectorAll('#font-chips .chip').forEach(el=>el.classList.remove('active'));
+  c.classList.add('active');
+  state.textFont = c.dataset.font;
+});
+document.getElementById('color-chips').addEventListener('click', (e)=>{
+  const c = e.target.closest('.color-chip'); if(!c) return;
+  document.querySelectorAll('#color-chips .color-chip').forEach(el=>el.classList.remove('active'));
+  c.classList.add('active');
+  state.textColor = c.dataset.color;
+});
+document.getElementById('text-add-btn').addEventListener('click', ()=>{
+  const txt = document.getElementById('text-input').value.trim();
+  if(!txt){ t('请先写内容'); return; }
+  state.stage.addSticker({
+    type:'text', text: txt, fontFamily: state.textFont, color: state.textColor,
+    fontSize: 32, x: STAGE_W/2, y: STAGE_H/2, w: Math.max(120, txt.length*36), h: 60, rotation:-2
+  });
+  t('已加御批');
+  closeDrawer();
+});
+
+document.getElementById('btn-back-edit').addEventListener('click', ()=> go('edit'));
+document.getElementById('btn-reshoot').addEventListener('click', ()=>{
+  if(confirm('重新审一张？当前奏折将丢弃。')) go('home');
+});
+document.getElementById('btn-share').addEventListener('click', async ()=>{
+  const ok = await copyShareLink();
+  t(ok ? '链接已复制' : '请手动复制 URL');
+});
+document.getElementById('btn-export-poster').addEventListener('click', exportPoster);
+
+// 入梦 → 跳转到 React Part 2（通过 localStorage 把图带过去；同源时生效）
+document.getElementById('btn-enter-story').addEventListener('click', async ()=>{
+  const dataUrl = state.bgDataURL;
+  if(!dataUrl){ t('未取得照片'); return; }
+  try{
+    // 计算 SHA-256（前 16）
+    const b64 = dataUrl.split(',')[1] || dataUrl;
+    const bin = atob(b64);
+    const bytes = new Uint8Array(bin.length);
+    for(let i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i);
+    const buf = await crypto.subtle.digest('SHA-256', bytes);
+    const hex = Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('').slice(0,16);
+    localStorage.setItem('kacha_story_image', dataUrl);
+    localStorage.setItem('kacha_story_hash', hex);
+    const target = (window.__KACHA_STORY_URL__) || 'http://localhost:5173/?fromGuofeng=1';
+    window.location.href = target;
+  }catch(e){
+    t('准备入梦失败：'+(e?.message||e));
+  }
+});
+
+go('home');
+</script>
+</body>
+</html>

@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<title>咔嚓剧场 · 三种设计语言对比</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:#1a1a1a;color:#eee;padding:24px}
+.wrap{max-width:1280px;margin:0 auto}
+h1{font-size:28px;margin-bottom:8px}
+.sub{color:#999;margin-bottom:32px;font-size:14px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.card{background:#222;border-radius:12px;overflow:hidden;border:1px solid #333}
+.card iframe{width:100%;height:520px;border:0;display:block;background:#fff}
+.card-body{padding:20px}
+.card h2{font-size:18px;margin-bottom:6px}
+.card .meta{color:#888;font-size:12px;margin-bottom:12px}
+.card p{font-size:13px;line-height:1.6;color:#ccc;margin-bottom:12px}
+.card .open{display:inline-block;color:#5db8a6;font-size:12px;text-decoration:none;border:1px solid #5db8a6;padding:6px 12px;border-radius:4px}
+.card .open:hover{background:#5db8a6;color:#000}
+.compare{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:32px;padding:20px;background:#222;border-radius:12px;border:1px solid #333;font-size:13px}
+.compare .col h3{font-size:13px;color:#5db8a6;margin-bottom:8px}
+.compare .col li{margin-bottom:6px;color:#bbb;line-height:1.5;list-style:none;padding-left:16px;position:relative}
+.compare .col li::before{content:"·";position:absolute;left:4px;color:#666}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>咔嚓剧场 · 三种设计语言对比稿</h1>
+  <p class="sub">来源：awesome-design-md / 数据：api-contract.md mock 样本（score=87 摸鱼大将军 · 天降祥瑞结局）</p>
+
+  <div class="grid">
+    <div class="card">
+      <iframe src="01-claude-style.html" loading="lazy"></iframe>
+      <div class="card-body">
+        <h2>① claude 风 · 米黄奏折</h2>
+        <div class="meta">画面：奏折页 · Part 1 报告</div>
+        <p>米黄羊皮纸底、衬线大字、珊瑚红 CTA。配色 #faf9f5 / #cc785c。和"御史奏折"主题契合度最高，文气克制。</p>
+        <a class="open" href="01-claude-style.html" target="_blank">单独打开 →</a>
+      </div>
+    </div>
+    <div class="card">
+      <iframe src="02-theverge-style.html" loading="lazy"></iframe>
+      <div class="card-body">
+        <h2>② theverge 风 · 黑底酸性</h2>
+        <div class="meta">画面：奏折页 + 5 节剧情时间线</div>
+        <p>近黑画布、酸性薄荷+紫外光、巨型标题、StoryStream 时间线。截图爆款相最强，Part 2 五节剧情用它天然合适。</p>
+        <a class="open" href="02-theverge-style.html" target="_blank">单独打开 →</a>
+      </div>
+    </div>
+    <div class="card">
+      <iframe src="03-bugatti-style.html" loading="lazy"></iframe>
+      <div class="card-body">
+        <h2>③ bugatti 风 · 暗夜仪式</h2>
+        <div class="meta">画面：终章裁决页</div>
+        <p>纯黑+冷银+大留白+宽字距大写。仪式感拉满，适合"天降祥瑞/御史降罚"终章。但偏冷，不适合做整套。</p>
+        <a class="open" href="03-bugatti-style.html" target="_blank">单独打开 →</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="compare">
+    <div class="col">
+      <h3>① claude 风 · 取舍</h3>
+      <ul>
+        <li>+ 主题完美契合（奏折=米黄+衬线）</li>
+        <li>+ 体验最稳，护眼，长时间看不累</li>
+        <li>− 截图传播力一般，不如黑底显眼</li>
+        <li>− 在抖音生态里有点"安静"，不抓眼</li>
+      </ul>
+    </div>
+    <div class="col">
+      <h3>② theverge 风 · 取舍</h3>
+      <ul>
+        <li>+ StoryStream 完美承载 Part 2 五节</li>
+        <li>+ 大字+酸色，截图分享一眼记得住</li>
+        <li>− 古风 vs 黑底酸性，调性冲突要硬调</li>
+        <li>− 中文衬线 vs Manuka 大字需自定义字</li>
+      </ul>
+    </div>
+    <div class="col">
+      <h3>③ bugatti 风 · 取舍</h3>
+      <ul>
+        <li>+ 终章页奢侈感天花板</li>
+        <li>+ 纯极简，工作量最小</li>
+        <li>− 太冷，不适合"摸鱼"这种自嘲主题做整套</li>
+        <li>− 推荐只做终章裁决页，不做主流程</li>
+      </ul>
+    </div>
+  </div>
+
+  <div style="margin-top:32px;padding:20px;background:#1f2a25;border-left:3px solid #5db8a6;border-radius:6px;font-size:14px;line-height:1.7">
+    <strong style="color:#5db8a6">我的建议</strong><br/>
+    <span style="color:#ddd">主流程（首页 / 奏折页 / 海报编辑）走 ① claude 风，作为视觉基底。Part 2 五节剧情时间线借用 ② theverge 的 StoryStream 模式，但配色仍然用米黄底（避免双套设计的工作量）。终章裁决可以借鉴 ③ bugatti 的"宽字距 + 大留白 + 朱印封号"仪式感，但同样落在米黄底上做"奏折版仪式"。这样一套设计语言 + 三种节奏（日常 / 时间线 / 仪式），25h 内可控。</span>
+  </div>
+</div>
+</body>
+</html>

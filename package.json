@@ -1,0 +1,10 @@
+{
+  "name": "kacha-theatre-collection",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "verify:original": "npm --prefix versions/original/server run typecheck && npm --prefix versions/original/server test && npm --prefix versions/original/src/frontend run lint && npm --prefix versions/original/src/frontend run build",
+    "verify:collaboration": "npm --prefix versions/collaboration test",
+    "verify": "npm run verify:original && npm run verify:collaboration"
+  }
+}

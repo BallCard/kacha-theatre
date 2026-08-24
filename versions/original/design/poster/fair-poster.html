@@ -1,0 +1,648 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>咔嚓剧场 · 游园会海报</title>
+  <style>
+    :root {
+      --ink: #211a17;
+      --muted: #77695f;
+      --paper: #f7efe0;
+      --paper-deep: #ead7b3;
+      --red: #d9222f;
+      --red-deep: #7a1018;
+      --gold: #f3c661;
+      --green: #1e6b44;
+      --blue: #225f8f;
+    }
+
+    * { box-sizing: border-box; }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+      background: #d8d0c4;
+      color: var(--ink);
+      font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", system-ui, sans-serif;
+    }
+
+    body {
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    .poster {
+      position: relative;
+      width: 794px;
+      height: 1123px;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 20% 16%, rgba(243, 198, 97, 0.28), transparent 30%),
+        radial-gradient(circle at 88% 8%, rgba(217, 34, 47, 0.16), transparent 28%),
+        linear-gradient(180deg, #fff8ec 0%, var(--paper) 54%, #f3e4c7 100%);
+      box-shadow: 0 18px 54px rgba(40, 24, 16, 0.28);
+      isolation: isolate;
+    }
+
+    .poster::before {
+      content: "";
+      position: absolute;
+      inset: 28px;
+      border: 2px solid rgba(122, 16, 24, 0.22);
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    .poster::after {
+      content: "咔嚓剧场";
+      position: absolute;
+      right: -34px;
+      top: 198px;
+      color: rgba(122, 16, 24, 0.055);
+      font-family: KaiTi, STKaiti, serif;
+      font-size: 132px;
+      font-weight: 900;
+      letter-spacing: 0.18em;
+      writing-mode: vertical-rl;
+      z-index: 0;
+    }
+
+    .grain {
+      position: absolute;
+      inset: 0;
+      opacity: 0.12;
+      background-image:
+        linear-gradient(90deg, rgba(33, 26, 23, 0.18) 1px, transparent 1px),
+        linear-gradient(rgba(33, 26, 23, 0.16) 1px, transparent 1px);
+      background-size: 37px 37px;
+      mask-image: linear-gradient(180deg, transparent, #000 12%, #000 88%, transparent);
+      z-index: 0;
+    }
+
+    .topbar {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 46px 58px 0;
+      font-size: 20px;
+      font-weight: 900;
+      letter-spacing: 0.04em;
+    }
+
+    .track {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 14px;
+      background: var(--red-deep);
+      color: #fff5e3;
+      border-radius: 999px;
+      font-size: 17px;
+      box-shadow: 0 8px 18px rgba(122, 16, 24, 0.24);
+    }
+
+    .track i {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--gold);
+      display: block;
+    }
+
+    .hero {
+      position: relative;
+      z-index: 2;
+      padding: 36px 58px 0;
+      display: grid;
+      grid-template-columns: 1fr 245px;
+      gap: 22px;
+      align-items: start;
+    }
+
+    .kicker {
+      width: max-content;
+      padding: 8px 14px;
+      border: 2px solid var(--red);
+      color: var(--red);
+      font-size: 18px;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      transform: rotate(-1.5deg);
+      background: rgba(255, 248, 236, 0.75);
+    }
+
+    h1 {
+      margin: 20px 0 0;
+      font-family: KaiTi, STKaiti, "Songti SC", serif;
+      font-size: 102px;
+      line-height: 0.96;
+      letter-spacing: 0.08em;
+      color: var(--red-deep);
+      text-shadow: 4px 4px 0 rgba(243, 198, 97, 0.52);
+    }
+
+    .subtitle {
+      margin: 18px 0 0;
+      max-width: 446px;
+      font-size: 34px;
+      line-height: 1.25;
+      font-weight: 900;
+      letter-spacing: 0.02em;
+    }
+
+    .subtitle strong {
+      color: var(--red);
+    }
+
+    .one-line {
+      margin-top: 18px;
+      max-width: 456px;
+      color: var(--muted);
+      font-size: 19px;
+      line-height: 1.68;
+      font-weight: 650;
+    }
+
+    .seal {
+      position: relative;
+      width: 210px;
+      height: 210px;
+      margin: 8px 8px 0 auto;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-family: KaiTi, STKaiti, serif;
+      font-size: 46px;
+      font-weight: 900;
+      line-height: 1.18;
+      text-align: center;
+      background: var(--red);
+      border: 10px solid #fff4e6;
+      outline: 4px solid var(--red);
+      box-shadow: 0 16px 30px rgba(122, 16, 24, 0.28);
+      transform: rotate(7deg);
+    }
+
+    .seal::before {
+      content: "";
+      position: absolute;
+      inset: 12px;
+      border: 2px dashed rgba(255, 255, 255, 0.68);
+    }
+
+    .demo-zone {
+      position: relative;
+      z-index: 2;
+      margin: 34px 58px 0;
+      display: grid;
+      grid-template-columns: 258px 1fr;
+      gap: 26px;
+      align-items: stretch;
+    }
+
+    .phone {
+      position: relative;
+      height: 438px;
+      border: 8px solid #241d1a;
+      border-radius: 38px;
+      background: #fbfaf8;
+      box-shadow: 0 22px 36px rgba(33, 26, 23, 0.22);
+      padding: 18px 16px;
+      overflow: hidden;
+    }
+
+    .phone::before {
+      content: "";
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      width: 86px;
+      height: 10px;
+      transform: translateX(-50%);
+      border-radius: 999px;
+      background: #241d1a;
+    }
+
+    .phone-header {
+      margin-top: 18px;
+      color: var(--red-deep);
+      font-weight: 900;
+      text-align: center;
+      font-size: 16px;
+      letter-spacing: 0.08em;
+    }
+
+    .photo {
+      position: relative;
+      margin-top: 14px;
+      height: 168px;
+      border-radius: 18px;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.7), rgba(255,255,255,0.06)),
+        url("../../assets/demo/test-sleep-face.jpg") center / cover;
+      overflow: hidden;
+      border: 1px solid rgba(33, 26, 23, 0.12);
+    }
+
+    .stamp {
+      position: absolute;
+      right: 10px;
+      top: 10px;
+      padding: 8px 10px;
+      color: #fff;
+      background: var(--red);
+      font-size: 20px;
+      font-family: KaiTi, STKaiti, serif;
+      font-weight: 900;
+      transform: rotate(9deg);
+      box-shadow: 0 5px 14px rgba(122, 16, 24, 0.28);
+    }
+
+    .score {
+      position: absolute;
+      left: 12px;
+      bottom: 12px;
+      padding: 6px 12px;
+      background: var(--gold);
+      color: #3c2600;
+      border: 2px solid rgba(255,255,255,0.7);
+      border-radius: 999px;
+      font-weight: 1000;
+      font-size: 20px;
+      transform: rotate(-5deg);
+    }
+
+    .report {
+      margin-top: 14px;
+      padding: 15px;
+      min-height: 132px;
+      border-radius: 18px;
+      background: #5f1015;
+      color: #fff3db;
+      box-shadow: inset 0 0 0 1px rgba(243, 198, 97, 0.34);
+    }
+
+    .report h3 {
+      margin: 0 0 8px;
+      color: var(--gold);
+      font-family: KaiTi, STKaiti, serif;
+      font-size: 22px;
+      letter-spacing: 0.1em;
+    }
+
+    .report p {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.72;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .actions span {
+      flex: 1;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      color: #fff;
+      background: var(--red);
+      font-size: 14px;
+      font-weight: 850;
+    }
+
+    .flow-card {
+      position: relative;
+      min-height: 438px;
+      padding: 24px 26px;
+      border-radius: 20px;
+      background: rgba(255, 248, 236, 0.84);
+      border: 2px solid rgba(122, 16, 24, 0.18);
+      box-shadow: 0 16px 34px rgba(88, 52, 21, 0.12);
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--red-deep);
+      font-size: 28px;
+      font-weight: 1000;
+      letter-spacing: 0.04em;
+      margin: 0 0 18px;
+    }
+
+    .section-title::before {
+      content: "";
+      width: 16px;
+      height: 38px;
+      background: var(--red);
+      box-shadow: 7px 0 0 var(--gold);
+    }
+
+    .steps {
+      display: grid;
+      gap: 12px;
+    }
+
+    .step {
+      display: grid;
+      grid-template-columns: 48px 1fr;
+      gap: 13px;
+      align-items: center;
+      padding: 12px;
+      background: #fffdf7;
+      border-radius: 14px;
+      border: 1px solid rgba(33, 26, 23, 0.1);
+    }
+
+    .num {
+      height: 48px;
+      display: grid;
+      place-items: center;
+      border-radius: 13px;
+      background: var(--ink);
+      color: var(--gold);
+      font-family: Georgia, serif;
+      font-size: 24px;
+      font-weight: 900;
+    }
+
+    .step b {
+      display: block;
+      color: var(--ink);
+      font-size: 21px;
+      line-height: 1.2;
+    }
+
+    .step span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.42;
+      font-weight: 650;
+    }
+
+    .badges {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .badge {
+      padding: 10px 8px;
+      text-align: center;
+      border-radius: 12px;
+      color: #fff;
+      font-size: 15px;
+      font-weight: 900;
+      box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.15);
+    }
+
+    .badge:nth-child(1) { background: var(--blue); }
+    .badge:nth-child(2) { background: var(--green); }
+    .badge:nth-child(3) { background: var(--red); }
+
+    .playline {
+      position: relative;
+      z-index: 2;
+      margin: 32px 58px 0;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    .point {
+      padding: 18px 16px;
+      min-height: 130px;
+      background: var(--ink);
+      color: #fff8ec;
+      border-radius: 18px;
+      box-shadow: 0 14px 30px rgba(33, 26, 23, 0.18);
+    }
+
+    .point:nth-child(2) {
+      background: var(--red-deep);
+    }
+
+    .point:nth-child(3) {
+      background: #74420f;
+    }
+
+    .point h3 {
+      margin: 0 0 8px;
+      color: var(--gold);
+      font-size: 22px;
+      line-height: 1.25;
+    }
+
+    .point p {
+      margin: 0;
+      font-size: 15px;
+      line-height: 1.6;
+      font-weight: 650;
+      color: rgba(255, 248, 236, 0.84);
+    }
+
+    .cta {
+      position: absolute;
+      left: 58px;
+      right: 58px;
+      bottom: 54px;
+      z-index: 2;
+      display: grid;
+      grid-template-columns: 160px 1fr 196px;
+      gap: 18px;
+      align-items: center;
+      padding: 18px;
+      border-radius: 24px;
+      background: #fffdf7;
+      border: 3px solid var(--red);
+      box-shadow: 0 18px 38px rgba(122, 16, 24, 0.2);
+    }
+
+    .qr {
+      width: 132px;
+      height: 132px;
+      margin: auto;
+      display: grid;
+      place-items: center;
+      background:
+        linear-gradient(90deg, var(--ink) 10px, transparent 10px) 0 0 / 22px 22px,
+        linear-gradient(var(--ink) 10px, transparent 10px) 0 0 / 22px 22px,
+        #fff;
+      border: 10px solid #fff;
+      outline: 2px solid rgba(33, 26, 23, 0.25);
+    }
+
+    .qr span {
+      padding: 4px 6px;
+      background: var(--red);
+      color: #fff;
+      font-size: 18px;
+      font-weight: 900;
+      transform: rotate(-8deg);
+    }
+
+    .cta-text h2 {
+      margin: 0 0 8px;
+      color: var(--red-deep);
+      font-size: 35px;
+      line-height: 1.12;
+      font-weight: 1000;
+      letter-spacing: 0.03em;
+    }
+
+    .cta-text p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.5;
+      font-weight: 700;
+    }
+
+    .meta {
+      align-self: stretch;
+      display: grid;
+      place-items: center;
+      padding: 12px;
+      border-radius: 18px;
+      background: var(--red-deep);
+      color: #fff8ec;
+      text-align: center;
+      font-size: 22px;
+      line-height: 1.36;
+      font-weight: 1000;
+    }
+
+    .meta small {
+      display: block;
+      margin-top: 6px;
+      color: var(--gold);
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    .corner-note {
+      position: absolute;
+      left: 58px;
+      bottom: 226px;
+      z-index: 2;
+      color: var(--muted);
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    @media print {
+      body { padding: 0; background: #fff; }
+      .poster { width: 210mm; height: 297mm; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="poster" aria-label="咔嚓剧场游园会海报">
+    <div class="grain"></div>
+
+    <header class="topbar">
+      <div>抖音 AI 创变者计划 2026 · 杭州 AI 视觉专场</div>
+      <div class="track"><i></i> 赛道四 · 视觉搜索</div>
+    </header>
+
+    <section class="hero">
+      <div>
+        <div class="kicker">办公室摸鱼审判局开张</div>
+        <h1>摸鱼<br>御史</h1>
+        <p class="subtitle">拍一张工位照，<strong>AI 判你摸鱼段位</strong></p>
+        <p class="one-line">从一张普通照片，生成朱红印章、摸鱼指数、玄学奏折和 5 幕互动剧情。现场扫码，60 秒拿到你的今日御批。</p>
+      </div>
+      <div class="seal">御史<br>开审</div>
+    </section>
+
+    <section class="demo-zone">
+      <div class="phone">
+        <div class="phone-header">今日批复 · 生成中</div>
+        <div class="photo">
+          <span class="stamp">假寐<br>天尊</span>
+          <span class="score">摸鱼 +96</span>
+        </div>
+        <div class="report">
+          <h3>御史房 · 今日批复</h3>
+          <p>该员紫微星偏东南三度，案上美式已凉，足证神游天外。今日宜闭目养神，忌开会改 PPT。</p>
+        </div>
+        <div class="actions">
+          <span>拖贴纸二创</span>
+          <span>演今日剧</span>
+        </div>
+      </div>
+
+      <div class="flow-card">
+        <h2 class="section-title">你现场会玩到什么</h2>
+        <div class="steps">
+          <div class="step">
+            <div class="num">1</div>
+            <div><b>上传 / 拍一张</b><span>办公室日常、装睡、走神、桌面线索都能审。</span></div>
+          </div>
+          <div class="step">
+            <div class="num">2</div>
+            <div><b>AI 御史审阅</b><span>一次视觉理解输出评分、段位、称号、奏折与宜忌。</span></div>
+          </div>
+          <div class="step">
+            <div class="num">3</div>
+            <div><b>生成可分享海报</b><span>朱红大印、段位徽章、贴纸二创，直接发群。</span></div>
+          </div>
+          <div class="step">
+            <div class="num">4</div>
+            <div><b>召见御史演今日剧</b><span>5 幕剧情、3 种选择、6 个结局，宜忌真的生效。</span></div>
+          </div>
+        </div>
+
+        <div class="badges">
+          <div class="badge">打工新丁</div>
+          <div class="badge">划水侍郎</div>
+          <div class="badge">假寐天尊</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="playline">
+      <article class="point">
+        <h3>真实触发</h3>
+        <p>下午三点，对面工位头一歪。照片有了，梗还缺一口气。</p>
+      </article>
+      <article class="point">
+        <h3>AI 不是识图器</h3>
+        <p>它是评分员、编剧和御史，把视觉线索变成可玩的社交素材。</p>
+      </article>
+      <article class="point">
+        <h3>用户继续加戏</h3>
+        <p>拖贴纸、换称号、选剧情，让 AI 起势，用户收尾。</p>
+      </article>
+    </section>
+
+    <div class="corner-note">不识别人脸身份 · 不需要账号 · 演示支持离线兜底</div>
+
+    <section class="cta">
+      <div class="qr"><span>扫码</span></div>
+      <div class="cta-text">
+        <h2>来领你的今日摸鱼判词</h2>
+        <p>适合现场试玩、群聊传播、同事互相“封官”。二维码位置可替换为正式 H5 入口。</p>
+      </div>
+      <div class="meta">
+        60 秒<br>生成长图
+        <small>摊位试玩中</small>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

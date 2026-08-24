@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>咔嚓剧场 · 项目提案</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #0e0d12; color: #f4f1ea; font-family: -apple-system, "Helvetica Neue", "PingFang SC", "Microsoft YaHei", sans-serif; line-height: 1.65; }
+  body { max-width: 960px; margin: 0 auto; padding: 56px 32px 96px; }
+
+  .kai { font-family: "KaiTi", "STKaiti", "Kaiti SC", serif; }
+
+  .tag { display: inline-block; padding: 4px 10px; border-radius: 4px; font-size: 12px; letter-spacing: 1px; background: #d4222b; color: #fff; margin-right: 6px; }
+  .tag.ghost { background: transparent; border: 1px solid #4a4750; color: #a09c95; }
+  .tag.gold  { background: #f0c869; color: #1a1820; }
+
+  h1 { font-size: 46px; font-weight: 800; letter-spacing: 2px; margin: 18px 0 8px; }
+  h1 .stamp { color: #d4222b; }
+  h2 { font-size: 22px; margin: 60px 0 18px; padding-bottom: 8px; border-bottom: 1px solid #2a2830; letter-spacing: 1px; }
+  h2 .num { color: #d4222b; font-family: "Times New Roman", serif; font-style: italic; margin-right: 10px; }
+  h3 { font-size: 16px; margin: 22px 0 10px; color: #f0c869; }
+  p, li { font-size: 15px; color: #d6d2c8; }
+  li { margin: 4px 0 4px 20px; }
+  strong { color: #f4f1ea; }
+  em.hi { color: #f0c869; font-style: normal; }
+  .muted { color: #8a8680; font-size: 13px; }
+
+  .hero { padding: 36px; border: 1px solid #2a2830; border-radius: 8px; background: linear-gradient(135deg, #1a1820 0%, #0e0d12 100%); position: relative; overflow: hidden; }
+  .hero::after { content: "御"; position: absolute; right: -30px; bottom: -80px; font-family: "KaiTi", serif; font-size: 320px; color: rgba(212,34,43,0.08); font-weight: 900; line-height: 1; }
+  .hero .lead { font-size: 18px; margin-top: 14px; color: #e8e3d8; position: relative; z-index: 1; }
+  .hero .meta { margin-top: 18px; font-size: 13px; color: #8a8680; position: relative; z-index: 1; }
+
+  .grid { display: grid; gap: 14px; margin-top: 12px; }
+  .grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+  .grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+  .grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
+  .card { padding: 18px; border: 1px solid #2a2830; border-radius: 6px; background: #15131b; }
+  .card .label { font-size: 11px; color: #d4222b; letter-spacing: 2px; margin-bottom: 6px; }
+  .card .big { font-size: 22px; font-weight: 700; color: #f4f1ea; margin-bottom: 4px; }
+  .card.gold { border-color: #4a3a1a; background: linear-gradient(180deg, #1b1710 0%, #15131b 100%); }
+  .card.gold .label { color: #f0c869; }
+
+  .flow { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 16px; }
+  .step { padding: 14px 10px; background: #15131b; border: 1px solid #2a2830; border-radius: 6px; }
+  .step .n { font-family: "Times New Roman", serif; font-style: italic; color: #d4222b; font-size: 28px; line-height: 1; }
+  .step .t { font-weight: 700; margin: 6px 0 4px; font-size: 14px; }
+  .step .d { font-size: 12px; color: #8a8680; line-height: 1.5; }
+
+  table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 14px; }
+  th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #2a2830; vertical-align: top; }
+  th { color: #f0c869; font-weight: 600; font-size: 13px; }
+  td.weight { color: #d4222b; font-weight: 700; font-family: "Times New Roman", serif; }
+  td.pick { color: #f0c869; font-weight: 700; }
+
+  /* 手机 mock */
+  .demo-mock { margin-top: 20px; padding: 24px; background: #1a1820; border: 1px solid #2a2830; border-radius: 8px; display: flex; gap: 28px; align-items: flex-start; flex-wrap: wrap; justify-content: center; }
+  .phone { width: 260px; aspect-ratio: 9/19; background: #0e0d12; border: 2px solid #3a3640; border-radius: 22px; padding: 16px 12px; position: relative; overflow: hidden; }
+  .phone .photo { aspect-ratio: 4/3; background: linear-gradient(135deg, #2c2832 0%, #1a1820 100%); border-radius: 4px; position: relative; display: flex; align-items: center; justify-content: center; color: #4a4750; font-size: 11px; }
+  .phone .sticker { position: absolute; padding: 3px 8px; border-radius: 3px; font-size: 10px; font-weight: 700; transform: rotate(-8deg); }
+  .phone .s1 { top: 12px; right: 14px; background: #d4222b; color: #fff; border: 1px solid #fff3; }
+  .phone .s2 { bottom: 18px; left: 18px; background: #f0c869; color: #1a1820; transform: rotate(6deg); }
+  .phone .s3 { top: 42%; left: 30%; background: rgba(255,255,255,0.92); color: #d4222b; font-size: 9px; }
+  .phone .report { margin-top: 10px; padding: 10px; background: #15131b; border: 1px solid #2a2830; border-radius: 4px; }
+  .phone .report .tt { color: #f0c869; font-size: 9px; letter-spacing: 1px; margin-bottom: 4px; }
+  .phone .report .ll { font-size: 10px; color: #d6d2c8; line-height: 1.6; }
+  .phone .report .yj { display: flex; gap: 6px; margin-top: 6px; }
+  .phone .report .yj span { font-size: 9px; padding: 2px 5px; border-radius: 2px; background: #0e0d12; }
+  .phone .report .yj .y { color: #6ec070; }
+  .phone .report .yj .j { color: #d4222b; }
+
+  /* 报告卡（米色奏折） */
+  .scroll { width: 280px; background: #f4f1ea; color: #2a2830; border-radius: 4px; padding: 24px 20px; position: relative; box-shadow: 0 0 0 1px #c9b88f inset, 0 8px 30px rgba(0,0,0,0.4); }
+  .scroll::before, .scroll::after { content: ""; position: absolute; left: 12px; right: 12px; height: 1px; background: #d4222b; opacity: 0.5; }
+  .scroll::before { top: 14px; } .scroll::after { bottom: 14px; }
+  .scroll .head { font-family: "KaiTi", serif; font-size: 13px; color: #d4222b; letter-spacing: 4px; text-align: center; margin-bottom: 14px; padding-top: 4px; }
+  .scroll .title { font-family: "KaiTi", serif; font-size: 36px; font-weight: 800; color: #d4222b; text-align: center; letter-spacing: 6px; margin: 10px 0 14px; }
+  .scroll .para { font-family: "KaiTi", serif; font-size: 14px; line-height: 1.9; color: #2a2830; margin-bottom: 18px; text-indent: 2em; }
+  .scroll .bar { font-size: 11px; color: #8a8680; text-align: center; margin: 12px 0 6px; letter-spacing: 2px; }
+  .scroll .gauge { height: 8px; background: #e0d7c2; border-radius: 4px; overflow: hidden; margin-bottom: 14px; }
+  .scroll .gauge i { display: block; height: 100%; background: #d4222b; width: 87%; }
+  .scroll .yj2 { display: grid; grid-template-columns: 1fr 1px 1fr; gap: 10px; align-items: center; font-family: "KaiTi", serif; font-size: 13px; padding: 6px 0; }
+  .scroll .yj2 .sep { background: #c9b88f; align-self: stretch; }
+  .scroll .yj2 .col { text-align: center; }
+  .scroll .yj2 .col h { display: block; color: #d4222b; font-size: 12px; letter-spacing: 4px; margin-bottom: 6px; }
+  .scroll .yj2 .col b { display: block; font-weight: normal; color: #2a2830; line-height: 1.8; }
+  .scroll .foot { margin-top: 14px; text-align: center; color: #d4222b; font-family: "KaiTi", serif; font-size: 11px; letter-spacing: 6px; padding-bottom: 4px; }
+
+  /* 贴纸库 */
+  .sticker-lib { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 14px; }
+  .sl-col { padding: 16px; background: #15131b; border: 1px solid #2a2830; border-radius: 6px; }
+  .sl-col h4 { font-size: 13px; color: #f0c869; margin-bottom: 12px; letter-spacing: 1px; }
+  .sl-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .seal { aspect-ratio: 1; background: #d4222b; color: #fff; font-family: "KaiTi", serif; font-weight: 800; font-size: 13px; display: flex; align-items: center; justify-content: center; text-align: center; border-radius: 2px; box-shadow: inset 0 0 0 2px #fff3; transform: rotate(-6deg); }
+  .seal.alt { transform: rotate(4deg); background: #b81a22; }
+  .bub { aspect-ratio: 1; background: #fff; color: #1a1820; font-weight: 800; font-size: 16px; display: flex; align-items: center; justify-content: center; border-radius: 50%; position: relative; }
+  .bub::after { content: ""; position: absolute; bottom: -4px; left: 30%; width: 0; height: 0; border: 6px solid transparent; border-top-color: #fff; }
+  .ytag { aspect-ratio: 1; background: #f0c869; color: #1a1820; font-weight: 700; font-size: 11px; display: flex; align-items: center; justify-content: center; text-align: center; transform: rotate(5deg); border-radius: 2px; padding: 4px; }
+
+  /* 代码块 */
+  pre { background: #0a0910; border: 1px solid #2a2830; border-radius: 6px; padding: 16px 18px; overflow-x: auto; font-family: "SF Mono", Consolas, Menlo, monospace; font-size: 12.5px; line-height: 1.7; color: #c8c3b6; margin-top: 12px; }
+  pre .k { color: #d4222b; }
+  pre .s { color: #6ec070; }
+  pre .c { color: #5a5660; font-style: italic; }
+  pre .n { color: #f0c869; }
+
+  /* 摸鱼榜 */
+  .board { padding: 18px; background: #15131b; border: 1px solid #2a2830; border-radius: 8px; margin-top: 14px; max-width: 480px; }
+  .board .bh { display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: 1px solid #2a2830; margin-bottom: 12px; }
+  .board .bh h4 { color: #f0c869; font-size: 14px; letter-spacing: 2px; }
+  .board .bh .date { color: #8a8680; font-size: 11px; font-family: "Times New Roman", serif; }
+  .br-row { display: grid; grid-template-columns: 28px 56px 1fr 60px 50px; gap: 10px; align-items: center; padding: 8px 0; border-bottom: 1px dashed #2a2830; font-size: 13px; }
+  .br-row .rank { color: #d4222b; font-family: "Times New Roman", serif; font-style: italic; font-weight: 700; font-size: 18px; text-align: center; }
+  .br-row .thumb { aspect-ratio: 1; background: linear-gradient(135deg, #2c2832, #1a1820); border-radius: 3px; position: relative; overflow: hidden; }
+  .br-row .thumb::after { content: "印"; position: absolute; top: 4px; right: 4px; width: 18px; height: 18px; background: #d4222b; color: #fff; font-family: "KaiTi", serif; font-size: 9px; display: flex; align-items: center; justify-content: center; border-radius: 1px; transform: rotate(-8deg); }
+  .br-row .ttl { color: #f4f1ea; font-family: "KaiTi", serif; font-size: 14px; }
+  .br-row .mi  { color: #d4222b; font-weight: 700; text-align: right; font-family: "Times New Roman", serif; }
+  .br-row .lk  { color: #8a8680; font-size: 11px; text-align: right; }
+
+  /* 看板 */
+  .dash { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 14px; }
+  .stat { padding: 14px; background: #15131b; border: 1px solid #2a2830; border-radius: 6px; }
+  .stat .l { font-size: 11px; color: #f0c869; letter-spacing: 1px; margin-bottom: 6px; }
+  .stat .v { font-size: 24px; font-weight: 800; color: #fff; font-family: "Times New Roman", serif; }
+  .stat .v small { font-size: 12px; color: #8a8680; font-family: -apple-system, sans-serif; font-weight: normal; margin-left: 4px; }
+
+  /* 时间线 */
+  .timeline { margin-top: 14px; }
+  .tl-row { display: grid; grid-template-columns: 140px 1fr; gap: 16px; padding: 10px 0; border-bottom: 1px dashed #2a2830; align-items: baseline; }
+  .tl-row .when { color: #d4222b; font-family: "Times New Roman", serif; font-style: italic; font-size: 14px; }
+  .tl-row .what { font-size: 14px; color: #d6d2c8; }
+  .tl-row.deadline .when, .tl-row.deadline .what { color: #f0c869; font-weight: 700; }
+
+  /* Pitch 脚本框 */
+  .pitch-script { background: #15131b; border-left: 3px solid #d4222b; padding: 18px 22px; margin-top: 14px; font-family: "KaiTi", serif; font-size: 15px; line-height: 2; color: #e8e3d8; border-radius: 0 6px 6px 0; }
+  .pitch-script .beat { color: #f0c869; font-style: italic; font-family: "Times New Roman", serif; font-size: 12px; letter-spacing: 1px; margin-top: 10px; display: block; }
+  .pitch-script .beat:first-child { margin-top: 0; }
+
+  /* 决策卡 */
+  .dec { padding: 16px 18px; background: #15131b; border: 1px solid #2a2830; border-radius: 6px; border-left: 3px solid #f0c869; }
+  .dec .q { font-size: 13px; color: #8a8680; letter-spacing: 1px; }
+  .dec .a { font-size: 18px; font-weight: 700; color: #f0c869; margin: 4px 0 6px; }
+  .dec .why { font-size: 13px; color: #d6d2c8; line-height: 1.7; }
+
+  .cta { margin-top: 56px; padding: 28px; border: 1px dashed #d4222b; border-radius: 8px; text-align: center; color: #f0c869; font-size: 15px; }
+  .cta strong { color: #fff; }
+  .cta .big { display: block; font-size: 24px; color: #fff; margin-bottom: 8px; font-family: "KaiTi", serif; letter-spacing: 4px; }
+
+  @media (max-width: 720px) {
+    body { padding: 32px 18px 64px; }
+    h1 { font-size: 32px; }
+    .grid.cols-2, .grid.cols-3, .grid.cols-4 { grid-template-columns: 1fr; }
+    .flow { grid-template-columns: 1fr 1fr; }
+    .sticker-lib { grid-template-columns: 1fr; }
+    .dash { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ========== HERO ========== -->
+<div class="hero">
+  <span class="tag">赛道四 · 视觉搜索</span>
+  <span class="tag ghost">25H 黑客松</span>
+  <span class="tag gold">v2 · 完整版</span>
+  <h1>摸鱼<span class="stamp">御史</span></h1>
+  <p class="lead">给工位上摸鱼午睡的同事拍一张，AI 自动盖戳出一份玄学御史奏折 + 大字报贴纸，30 秒导出群聊抹茶图，匿名上今日摸鱼榜。</p>
+  <p class="meta">2026 抖音 AI 创变者 · 长三角 TOP 高校站 · 杭州 AI 视觉专场 · 队长：波尔卡德</p>
+</div>
+
+<!-- ========== §1 为什么是这个 ========== -->
+<h2><span class="num">§1</span>为什么是这个</h2>
+<div class="grid cols-3">
+  <div class="card">
+    <div class="label">真实场景</div>
+    <div class="big">下午 3 点</div>
+    <p class="muted">对面同事头一歪睡过去了。你想发群里玩梗，但配文懒得想 —— 这就是日常被忽略、又每天都发生的视觉触发时刻。</p>
+  </div>
+  <div class="card">
+    <div class="label">目标用户</div>
+    <div class="big">20–35 白领</div>
+    <p class="muted">熟抖音梗文化、有自我嘲讽 + 群聊玩梗刚需。摸鱼是社交货币，不是负面词。</p>
+  </div>
+  <div class="card">
+    <div class="label">记忆锚点</div>
+    <div class="big">妙鸭 × 抽签机</div>
+    <p class="muted">妙鸭让一张脸变 AI 写真，但要训练、要付费、社交链断在导出那一步。<strong>我们要的是 30 秒零门槛、能直接甩进群聊的那一份</strong>。</p>
+  </div>
+</div>
+
+<!-- ========== §2 核心闭环 + 效果速写 ========== -->
+<h2><span class="num">§2</span>核心闭环（&lt; 30 秒）</h2>
+<div class="flow">
+  <div class="step"><div class="n">01</div><div class="t">触发</div><div class="d">H5 首页"拍一个"，调起摄像头/相册</div></div>
+  <div class="step"><div class="n">02</div><div class="t">理解</div><div class="d">VLM 一次调用，输出姿态+坐标+玄学+贴纸建议</div></div>
+  <div class="step"><div class="n">03</div><div class="t">重构</div><div class="d">Canvas 自动盖戳 + 渲染御史奏折</div></div>
+  <div class="step"><div class="n">04</div><div class="t">微调</div><div class="d">拖拽/缩放/删贴纸，换今日宜忌</div></div>
+  <div class="step"><div class="n">05</div><div class="t">分发</div><div class="d">导竖版长图 + 匿名上摸鱼榜</div></div>
+</div>
+
+<h3>效果速写 · 一张图 + 一份奏折</h3>
+<div class="demo-mock">
+  <div class="phone">
+    <div class="photo">
+      [ 同事午睡照 ]
+      <span class="sticker s1">划水大将军</span>
+      <span class="sticker s3">Zzz...</span>
+      <span class="sticker s2">摸鱼 +78</span>
+    </div>
+    <div class="report">
+      <div class="tt">御史台 · 今日批复</div>
+      <div class="ll">紫微星偏移三度，宜小憩养气。案上美式已凉，足证神游不下半盏茶时辰。</div>
+      <div class="yj"><span class="y">宜：摸鱼 / 划水 / 假装思考</span></div>
+      <div class="yj"><span class="j">忌：开会 / 改 PPT / 接电话</span></div>
+    </div>
+  </div>
+
+  <div class="scroll">
+    <div class="head">━━ 摸 鱼 御 史 奏 折 ━━</div>
+    <div class="title">假寐侍郎</div>
+    <div class="para">紫微星偏东南三度，恰逢未时困乏方位，案上美式已凉，足证神游天外不下半盏茶时辰。屏虽亮而魂已远，特此记档。</div>
+    <div class="bar">— 摸 鱼 指 数 —</div>
+    <div class="gauge"><i></i></div>
+    <div class="yj2">
+      <div class="col"><h>宜</h><b>闭目养神<br>假装思考<br>等下班</b></div>
+      <div class="sep"></div>
+      <div class="col"><h>忌</h><b>开周会<br>改PPT<br>接电话</b></div>
+    </div>
+    <div class="foot">御 史 台 · 印</div>
+  </div>
+</div>
+
+<!-- ========== §3 AI 干什么 ========== -->
+<h2><span class="num">§3</span>AI 不是辅助，AI 是导演</h2>
+<p>不是"识别完贴个标签"那种工具型 AI。<strong>一次 VLM 调用</strong>同时承担四件事，token 开销可控、效果集中：</p>
+<div class="grid cols-2">
+  <div class="card">
+    <div class="label">视觉理解</div>
+    <div class="big">姿态 + 物体 + 人脸坐标</div>
+    <p class="muted">7 种姿态分类 + 桌面线索（咖啡/键盘/文件）+ 归一化人脸框，作为玄学素材 + 强制盖印依据。</p>
+  </div>
+  <div class="card">
+    <div class="label">内容生成</div>
+    <div class="big">御史奏折口吻</div>
+    <p class="muted">封号、玄学解读、今日宜忌 —— 固定 prompt 模板 + few-shot 保证调性统一。</p>
+  </div>
+  <div class="card">
+    <div class="label">视觉重构</div>
+    <div class="big">贴纸坐标驱动 Canvas</div>
+    <p class="muted">VLM 直接吐 JSON 坐标，前端按坐标自动盖戳。AI 真的在"动手改图"。</p>
+  </div>
+  <div class="card">
+    <div class="label">用户再创作</div>
+    <div class="big">可拖拽微调</div>
+    <p class="muted">不准的位置用户能拖；好玩的贴纸可以加。AI 是搭子，不是上帝。</p>
+  </div>
+</div>
+
+<!-- ========== §4 评审打分 ========== -->
+<h2><span class="num">§4</span>对照评审打分（赛道四）</h2>
+<table>
+  <thead><tr><th>维度</th><th>权重</th><th>我们怎么打</th></tr></thead>
+  <tbody>
+    <tr><td>场景与问题洞察</td><td class="weight">15%</td><td>办公室摸鱼是高频、真实、自然的视觉触发场景</td></tr>
+    <tr><td>AI 能力与产品结合</td><td class="weight">30%</td><td>VLM 输出坐标 + 玄学解读，驱动整个视觉重构，不只是识别</td></tr>
+    <tr><td>体验完整性</td><td class="weight">20%</td><td>触发→理解→改造→微调→分发→社区，闭环完整</td></tr>
+    <tr><td>用户价值感</td><td class="weight">20%</td><td>一张睡照 → 可分享梗素材 + 社交货币</td></tr>
+    <tr><td>创新性与延展</td><td class="weight">15%</td><td>视觉理解 + LLM 玩梗 + 可拖拽再创作 + 匿名榜单 四件套</td></tr>
+  </tbody>
+</table>
+
+<!-- ========== §5 Prompt 工程 ========== -->
+<h2><span class="num">§5</span>Prompt 工程 · 调性命门</h2>
+<p>整套产品调性挂在这份 prompt 上。VLM 一次往返同时输出结构化 JSON，schema 校验 + retry + 兜底模板三重保险。</p>
+
+<h3>System Prompt（御史人设）</h3>
+<pre><span class="c"># 你是御史房派驻现代办公室的明代御史台官员</span>
+语气：半文半白、玄学占卜、互联网梗
+工作：观察办公室照片，输出一份「御史奏折」+ 在图上盖戳的建议位置
+
+输出原则：
+1. 摸鱼是社交货币，<span class="n">嘲讽但不刻薄，不羞辱当事人</span>
+2. 不评价相貌、体型、性别、肤色；只描述姿态与桌面物件
+3. 不识别真实身份；只用"该员"、"卿"等代称
+4. 严格按 JSON schema 输出，<span class="k">不要 markdown 代码块包裹</span>
+5. 如果图中没有人，仍按"无人值守"主题生成奏折</pre>
+
+<h3>VLM 输出 · JSON 示例</h3>
+<pre>{
+  <span class="k">"pose_type"</span>: <span class="s">"趴桌型"</span>,
+  <span class="k">"desk_objects"</span>: [<span class="s">"半杯冷美式"</span>, <span class="s">"青轴机械键盘"</span>, <span class="s">"亮着的双屏"</span>],
+  <span class="k">"moyu_index"</span>: <span class="n">78</span>,
+  <span class="k">"report"</span>: {
+    <span class="k">"title"</span>: <span class="s">"假寐侍郎"</span>,
+    <span class="k">"paragraph"</span>: <span class="s">"紫微星偏东南三度，恰逢未时困乏方位..."</span>,
+    <span class="k">"yi"</span>: [<span class="s">"闭目养神"</span>, <span class="s">"假装思考"</span>, <span class="s">"等下班"</span>],
+    <span class="k">"ji"</span>: [<span class="s">"开周会"</span>, <span class="s">"改PPT"</span>, <span class="s">"接电话"</span>]
+  },
+  <span class="k">"face_boxes"</span>: [{ x: <span class="n">0.36</span>, y: <span class="n">0.22</span>, w: <span class="n">0.20</span>, h: <span class="n">0.24</span> }],
+  <span class="k">"stickers"</span>: [
+    { type: <span class="s">"seal_red"</span>,   text: <span class="s">"假寐侍郎"</span>, x: <span class="n">0.80</span>, y: <span class="n">0.10</span>, rotate: <span class="n">-10</span> },
+    { type: <span class="s">"bubble"</span>,     text: <span class="s">"Zzz"</span>,     x: <span class="n">0.50</span>, y: <span class="n">0.30</span>, rotate: <span class="n">0</span> },
+    { type: <span class="s">"yellow_tag"</span>, text: <span class="s">"摸鱼+78"</span>, x: <span class="n">0.18</span>, y: <span class="n">0.84</span>, rotate: <span class="n">5</span> }
+  ]
+}</pre>
+
+<!-- ========== §6 贴纸库 ========== -->
+<h2><span class="num">§6</span>贴纸素材库 · P0 必备 18 张</h2>
+<p>三大类，PNG 透明背景，统一短边 256px。中央 60% 区留白由前端 Canvas 写入 VLM 返回的 <em class="hi">text</em>。</p>
+
+<div class="sticker-lib">
+  <div class="sl-col">
+    <h4>seal_red · 朱红大印 × 6</h4>
+    <div class="sl-grid">
+      <div class="seal">划水<br>大将军</div>
+      <div class="seal alt">假寐<br>侍郎</div>
+      <div class="seal">走神<br>巡按</div>
+      <div class="seal alt">摸鱼<br>御史</div>
+      <div class="seal">划水<br>侯爵</div>
+      <div class="seal alt">玄机<br>巡按</div>
+    </div>
+    <p class="muted" style="margin-top:10px;">每图必出 1 个，置顶层。右上 / 左上，rotate ±15°。</p>
+  </div>
+
+  <div class="sl-col">
+    <h4>bubble · 漫画气泡 × 6</h4>
+    <div class="sl-grid">
+      <div class="bub">Zzz</div>
+      <div class="bub">?!</div>
+      <div class="bub">...</div>
+      <div class="bub">嗯?</div>
+      <div class="bub">摸</div>
+      <div class="bub">😪</div>
+    </div>
+    <p class="muted" style="margin-top:10px;">贴在人物头部附近，y &lt; 0.5。</p>
+  </div>
+
+  <div class="sl-col">
+    <h4>yellow_tag · 便利贴 × 6</h4>
+    <div class="sl-grid">
+      <div class="ytag">摸鱼<br>+78</div>
+      <div class="ytag">已凉</div>
+      <div class="ytag">代码<br>已亡</div>
+      <div class="ytag">屏幕<br>亮着</div>
+      <div class="ytag">未时<br>困乏</div>
+      <div class="ytag">续命<br>美式</div>
+    </div>
+    <p class="muted" style="margin-top:10px;">桌面区域，y &gt; 0.5，rotate ±10°。</p>
+  </div>
+</div>
+
+<!-- ========== §7 摸鱼榜 ========== -->
+<h2><span class="num">§7</span>今日摸鱼榜 · P1 核心</h2>
+<p>这是社交传播主引擎，不是可选项。上榜<strong>强制脸部盖御史印</strong>不可跳过 —— 把合规做成产品卖点。</p>
+
+<div style="display: flex; gap: 24px; flex-wrap: wrap; align-items: flex-start;">
+  <div class="board">
+    <div class="bh">
+      <h4>今 日 摸 鱼 榜</h4>
+      <span class="date">甲辰年四月十六 · 142 卷</span>
+    </div>
+    <div class="br-row"><span class="rank">I</span>  <div class="thumb"></div><span class="ttl">假寐侍郎</span><span class="mi">94</span><span class="lk">♡ 38</span></div>
+    <div class="br-row"><span class="rank">II</span> <div class="thumb"></div><span class="ttl">划水大将军</span><span class="mi">91</span><span class="lk">♡ 27</span></div>
+    <div class="br-row"><span class="rank">III</span><div class="thumb"></div><span class="ttl">椅背瘫王</span><span class="mi">88</span><span class="lk">♡ 21</span></div>
+    <div class="br-row"><span class="rank">IV</span> <div class="thumb"></div><span class="ttl">走神巡按</span><span class="mi">82</span><span class="lk">♡ 19</span></div>
+    <div class="br-row"><span class="rank">V</span>  <div class="thumb"></div><span class="ttl">假装思考郎</span><span class="mi">79</span><span class="lk">♡ 14</span></div>
+    <p class="muted" style="margin-top:10px; font-size:11px;">排序 = 摸鱼指数 × 0.6 + 点赞(归一) × 0.4。每日 0 点清零 → 名人堂。</p>
+  </div>
+
+  <div style="flex: 1; min-width: 280px;">
+    <h3 style="margin-top:0">隐私底线（不可妥协）</h3>
+    <ul>
+      <li>VLM 同时返回 <em class="hi">face_boxes</em>，前端用大号"御史印"PNG 自动盖人脸</li>
+      <li>用户<strong>不能跳过</strong>这一步，但可拖动御史印位置</li>
+      <li>上榜按钮文案：<em class="hi">「匿名摸鱼，互不揭穿 · 提交即同意脸部已被遮蔽」</em></li>
+      <li>无账号体系 · 无数据库 · 仅当日内存 + JSON 文件</li>
+      <li>每张榜单图带 <strong>⚠️ 举报</strong> 按钮，点即下架（不走审核）</li>
+    </ul>
+    <h3>冷启动 · 种子数据</h3>
+    <p class="muted">5.23 晚上前预置 5–10 张内部测试图，<em class="hi">moyu_index</em> 故意设 60–80，给真实用户留上榜空间。</p>
+  </div>
+</div>
+
+<!-- ========== §8 MVP 范围 ========== -->
+<h2><span class="num">§8</span>MVP 范围（25H 能交付的）</h2>
+<div class="grid cols-2">
+  <div class="card">
+    <div class="label">必做 P0</div>
+    <div class="big">主闭环 5 步</div>
+    <ul>
+      <li>上传/拍照 → 后端 VLM</li>
+      <li>报告卡 + 贴纸自动盖戳</li>
+      <li>拖拽微调（基础手势）</li>
+      <li>导出竖版长图 1080×1920</li>
+      <li>18 张贴纸素材库</li>
+    </ul>
+  </div>
+  <div class="card gold">
+    <div class="label">核心 P1</div>
+    <div class="big">今日摸鱼榜</div>
+    <ul>
+      <li>AI 摸鱼指数 + 用户点赞加权排序</li>
+      <li>强制脸部盖印（隐私卖点）</li>
+      <li>「匿名摸鱼」产品话术</li>
+      <li>每日 0 点清榜 → 名人堂</li>
+      <li>宠物彩蛋（自动识别走另一套 prompt）</li>
+    </ul>
+  </div>
+</div>
+<p class="muted" style="margin-top:14px;">P2 砍掉：AI 重绘魔改、多图连拍连续剧、登录账号体系、长期数据沉淀。</p>
+
+<!-- ========== §9 已决策 ========== -->
+<h2><span class="num">§9</span>已决策项（推荐答案 · 上午会上拍板）</h2>
+<div class="grid cols-2">
+  <div class="dec">
+    <div class="q">产品名</div>
+    <div class="a kai">咔嚓剧场</div>
+    <p class="why">「御史」自带玄学 + 官威调性，与 prompt 人设耦合。备案英文副标 MoYu Imperial。</p>
+  </div>
+  <div class="dec">
+    <div class="q">VLM 选型</div>
+    <div class="a">豆包 vision-pro</div>
+    <p class="why">中文调性最贴；字节生态评审加分；token 最低。前端留 provider 字段，第 6h 不顺切 GPT-4o。</p>
+  </div>
+  <div class="dec">
+    <div class="q">隐私话术</div>
+    <div class="a kai">匿名摸鱼，互不揭穿</div>
+    <p class="why">比"模糊脸部"积极，把合规变成卖点。评审被问到时反守为攻。</p>
+  </div>
+  <div class="dec">
+    <div class="q">分工 (4 人)</div>
+    <div class="a" style="font-size:15px;">前 A · 前 B · 后端+Prompt · 设计+海报</div>
+    <p class="why">前 A 扛 Capture+Analyzer+Exporter；前 B 扛 Stage+ReportCard+榜单；队长扛后端+prompt。</p>
+  </div>
+</div>
+
+<!-- ========== §10 演示物料 ========== -->
+<h2><span class="num">§10</span>演示物料 · 游园会才是主场</h2>
+
+<h3>90 秒答辩脚本（朗读速度 240 字/分）</h3>
+<div class="pitch-script">
+  <span class="beat">0–10s · 钩子</span>
+  下午三点，对面工位的同事头一歪睡着了。你想发群里玩梗，可只丢张照片不够梗，配文又懒得想 —— 这就是「咔嚓剧场」要解决的真实场景。
+
+  <span class="beat">10–30s · 5 步闭环演示</span>
+  打开 H5，拍一张同事的睡照 —— 3 秒后，AI 在原图上自动盖了朱红印「划水大将军」，旁边一张奏折：「紫微星偏移三度，案上美式已凉……」今日宜摸鱼，今日忌开会。
+
+  <span class="beat">30–55s · AI 能力差异化</span>
+  我们没用 AI 做识图，我们用 VLM 一次往返同时输出：姿态分类、桌面线索、人脸坐标、御史封号、贴纸位置 —— 这是一份能直接驱动 Canvas 重构的结构化奏折。AI 不是辅助，AI 就是这套体验的导演。
+
+  <span class="beat">55–75s · 社交闭环 + 隐私</span>
+  导出竖版长图带二维码，发群即拉新。更狠的是「今日摸鱼榜」：上榜强制脸部盖印，不可跳过。「匿名摸鱼，互不揭穿」—— 我们把合规做成了产品卖点。
+
+  <span class="beat">75–90s · 收尾</span>
+  25 小时，4 个人，从触发到分发到社区，旅程闭合。咔嚓剧场，让一张睡照成为一份社交货币。谢谢。
+</div>
+
+<h3>断网兜底（5.24 凌晨 1:00 前必须就位）</h3>
+<div class="grid cols-3">
+  <div class="card">
+    <div class="label">预录样例</div>
+    <div class="big">3 张 + JSON</div>
+    <p class="muted">趴桌 / 仰头 / 无人值守，配套人工调过的最佳贴纸坐标。图片 hash 命中即用预录 JSON。</p>
+  </div>
+  <div class="card">
+    <div class="label">离线开关</div>
+    <div class="big">?offline=1</div>
+    <p class="muted">URL 带参数走纯前端，所有 /analyze 直接返回预录 JSON。现场断网一键切换。</p>
+  </div>
+  <div class="card">
+    <div class="label">死线</div>
+    <div class="big">凌晨 1:00</div>
+    <p class="muted">主闭环必须能离线跑通 3 张。跑不通就当场砍 §7 摸鱼榜，全员保闭环。</p>
+  </div>
+</div>
+
+<h3>实时数据看板（评审加分项 · 投副屏）</h3>
+<div class="dash">
+  <div class="stat"><div class="l">累计审阅</div><div class="v">142 <small>卷</small></div></div>
+  <div class="stat"><div class="l">VLM 延迟</div><div class="v">4.8 <small>s</small></div></div>
+  <div class="stat"><div class="l">当日上榜</div><div class="v">38</div></div>
+  <div class="stat"><div class="l">最高指数</div><div class="v">94 <small>假寐侍郎</small></div></div>
+</div>
+<p class="muted" style="margin-top:10px;">事件流：capture_start / analyze_success / sticker_drag / export_done / board_submit / board_like。后端追加写 events.jsonl，前端 5s 轮询。</p>
+
+<!-- ========== §11 时间分配 ========== -->
+<h2><span class="num">§11</span>时间分配</h2>
+<div class="timeline">
+  <div class="tl-row"><span class="when">5.23 早</span><span class="what">2h 创意定型 + 技术栈敲定 + 分工（拍板 §9 推荐答案）</span></div>
+  <div class="tl-row"><span class="when">5.23 中–晚</span><span class="what">12h MVP 主闭环（前端 Canvas、后端 VLM、贴纸库）/ 海报并行</span></div>
+  <div class="tl-row deadline"><span class="when">5.24 凌晨 1:00</span><span class="what">死线：主闭环离线跑通。跑不通立刻砍 P1。</span></div>
+  <div class="tl-row"><span class="when">5.24 早</span><span class="what">6h 联调 + 摸鱼榜 + 体验打磨 + 演示物料</span></div>
+  <div class="tl-row"><span class="when">5.24 上午</span><span class="what">4h 睡 / 准备演示稿 / 12:00 提交</span></div>
+  <div class="tl-row"><span class="when">5.24 下午</span><span class="what">游园会现场试玩 —— 真正的拉票主场</span></div>
+</div>
+
+<!-- ========== CTA ========== -->
+<div class="cta">
+  <span class="big">场景真实 · AI 干活 · 闭环完整 · 即玩即分享</span>
+  <strong>下一步</strong>：5.23 11:00 启动开发 · 申请域名 · 后端搭 /analyze 骨架 · 前端搭拍照页 · 海报并行
+</div>
+
+</body>
+</html>

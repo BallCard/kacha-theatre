@@ -1,0 +1,917 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=375,initial-scale=1,maximum-scale=1,user-scalable=no" />
+<title>咔嚓剧场 · the verge app</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo+Black&family=Space+Grotesk:wght@300;400;500;700&family=Space+Mono:wght@400;700&family=Noto+Sans+SC:wght@400;500;700;900&family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+<style>
+:root{
+  --mint:#3cffd0;--mint-border:#309875;
+  --uv:#5200ff;--uv-dark:#3d00bf;
+  --link:#3860be;
+  --black:#131313;--slate:#2d2d2d;--frame:#313131;
+  --white:#fff;--abs-black:#000;--txt-2:#949494;
+  --yellow:#ffd400;
+  --display:"Anton","Archivo Black","Noto Sans SC",sans-serif;
+  --display-cn:"ZCOOL KuaiLe","Noto Sans SC",sans-serif;
+  --sans:"Space Grotesk","Noto Sans SC",sans-serif;
+  --mono:"Space Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{background:#1a1a1a;font-family:var(--sans);color:var(--white)}
+body{display:flex;justify-content:center;align-items:flex-start;min-height:100vh;padding:24px 0}
+@media(max-width:480px){body{padding:0;background:var(--black)}}
+
+.phone{
+  width:375px;height:812px;background:var(--black);color:var(--white);
+  border-radius:36px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.6);
+  position:relative;
+}
+@media(max-width:480px){.phone{width:100vw;height:100vh;border-radius:0;box-shadow:none}}
+
+.statusbar{
+  height:44px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;font-family:var(--mono);font-size:13px;font-weight:700;
+  flex-shrink:0;
+}
+
+.screen{position:absolute;inset:0;display:none;flex-direction:column;background:var(--black)}
+.screen.active{display:flex}
+
+/* shared topbar */
+.topbar{padding:0 16px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--frame);flex-shrink:0}
+.wordmark{font-family:var(--display);font-size:32px;font-weight:900;line-height:.8;letter-spacing:.5px;text-transform:uppercase}
+.wordmark .slash{color:var(--mint)}
+.btn-mint-sm{background:var(--mint);color:#000;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;padding:8px 14px;border:0;border-radius:20px;cursor:pointer}
+.btn-outline-sm{background:transparent;border:1px solid var(--mint);color:var(--mint);font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;padding:7px 12px;border-radius:20px;cursor:pointer}
+
+/* === SCREEN 1 HOME === */
+#screen-home .hero-wrap{flex:1;overflow-y:auto;padding:24px 18px 24px}
+.eyebrow{font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--mint);margin-bottom:16px}
+.eyebrow .dot{display:inline-block;width:6px;height:6px;background:var(--mint);border-radius:50%;margin-right:6px;vertical-align:middle;animation:pulse 1.6s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.home-h1{font-family:var(--display-cn);font-size:54px;font-weight:900;line-height:.9;letter-spacing:-1px;margin-bottom:14px}
+.home-h1 .uv{color:var(--uv)}
+.home-h1 .mint{color:var(--mint)}
+.home-deck{font-family:var(--sans);font-size:14px;font-weight:500;line-height:1.55;color:var(--white);margin-bottom:22px;opacity:.85}
+.home-deck .mono{font-family:var(--mono);font-size:11px;color:var(--mint);letter-spacing:1.2px;text-transform:uppercase}
+
+.cta-mint{
+  display:block;width:100%;background:var(--mint);color:#000;border:0;
+  border-radius:24px;padding:28px 22px;text-align:left;cursor:pointer;
+  margin-bottom:12px;position:relative;overflow:hidden;
+}
+.cta-mint .cta-tag{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;opacity:.6;margin-bottom:8px}
+.cta-mint .cta-title{font-family:var(--display);font-size:40px;font-weight:900;line-height:.9;letter-spacing:-.5px;text-transform:uppercase}
+.cta-mint .cta-arrow{position:absolute;right:22px;bottom:22px;font-family:var(--display);font-size:32px;font-weight:900}
+
+.cta-slate{
+  display:flex;width:100%;background:var(--slate);color:var(--white);border:0;
+  border-radius:20px;padding:18px 20px;text-align:left;cursor:pointer;
+  margin-bottom:12px;align-items:center;justify-content:space-between;
+}
+.cta-slate .label{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase}
+.cta-slate .icon{font-size:22px}
+
+.cta-outline{
+  display:block;width:100%;background:transparent;border:1px solid var(--mint);
+  color:var(--mint);border-radius:24px;padding:14px;cursor:pointer;
+  font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:1.5px;
+  text-transform:uppercase;margin-bottom:24px;
+}
+
+.feature-tags{display:flex;justify-content:space-between;gap:10px;padding-top:16px;border-top:1px solid var(--frame)}
+.feature-tags .ftag{flex:1;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--txt-2);text-align:center}
+.feature-tags .ftag .num{display:block;font-family:var(--display);font-size:18px;color:var(--mint);margin-bottom:2px}
+
+/* === SCREEN 2 LOADING === */
+#screen-loading{justify-content:center;align-items:center;text-align:center}
+.loader-wrap{padding:24px;display:flex;flex-direction:column;align-items:center;gap:30px;width:100%}
+.pixel-bar{display:flex;gap:4px;height:42px;align-items:flex-end}
+.pixel-bar span{width:8px;background:var(--mint);animation:bounce 1.2s infinite ease-in-out}
+.pixel-bar span:nth-child(1){animation-delay:0s}
+.pixel-bar span:nth-child(2){animation-delay:.1s}
+.pixel-bar span:nth-child(3){animation-delay:.2s}
+.pixel-bar span:nth-child(4){animation-delay:.3s}
+.pixel-bar span:nth-child(5){animation-delay:.4s}
+.pixel-bar span:nth-child(6){animation-delay:.5s}
+.pixel-bar span:nth-child(7){animation-delay:.6s}
+.pixel-bar span:nth-child(8){animation-delay:.7s}
+@keyframes bounce{0%,100%{height:6px}50%{height:42px}}
+.loader-text{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--white)}
+.loader-text .mint{color:var(--mint)}
+.loader-sub{font-family:var(--display-cn);font-size:28px;line-height:1;color:var(--white);margin-top:8px}
+.loader-nodes{display:flex;gap:8px;font-family:var(--mono);font-size:9px;letter-spacing:1.4px;text-transform:uppercase;color:var(--txt-2);margin-top:8px}
+.loader-nodes span.on{color:var(--mint)}
+
+/* === SCREEN 3 REPORT === */
+#screen-report .content{flex:1;overflow-y:auto;padding:18px 16px 110px}
+
+.kicker{font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--mint);margin-bottom:10px}
+.hero h1{font-family:var(--display-cn);font-size:42px;font-weight:900;line-height:.95;letter-spacing:-.5px;margin-bottom:12px}
+.hero h1 .uv{color:var(--uv);background:linear-gradient(transparent 60%,rgba(82,0,255,.25) 60%);padding:0 4px}
+.hero .deck{font-family:var(--sans);font-size:13px;font-weight:500;line-height:1.55;color:var(--white);margin-bottom:18px;opacity:.85}
+
+.score-banner{background:var(--mint);color:var(--abs-black);border-radius:24px;padding:20px;display:grid;grid-template-columns:1fr auto;gap:12px;align-items:end;margin-bottom:14px}
+.score-banner .tag{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px}
+.score-banner h2{font-family:var(--display);font-size:64px;font-weight:900;line-height:.85;letter-spacing:-1px}
+.score-banner h2 small{font-size:22px;color:rgba(0,0,0,.5)}
+.score-banner .tier{font-family:var(--display-cn);font-size:22px;font-weight:900;line-height:1;text-align:right}
+.score-banner .meta{font-family:var(--mono);font-size:9px;letter-spacing:1.2px;text-transform:uppercase;color:rgba(0,0,0,.7);text-align:right;margin-bottom:4px}
+
+.yiji-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+.yiji-tile{border-radius:18px;padding:18px 14px}
+.yiji-tile.yi{background:var(--mint);color:#000}
+.yiji-tile.ji{background:var(--uv);color:#fff}
+.yiji-tile .label{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;opacity:.65}
+.yiji-tile h3{font-family:var(--display-cn);font-size:48px;font-weight:900;line-height:.9;margin-bottom:10px}
+.yiji-tile ul{list-style:none}
+.yiji-tile li{font-family:var(--sans);font-size:13px;font-weight:700;padding:5px 0;border-top:1px solid currentColor;opacity:.95}
+.yiji-tile li:first-child{border-top:0}
+
+.section-title{font-family:var(--display);font-size:22px;font-weight:900;letter-spacing:.5px;text-transform:uppercase;margin:18px 0 14px;display:flex;align-items:center;gap:8px}
+.section-title .cn{font-family:var(--display-cn);font-size:14px;color:var(--txt-2);font-weight:500}
+
+.stream{position:relative;padding-left:18px}
+.stream::before{content:"";position:absolute;left:0;top:6px;bottom:0;border-left:1px dashed var(--uv-dark)}
+.stream-item{position:relative;background:var(--black);border:1px solid var(--white);border-radius:18px;padding:16px 18px;margin-bottom:10px}
+.stream-item::before{content:"";position:absolute;left:-22px;top:22px;width:7px;height:7px;border-radius:50%;background:var(--mint)}
+.stream-item .ts{font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:var(--txt-2);margin-bottom:4px}
+.stream-item h3{font-family:var(--display-cn);font-size:20px;font-weight:900;line-height:1.1;margin-bottom:6px}
+.stream-item p{font-family:var(--sans);font-size:12px;font-weight:500;line-height:1.55;color:var(--white)}
+.stream-item.fill-uv{background:var(--uv);border-color:var(--uv)}
+.stream-item.fill-uv .ts{color:rgba(255,255,255,.7)}
+.stream-item.fill-yellow{background:var(--yellow);border-color:var(--yellow);color:#000}
+.stream-item.fill-yellow h3,.stream-item.fill-yellow p{color:#000}
+.stream-item.fill-yellow .ts{color:rgba(0,0,0,.6)}
+
+.titles-row{margin-top:16px;display:flex;gap:6px;flex-wrap:wrap}
+.title-pill{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;background:transparent;color:var(--mint);border:1px solid var(--mint);border-radius:30px;padding:8px 14px;cursor:pointer}
+.title-pill.active{background:var(--mint);color:#000}
+
+.bottom-bar{position:absolute;left:0;right:0;bottom:0;background:var(--black);border-top:1px solid var(--frame);padding:12px 16px 26px;display:flex;gap:8px}
+.btn{flex:1;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;height:46px;border-radius:24px;border:0;cursor:pointer}
+.btn-primary{background:var(--mint);color:#000}
+.btn-secondary{background:var(--slate);color:var(--white)}
+.btn-outline{background:transparent;border:1px solid var(--mint);color:var(--mint)}
+
+/* === SCREEN EDIT === */
+#screen-edit{background:var(--black)}
+#screen-edit .edit-topbar{padding:6px 12px 10px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--frame);flex-shrink:0}
+.edit-title{font-family:var(--display-cn);font-size:18px;font-weight:900;line-height:1;text-align:center}
+.edit-title .sub{display:block;font-family:var(--mono);font-size:8px;letter-spacing:1.4px;color:var(--mint);margin-top:2px;text-transform:uppercase;font-weight:700}
+.edit-tag-right{font-family:var(--mono);font-size:9px;letter-spacing:1.2px;text-transform:uppercase;color:var(--txt-2);text-align:right;line-height:1.4;max-width:100px}
+.edit-tag-right .mint{color:var(--mint);font-weight:700}
+.edit-canvas-wrap{flex:1;display:flex;flex-direction:column;align-items:center;padding:14px 12px 8px;gap:8px;overflow:hidden}
+.edit-hint{font-family:var(--mono);font-size:9px;letter-spacing:1.2px;text-transform:uppercase;color:var(--txt-2)}
+.edit-hint .mint{color:var(--mint)}
+.stage{background:var(--slate);border-radius:14px;overflow:hidden;border:1px solid var(--frame);box-shadow:0 10px 30px rgba(0,0,0,.4)}
+
+/* edit toolbar */
+.edit-toolbar{flex-shrink:0;background:var(--black);border-top:1px solid var(--frame);padding:10px 12px 20px;position:relative}
+.tool-row{display:flex;align-items:center;gap:8px}
+.tab-btn{flex:1;background:var(--slate);border:1px solid var(--frame);color:var(--white);font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;padding:10px 6px;border-radius:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px}
+.tab-btn.active{background:var(--mint);color:#000;border-color:var(--mint)}
+.icon-btn{width:42px;height:42px;border-radius:50%;background:var(--slate);border:1px solid var(--frame);color:var(--white);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.icon-btn:disabled{opacity:.35;cursor:not-allowed}
+.done-pill{background:var(--mint);color:#000;border:0;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;padding:0 18px;height:42px;border-radius:24px;cursor:pointer;flex-shrink:0}
+
+/* drawer */
+.drawer{position:absolute;left:0;right:0;bottom:100%;background:var(--black);border-top:1px solid var(--mint);padding:14px 14px 16px;max-height:280px;overflow-y:auto;transform:translateY(100%);transition:transform .25s ease;pointer-events:none}
+.drawer.open{transform:translateY(0);pointer-events:auto}
+.drawer-title{font-family:var(--mono);font-size:9px;letter-spacing:1.4px;color:var(--mint);text-transform:uppercase;margin-bottom:10px;font-weight:700}
+.stk-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.stk-card{background:#000;border:1px solid var(--mint);border-radius:10px;aspect-ratio:1;display:flex;align-items:center;justify-content:center;padding:6px;cursor:pointer;overflow:hidden}
+.stk-card:active{background:var(--slate)}
+.stk-card svg{width:100%;height:100%}
+
+.text-row{display:flex;gap:6px;margin-bottom:8px}
+.text-row input{flex:1;background:#000;border:1px solid var(--frame);color:var(--white);font-family:var(--sans);font-size:13px;padding:10px 12px;border-radius:10px;outline:none}
+.text-row input:focus{border-color:var(--mint)}
+.chip-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.chip{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;background:transparent;color:var(--white);border:1px solid var(--frame);border-radius:20px;padding:6px 12px;cursor:pointer}
+.chip.active{background:var(--mint);color:#000;border-color:var(--mint)}
+.color-row{display:flex;gap:8px;margin-bottom:10px}
+.color-dot{width:28px;height:28px;border-radius:50%;cursor:pointer;border:2px solid var(--frame)}
+.color-dot.active{border-color:var(--mint);box-shadow:0 0 0 2px #000 inset}
+.add-btn{width:100%;background:var(--mint);color:#000;border:0;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;padding:11px;border-radius:22px;cursor:pointer}
+
+.title-grid{display:flex;flex-direction:column;gap:8px}
+.title-card{background:#000;border:1px solid var(--mint);border-radius:14px;padding:12px 14px;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--mint);cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.title-card.active{background:var(--mint);color:#000}
+.title-card .num{font-family:var(--display);font-size:14px;opacity:.6}
+
+/* === SCREEN 4 POSTER === */
+#screen-poster{padding-top:0}
+#screen-poster .topbar{padding:0 16px 12px}
+.poster-scroll{flex:1;overflow-y:auto;padding:16px 16px 110px;display:flex;flex-direction:column;align-items:center;gap:14px}
+.poster{
+  width:100%;max-width:343px;background:var(--black);
+  border-radius:20px;overflow:hidden;position:relative;color:var(--white);
+  border:1px solid var(--frame);
+  display:flex;flex-direction:column;
+}
+.poster-head{padding:18px 18px 8px;display:flex;justify-content:space-between;align-items:flex-start}
+.poster-head .pwordmark{font-family:var(--display);font-size:24px;font-weight:900;letter-spacing:.5px;text-transform:uppercase}
+.poster-head .pwordmark .slash{color:var(--mint)}
+.poster-head .pno{font-family:var(--mono);font-size:9px;letter-spacing:1.4px;text-transform:uppercase;color:var(--mint);text-align:right;line-height:1.4}
+.poster-photo{width:100%;aspect-ratio:335/420;background:var(--slate);overflow:hidden;border-top:1px solid var(--frame);border-bottom:1px solid var(--frame)}
+.poster-photo img{width:100%;height:100%;object-fit:cover;display:block}
+.poster-body{padding:16px 18px}
+.pscore-wrap{margin-bottom:14px}
+.ptag{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--mint);margin-bottom:4px}
+.pscore{font-family:var(--display);font-size:96px;font-weight:900;line-height:.85;letter-spacing:-3px;color:var(--mint)}
+.pscore small{font-size:28px;color:var(--white);opacity:.5}
+.ptier{font-family:var(--display-cn);font-size:32px;font-weight:900;line-height:1;margin-top:6px;color:var(--white)}
+.ptier .mint{color:var(--mint)}
+.p-yiji{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.p-yiji .pyi,.p-yiji .pji{border-radius:12px;padding:12px}
+.p-yiji .pyi{background:var(--mint);color:#000}
+.p-yiji .pji{background:var(--uv);color:#fff}
+.p-yiji .lbl{font-family:var(--mono);font-size:9px;letter-spacing:1.4px;text-transform:uppercase;margin-bottom:4px;opacity:.65}
+.p-yiji .big{font-family:var(--display-cn);font-size:28px;font-weight:900;line-height:.9;margin-bottom:6px}
+.p-yiji .lst{font-family:var(--sans);font-size:11px;font-weight:700;line-height:1.4}
+.p-para{font-family:var(--sans);font-size:12px;line-height:1.6;color:var(--white);opacity:.85;border-top:1px solid var(--frame);padding-top:12px;margin-bottom:12px}
+.p-para .uv{color:var(--mint)}
+.p-foot{display:flex;justify-content:space-between;align-items:flex-end;font-family:var(--mono);font-size:9px;letter-spacing:1.4px;text-transform:uppercase;color:var(--txt-2);border-top:1px solid var(--frame);padding-top:12px}
+.p-foot .big{font-family:var(--display);font-size:18px;color:var(--mint);letter-spacing:0}
+
+.poster-hint{font-family:var(--mono);font-size:10px;letter-spacing:1.4px;text-transform:uppercase;color:var(--txt-2);text-align:center;padding:0 12px}
+.poster-actions{width:100%;max-width:343px;display:flex;flex-direction:column;gap:8px}
+.poster-actions .btn{width:100%}
+
+/* exporting overlay */
+.exporting-overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:99998;display:none;flex-direction:column;align-items:center;justify-content:center;gap:18px;backdrop-filter:blur(4px)}
+.exporting-overlay.show{display:flex}
+.spinner{width:48px;height:48px;border:3px solid var(--frame);border-top-color:var(--mint);border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.exporting-overlay .txt{font-family:var(--mono);font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--mint);font-weight:700}
+.exporting-overlay .txt-cn{font-family:var(--display-cn);font-size:20px;color:var(--white)}
+
+input[type=file]{display:none}
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <!-- === SCREEN 1 HOME === -->
+  <div class="screen active" id="screen-home">
+    <div class="statusbar"><span>9:41</span><span>●●●●● 5G</span></div>
+    <div class="topbar">
+      <div class="wordmark">摸鱼<span class="slash">/</span>御史</div>
+      <span class="btn-mint-sm">v0.1</span>
+    </div>
+    <div class="hero-wrap">
+      <div class="eyebrow"><span class="dot"></span>AI VISUAL TRIBUNAL · 上线中</div>
+      <h1 class="home-h1">今日，<br/>你是<span class="uv">几品</span><br/><span class="mint">摸鱼</span>？</h1>
+      <p class="home-deck">拍一张你的工位，<span class="mono">AI 御史</span> 当场断案：识姿势、读杂物、给你写一卷奏折、生成今日宜忌、铺开 5 节剧情。</p>
+
+      <button class="cta-mint" id="cta-scan">
+        <div class="cta-tag">PRIMARY · 一键开案</div>
+        <div class="cta-title">📸 SCAN<br/>MY DESK</div>
+        <div class="cta-arrow">→</div>
+      </button>
+
+      <button class="cta-slate" id="cta-album">
+        <span class="label">🖼️ Pick from Album</span>
+        <span class="icon">›</span>
+      </button>
+
+      <button class="cta-outline" id="cta-demo">⚡ TRY WITH DEMO IMAGE</button>
+
+      <div class="feature-tags">
+        <div class="ftag"><span class="num">01</span>AI<br/>SCORING</div>
+        <div class="ftag"><span class="num">02</span>PLOT<br/>GAME</div>
+        <div class="ftag"><span class="num">03</span>POSTER<br/>EXPORT</div>
+      </div>
+    </div>
+    <input type="file" id="file-input" accept="image/*" />
+    <input type="file" id="cam-input" accept="image/*" capture="environment" />
+  </div>
+
+  <!-- === SCREEN 2 LOADING === -->
+  <div class="screen" id="screen-loading">
+    <div class="statusbar"><span>9:41</span><span>●●●●● 5G</span></div>
+    <div class="loader-wrap">
+      <div class="eyebrow"><span class="dot"></span>VISION MODEL · ACTIVATED</div>
+      <div class="pixel-bar"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+      <div class="loader-text">SCANNING DESK · NODE <span class="mint" id="loader-node">00</span></div>
+      <div class="loader-sub" id="loader-cn">御史巡案中…</div>
+      <div class="loader-nodes">
+        <span class="on">▮ POSE</span>
+        <span class="on">▮ OBJECTS</span>
+        <span>▯ SCORE</span>
+        <span>▯ REPORT</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- === SCREEN 3 REPORT === -->
+  <div class="screen" id="screen-report">
+    <div class="statusbar"><span>9:41</span><span>●●●●● 5G</span></div>
+    <div class="topbar">
+      <div class="wordmark">摸鱼<span class="slash">/</span>御史</div>
+      <button class="btn-mint-sm" id="btn-export">REMIX →</button>
+    </div>
+    <div class="content">
+      <div class="kicker" id="r-kicker">SCROLL NO.XXXXXXXX · 辰时入呈</div>
+      <div class="hero">
+        <h1 id="r-headline">案上美式已凉，<span class="uv">紫微星偏三度</span>。</h1>
+        <p class="deck" id="r-deck">趴桌型 · 中正姿态。</p>
+      </div>
+
+      <div class="score-banner">
+        <div>
+          <div class="tag">MOYU SCORE</div>
+          <h2><span id="r-score">87</span><small>/100</small></h2>
+        </div>
+        <div>
+          <div class="meta">LEVEL TIER</div>
+          <div class="tier" id="r-tier">摸鱼<br/>大将军</div>
+        </div>
+      </div>
+
+      <div class="yiji-row">
+        <div class="yiji-tile yi">
+          <div class="label">YI · 今日宜</div>
+          <h3>宜</h3>
+          <ul id="r-yi"></ul>
+        </div>
+        <div class="yiji-tile ji">
+          <div class="label">JI · 今日忌</div>
+          <h3>忌</h3>
+          <ul id="r-ji"></ul>
+        </div>
+      </div>
+
+      <h2 class="section-title">PLOT STREAM <span class="cn">· 5 节剧情时间线</span></h2>
+      <div class="stream" id="r-stream"></div>
+
+      <div class="titles-row" id="r-titles"></div>
+    </div>
+    <div class="bottom-bar">
+      <button class="btn btn-secondary" id="btn-retry">RETRY</button>
+      <button class="btn btn-primary" id="btn-to-edit">START REMIX →</button>
+    </div>
+  </div>
+
+  <!-- === SCREEN EDIT === -->
+  <div class="screen" id="screen-edit">
+    <div class="statusbar"><span>9:41</span><span>●●●●● 5G</span></div>
+    <div class="edit-topbar">
+      <button class="icon-btn" id="edit-back" style="width:36px;height:36px;font-size:14px">←</button>
+      <div class="edit-title">二创神游御笔<span class="sub">REMIX · STAMP · TITLE</span></div>
+      <div class="edit-tag-right" id="edit-tag-right"><span class="mint">摸鱼大将军</span><br/>· 未封号</div>
+    </div>
+    <div class="edit-canvas-wrap">
+      <div class="edit-hint">👇 拖动调位置 · <span class="mint">右下角控制点</span>缩放+旋转</div>
+      <div id="stage" class="stage"></div>
+    </div>
+
+    <div class="edit-toolbar">
+      <!-- drawer -->
+      <div class="drawer" id="drawer-sticker">
+        <div class="drawer-title">STICKER LIBRARY · 朱印库</div>
+        <div class="stk-grid" id="stk-grid"></div>
+      </div>
+      <div class="drawer" id="drawer-text">
+        <div class="drawer-title">TEXT BRUSH · 御笔批文</div>
+        <div class="text-row">
+          <input id="text-input" placeholder="写一句御批，例：朕已阅 / 准奏 / 摸鱼有道" />
+        </div>
+        <div class="drawer-title">FONT</div>
+        <div class="chip-row" id="font-chips">
+          <span class="chip active" data-font="ZCOOL KuaiLe">快乐体</span>
+          <span class="chip" data-font="Noto Sans SC">宋体</span>
+          <span class="chip" data-font="Anton">ANTON</span>
+        </div>
+        <div class="drawer-title">COLOR</div>
+        <div class="color-row" id="color-row">
+          <span class="color-dot active" style="background:#3cffd0" data-color="#3cffd0"></span>
+          <span class="color-dot" style="background:#5200ff" data-color="#5200ff"></span>
+          <span class="color-dot" style="background:#ffd400" data-color="#ffd400"></span>
+          <span class="color-dot" style="background:#ffffff" data-color="#ffffff"></span>
+          <span class="color-dot" style="background:#000000;border-color:#444" data-color="#000000"></span>
+        </div>
+        <button class="add-btn" id="add-text-btn">＋ ADD TO CANVAS</button>
+      </div>
+      <div class="drawer" id="drawer-title">
+        <div class="drawer-title">SWITCH TITLE · 切换封号</div>
+        <div class="title-grid" id="title-grid"></div>
+      </div>
+
+      <div class="tool-row">
+        <button class="icon-btn" id="btn-undo" title="撤销">↶</button>
+        <button class="tab-btn" data-tab="sticker">🏷️ STICKER</button>
+        <button class="tab-btn" data-tab="text">✍️ TEXT</button>
+        <button class="tab-btn" data-tab="title">👑 TITLE</button>
+        <button class="done-pill" id="btn-done">DONE →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- === SCREEN 4 POSTER === -->
+  <div class="screen" id="screen-poster">
+    <div class="statusbar"><span>9:41</span><span>●●●●● 5G</span></div>
+    <div class="topbar">
+      <div class="wordmark">摸鱼<span class="slash">/</span>御史</div>
+      <button class="btn-outline-sm" id="btn-back-edit">← EDIT</button>
+    </div>
+    <div class="poster-scroll">
+      <div class="poster" id="poster">
+        <div class="poster-head">
+          <div class="pwordmark">摸鱼<span class="slash">/</span>御史</div>
+          <div class="pno" id="p-no">SCROLL<br/>NO.00000000</div>
+        </div>
+        <div class="poster-photo"><img id="p-photo" alt="" /></div>
+        <div class="poster-body">
+          <div class="pscore-wrap">
+            <div class="ptag">MOYU SCORE · 今日得分</div>
+            <div class="pscore"><span id="p-score">87</span><small>/100</small></div>
+            <div class="ptier"><span class="mint">封</span> <span id="p-tier">摸鱼大将军</span></div>
+          </div>
+          <div class="p-yiji">
+            <div class="pyi">
+              <div class="lbl">YI · 宜</div>
+              <div class="big">宜</div>
+              <div class="lst" id="p-yi"></div>
+            </div>
+            <div class="pji">
+              <div class="lbl" style="color:rgba(255,255,255,.6)">JI · 忌</div>
+              <div class="big">忌</div>
+              <div class="lst" id="p-ji"></div>
+            </div>
+          </div>
+          <div class="p-para" id="p-para"></div>
+          <div class="p-foot">
+            <div>
+              <div class="big">MO/YU</div>
+              <div>2026.05.23 · 长三角站</div>
+            </div>
+            <div style="text-align:right">
+              <div>AI VISUAL<br/>TRIBUNAL</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="poster-hint">长按图片保存到相册 · 或点 ⬇ 下载</div>
+
+      <div class="poster-actions">
+        <button class="btn btn-primary" id="btn-download">↓ DOWNLOAD POSTER</button>
+        <button class="btn btn-secondary" id="btn-copy">⎘ COPY LINK</button>
+        <button class="btn btn-outline" id="btn-restart">↺ RESTART</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- exporting overlay -->
+  <div class="exporting-overlay" id="exporting-overlay">
+    <div class="spinner"></div>
+    <div class="txt">SCANNING · STAMPING POSTER...</div>
+    <div class="txt-cn">御笔著墨中…</div>
+  </div>
+
+</div>
+
+<script type="module">
+import { analyzeImage, makeDemoImageDataURL } from './_shared/api.js';
+import { createStage } from './_shared/sticker-engine.js';
+import { exportNodeToPNG, showSaveModal, copyShareLink } from './_shared/export.js';
+import { toast as toastLib } from './_shared/toast.js';
+
+const screens = {
+  home: document.getElementById('screen-home'),
+  loading: document.getElementById('screen-loading'),
+  report: document.getElementById('screen-report'),
+  edit: document.getElementById('screen-edit'),
+  poster: document.getElementById('screen-poster'),
+};
+
+let state = 'home';
+let lastResult = null;
+let userPhotoURL = null;
+let selectedTitle = null;
+let stage = null;
+let capturedPhotoURL = null;
+
+function go(name){
+  state = name;
+  Object.entries(screens).forEach(([k,el])=>el.classList.toggle('active', k===name));
+  if(name==='loading') runLoader();
+  if(name==='edit') initEditScreen();
+}
+
+function toast(msg, opts){
+  toastLib(msg, { bg:'#131313', color:'#fff', accent:'#3cffd0', ...(opts||{}) });
+}
+
+function showExporting(show){
+  document.getElementById('exporting-overlay').classList.toggle('show', !!show);
+}
+
+function hash8(s){
+  let h=0;
+  for(const c of s) h = ((h<<5)-h + c.charCodeAt(0))|0;
+  return ('00000000' + (h>>>0).toString(16)).slice(-8).toUpperCase();
+}
+
+function escapeHtml(s){
+  return String(s||'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+// ========== Verge SVG STAMPS (6+) ==========
+function svgTierStamp(text){
+  // mint 圆形描边 + uv 中文大字
+  const t = String(text||'摸鱼大将军');
+  const a = t.slice(0,2), b = t.slice(2);
+  return `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="60" cy="60" r="54" fill="#000" stroke="#3cffd0" stroke-width="3"/>
+    <circle cx="60" cy="60" r="46" fill="none" stroke="#3cffd0" stroke-width="1" stroke-dasharray="2 3"/>
+    <text x="60" y="48" text-anchor="middle" font-family="Anton,sans-serif" font-size="9" fill="#3cffd0" letter-spacing="1.5">LEVEL · TIER</text>
+    <text x="60" y="70" text-anchor="middle" font-family="ZCOOL KuaiLe,sans-serif" font-size="22" font-weight="900" fill="#5200ff">${escapeHtml(a)}</text>
+    <text x="60" y="92" text-anchor="middle" font-family="ZCOOL KuaiLe,sans-serif" font-size="16" font-weight="900" fill="#5200ff">${escapeHtml(b)}</text>
+  </svg>`;
+}
+function svgScoreTicket(score){
+  // mint 实心黑字 +分数
+  return `<svg viewBox="0 0 160 60" xmlns="http://www.w3.org/2000/svg">
+    <rect x="2" y="2" width="156" height="56" rx="10" fill="#3cffd0" stroke="#000" stroke-width="2"/>
+    <text x="14" y="22" font-family="Space Mono,monospace" font-size="9" font-weight="700" fill="#000" letter-spacing="1.5">MOYU+</text>
+    <text x="14" y="50" font-family="Anton,sans-serif" font-size="32" font-weight="900" fill="#000">+${score}</text>
+    <text x="146" y="50" text-anchor="end" font-family="ZCOOL KuaiLe,sans-serif" font-size="14" font-weight="900" fill="#5200ff">摸鱼</text>
+  </svg>`;
+}
+function svgFaceSeal(){
+  // 紫色实心圆 + 白字
+  return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="50" cy="50" r="46" fill="#5200ff" stroke="#3cffd0" stroke-width="2"/>
+    <circle cx="50" cy="50" r="40" fill="none" stroke="#fff" stroke-width="1" stroke-dasharray="3 2"/>
+    <text x="50" y="42" text-anchor="middle" font-family="ZCOOL KuaiLe,sans-serif" font-size="13" fill="#fff" font-weight="900">御史</text>
+    <text x="50" y="62" text-anchor="middle" font-family="ZCOOL KuaiLe,sans-serif" font-size="13" fill="#fff" font-weight="900">封脸印</text>
+  </svg>`;
+}
+// 6 朱印（verge 酸性风）
+const STAMPS = [
+  { key:'zhunzou', label:'准奏', svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="50" cy="50" r="44" fill="#000" stroke="#3cffd0" stroke-width="3"/>
+    <text x="50" y="44" text-anchor="middle" font-family="ZCOOL KuaiLe,sans-serif" font-size="26" font-weight="900" fill="#3cffd0">准</text>
+    <text x="50" y="74" text-anchor="middle" font-family="ZCOOL KuaiLe,sans-serif" font-size="26" font-weight="900" fill="#3cffd0">奏</text>
+    <line x1="20" y1="50" x2="80" y2="50" stroke="#3cffd0" stroke-width=".5" stroke-dasharray="2 2"/>
+  </svg>` },
+  { key:'bohui', label:'驳回', svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <rect x="6" y="6" width="88" height="88" fill="#5200ff" stroke="#3cffd0" stroke-width="3"/>
+    <text x="50" y="44" text-anchor="middle" font-family="ZCOOL KuaiLe,sans-serif" font-size="26" font-weight="900" fill="#fff">驳</text>
+    <text x="50" y="74" text-anchor="middle" font-family="ZCOOL KuaiLe,sans-serif" font-size="26" font-weight="900" fill="#fff">回</text>
+  </svg>` },
+  { key:'shenyou', label:'神游', svg:`<svg viewBox="0 0 140 70" xmlns="http://www.w3.org/2000/svg">
+    <rect x="2" y="2" width="136" height="66" rx="33" fill="#ffd400" stroke="#000" stroke-width="2"/>
+    <text x="70" y="46" text-anchor="middle" font-family="ZCOOL KuaiLe,sans-serif" font-size="28" font-weight="900" fill="#000">神游太虚</text>
+  </svg>` },
+  { key:'daji', label:'大吉', svg:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <rect x="8" y="8" width="84" height="84" fill="none" stroke="#3cffd0" stroke-width="2" stroke-dasharray="4 3"/>
+    <rect x="14" y="14" width="72" height="72" fill="#000" stroke="#3cffd0" stroke-width="1"/>
+    <text x="50" y="46" text-anchor="middle" font-family="ZCOOL KuaiLe,sans-serif" font-size="22" font-weight="900" fill="#3cffd0">大</text>
+    <text x="50" y="76" text-anchor="middle" font-family="ZCOOL KuaiLe,sans-serif" font-size="22" font-weight="900" fill="#3cffd0">吉</text>
+  </svg>` },
+  { key:'moyuyouli', label:'摸鱼有理', svg:`<svg viewBox="0 0 160 70" xmlns="http://www.w3.org/2000/svg">
+    <rect x="2" y="2" width="156" height="66" rx="14" fill="#3cffd0" stroke="#000" stroke-width="2"/>
+    <text x="80" y="32" text-anchor="middle" font-family="Space Mono,monospace" font-size="8" font-weight="700" fill="#000" letter-spacing="2">EDICT</text>
+    <text x="80" y="58" text-anchor="middle" font-family="ZCOOL KuaiLe,sans-serif" font-size="24" font-weight="900" fill="#000">摸鱼有理</text>
+  </svg>` },
+  { key:'fengtian', label:'奉天承运', svg:`<svg viewBox="0 0 80 140" xmlns="http://www.w3.org/2000/svg">
+    <rect x="4" y="4" width="72" height="132" rx="4" fill="#5200ff" stroke="#3cffd0" stroke-width="2"/>
+    <text x="40" y="36" text-anchor="middle" font-family="ZCOOL KuaiLe,sans-serif" font-size="20" font-weight="900" fill="#3cffd0">奉</text>
+    <text x="40" y="62" text-anchor="middle" font-family="ZCOOL KuaiLe,sans-serif" font-size="20" font-weight="900" fill="#fff">天</text>
+    <text x="40" y="88" text-anchor="middle" font-family="ZCOOL KuaiLe,sans-serif" font-size="20" font-weight="900" fill="#fff">承</text>
+    <text x="40" y="114" text-anchor="middle" font-family="ZCOOL KuaiLe,sans-serif" font-size="20" font-weight="900" fill="#3cffd0">运</text>
+  </svg>` },
+];
+
+// ========== Report render ==========
+function renderReport(data){
+  lastResult = data;
+  const id = hash8((data.report?.paragraph||'') + data.moyu_score);
+  document.getElementById('r-kicker').textContent = `SCROLL NO.${id} · 辰时入呈`;
+  document.getElementById('p-no').innerHTML = `SCROLL<br/>NO.${id}`;
+
+  const p = data.report?.paragraph || '';
+  const head = p.slice(0, 10);
+  const tail = p.slice(10, 22);
+  document.getElementById('r-headline').innerHTML = `${escapeHtml(head)}<br/><span class="uv">${escapeHtml(tail)}</span>`;
+  document.getElementById('p-para').innerHTML = `<span class="uv">「</span>${escapeHtml(p)}<span class="uv">」</span>`;
+
+  const deckBits = [data.pose_type, ...(data.desk_objects||[]).slice(0,2)].filter(Boolean);
+  document.getElementById('r-deck').textContent = deckBits.join(' · ') + '。卿之神色介乎入定与出神之间。';
+
+  document.getElementById('r-score').textContent = data.moyu_score;
+  document.getElementById('p-score').textContent = data.moyu_score;
+
+  const tierHtml = (data.level_tier||'').length>=4
+    ? data.level_tier.slice(0,2)+'<br/>'+data.level_tier.slice(2)
+    : data.level_tier;
+  document.getElementById('r-tier').innerHTML = tierHtml;
+  document.getElementById('p-tier').textContent = data.level_tier;
+
+  const yi = data.report?.yi || [];
+  const ji = data.report?.ji || [];
+  document.getElementById('r-yi').innerHTML = yi.map(x=>`<li>${escapeHtml(x)}</li>`).join('');
+  document.getElementById('r-ji').innerHTML = ji.map(x=>`<li>${escapeHtml(x)}</li>`).join('');
+  document.getElementById('p-yi').textContent = yi.join(' · ');
+  document.getElementById('p-ji').textContent = ji.join(' · ');
+
+  const fillClasses = ['', 'fill-uv', '', 'fill-yellow', ''];
+  const nodes = buildPlotNodes(data);
+  document.getElementById('r-stream').innerHTML = nodes.map((n,i)=>`
+    <div class="stream-item ${fillClasses[i]||''}">
+      <div class="ts">${n.ts} · NODE 0${i+1}</div>
+      <h3>${escapeHtml(n.title)}</h3>
+      <p>${escapeHtml(n.body)}</p>
+    </div>
+  `).join('');
+
+  const titles = data.title_candidates || [];
+  selectedTitle = titles[0] || data.level_tier || null;
+  document.getElementById('r-titles').innerHTML = titles.map((t,i)=>
+    `<span class="title-pill ${i===0?'active':''}">${escapeHtml(t)}</span>`
+  ).join('');
+}
+
+function buildPlotNodes(data){
+  const obj = (data.desk_objects||[])[0] || '工位杂物';
+  const yi0 = (data.report?.yi||[])[0] || '摸鱼';
+  const ji0 = (data.report?.ji||[])[0] || '开会';
+  return [
+    { ts:'07:42', title:'领导踱步而过', body:`切到短视频，企业微信突然亮起。装作专注，还是切回文档？` },
+    { ts:'10:18', title:'「@所有人 临时复盘」', body:`三个分支：顺应天命 / 逆天而行 / 中立观望。${ji0}是大忌。` },
+    { ts:'14:05', title:`茶水间偶遇 · ${obj}见证`, body:`小李端着保温杯出现，套点情报，还是回工位假装看注释？` },
+    { ts:'16:30', title:'"再改一版就好"', body:`—— AI 时代仍然成立的一句谎言。今日宜${yi0}。` },
+    { ts:'18:00', title:'御史降罚 · 待你抉择', body:`5 节跑完后按宜忌命中数算结局。` },
+  ];
+}
+
+// ========== Analyze flow ==========
+async function runAnalyze(dataUrl){
+  userPhotoURL = dataUrl;
+  go('loading');
+  try{
+    const res = await analyzeImage(dataUrl);
+    renderReport(res);
+    go('report');
+  }catch(e){
+    console.error(e);
+    toast('分析失败，回到首页');
+    go('home');
+  }
+}
+
+let loaderTimer;
+function runLoader(){
+  clearInterval(loaderTimer);
+  const node = document.getElementById('loader-node');
+  const cn = document.getElementById('loader-cn');
+  const cns = ['御史巡案中…','姿势比对中…','物证清点中…','拟卷生奏折…'];
+  let i = 0;
+  node.textContent = '00';
+  cn.textContent = cns[0];
+  loaderTimer = setInterval(()=>{
+    i++;
+    node.textContent = String(i).padStart(2,'0');
+    cn.textContent = cns[i % cns.length];
+  }, 600);
+}
+
+// ========== EDIT SCREEN ==========
+const STAGE_W = 335, STAGE_H = 420;
+
+function initEditScreen(){
+  const stageEl = document.getElementById('stage');
+  stageEl.innerHTML = '';
+  stage = createStage(stageEl, {
+    width: STAGE_W, height: STAGE_H,
+    bgImageDataURL: userPhotoURL,
+    handleStyle: { stroke:'#3cffd0', bg:'#000', delBg:'#5200ff', outline:'#3cffd0' }
+  });
+
+  // 初始入场贴纸
+  if(lastResult){
+    // 1. 右上段位印
+    stage.addSticker({
+      type:'svg', svg: svgTierStamp(lastResult.level_tier||'摸鱼大将军'),
+      x: STAGE_W - 70, y: 80, w: 120, h: 120, rotation: -12,
+    });
+    // 2. 左下分数票
+    stage.addSticker({
+      type:'svg', svg: svgScoreTicket(lastResult.moyu_score||0),
+      x: 90, y: STAGE_H - 80, w: 160, h: 60, rotation: -4,
+    });
+    // 3. 人脸封印
+    const faces = lastResult.face_boxes || [];
+    faces.forEach(box=>{
+      const cx = (box.x + box.w/2) * STAGE_W;
+      const cy = (box.y + box.h/2) * STAGE_H;
+      const size = Math.max(80, box.w * STAGE_W * 1.4);
+      stage.addSticker({
+        type:'svg', svg: svgFaceSeal(),
+        x: cx, y: cy, w: size, h: size, rotation: 0,
+      });
+    });
+  }
+
+  // toolbar 重新绑定
+  setupToolbar();
+  updateEditTagRight();
+  toast('双击/拖动贴纸调整位置', { duration: 1800 });
+}
+
+function updateEditTagRight(){
+  const tier = lastResult?.level_tier || '—';
+  const title = selectedTitle || '未封号';
+  document.getElementById('edit-tag-right').innerHTML =
+    `<span class="mint">${escapeHtml(tier)}</span><br/>· ${escapeHtml(title)}`;
+}
+
+function setupToolbar(){
+  // 贴纸库
+  const grid = document.getElementById('stk-grid');
+  grid.innerHTML = STAMPS.map((s,i)=>`<div class="stk-card" data-i="${i}" title="${s.label}">${s.svg}</div>`).join('');
+  grid.onclick = (e)=>{
+    const card = e.target.closest('.stk-card');
+    if(!card) return;
+    const i = +card.dataset.i;
+    const s = STAMPS[i];
+    const w = s.key==='shenyou'||s.key==='moyuyouli' ? 140 : (s.key==='fengtian'?70:100);
+    const h = s.key==='shenyou'||s.key==='moyuyouli' ? 60 : (s.key==='fengtian'?130:100);
+    stage.addSticker({ type:'svg', svg:s.svg, x: STAGE_W/2, y: STAGE_H/2, w, h, rotation:(Math.random()*16-8)|0 });
+    toast(`已添加：${s.label}`, { duration: 1400 });
+    closeDrawers();
+  };
+
+  // text drawer
+  let curFont = 'ZCOOL KuaiLe';
+  let curColor = '#3cffd0';
+  const fontChips = document.getElementById('font-chips');
+  fontChips.onclick = (e)=>{
+    const c = e.target.closest('.chip'); if(!c) return;
+    fontChips.querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));
+    c.classList.add('active');
+    curFont = c.dataset.font;
+  };
+  const colorRow = document.getElementById('color-row');
+  colorRow.onclick = (e)=>{
+    const d = e.target.closest('.color-dot'); if(!d) return;
+    colorRow.querySelectorAll('.color-dot').forEach(x=>x.classList.remove('active'));
+    d.classList.add('active');
+    curColor = d.dataset.color;
+  };
+  document.getElementById('add-text-btn').onclick = ()=>{
+    const input = document.getElementById('text-input');
+    const txt = (input.value||'').trim();
+    if(!txt){ toast('先写几个字'); return; }
+    const w = Math.max(80, txt.length * 26);
+    stage.addSticker({ type:'text', text:txt, fontFamily:curFont, color:curColor, fontSize:28, fontWeight:900,
+      x: STAGE_W/2, y: STAGE_H/2, w, h:50, rotation:0 });
+    input.value = '';
+    toast('已加御批', { duration: 1400 });
+    closeDrawers();
+  };
+
+  // title drawer
+  const titles = (lastResult?.title_candidates)||[];
+  const tg = document.getElementById('title-grid');
+  tg.innerHTML = titles.map((t,i)=>`<div class="title-card ${t===selectedTitle?'active':''}" data-t="${escapeHtml(t)}"><span>${escapeHtml(t)}</span><span class="num">0${i+1}</span></div>`).join('');
+  tg.onclick = (e)=>{
+    const card = e.target.closest('.title-card');
+    if(!card) return;
+    selectedTitle = card.dataset.t;
+    tg.querySelectorAll('.title-card').forEach(x=>x.classList.toggle('active', x===card));
+    updateEditTagRight();
+    toast(`已封号：${selectedTitle}`, { duration: 1400 });
+  };
+
+  // tabs
+  document.querySelectorAll('#screen-edit .tab-btn').forEach(btn=>{
+    btn.onclick = ()=>{
+      const tab = btn.dataset.tab;
+      const drawer = document.getElementById('drawer-'+tab);
+      const isOpen = drawer.classList.contains('open');
+      closeDrawers();
+      if(!isOpen){
+        drawer.classList.add('open');
+        btn.classList.add('active');
+      }
+    };
+  });
+
+  // undo
+  const btnUndo = document.getElementById('btn-undo');
+  const refreshUndo = ()=>{ btnUndo.disabled = !stage.canUndo(); };
+  stage.setOnChange(()=> refreshUndo());
+  refreshUndo();
+  btnUndo.onclick = ()=>{
+    if(stage.undo()){ toast('已撤销', { duration: 1000 }); }
+    refreshUndo();
+  };
+
+  // back
+  document.getElementById('edit-back').onclick = ()=>{
+    if(confirm('确定要返回吗？画布会清空')){
+      go('report');
+    }
+  };
+
+  // done
+  document.getElementById('btn-done').onclick = async ()=>{
+    closeDrawers();
+    stage.clearSelection();
+    showExporting(true);
+    try{
+      capturedPhotoURL = await exportNodeToPNG(stage.el, { pixelRatio: 2, backgroundColor: '#2d2d2d' });
+      document.getElementById('p-photo').src = capturedPhotoURL;
+      if(selectedTitle) document.getElementById('p-tier').textContent = selectedTitle;
+      go('poster');
+    }catch(e){
+      console.error(e);
+      toast('导出失败，请重试');
+    }finally{
+      showExporting(false);
+    }
+  };
+}
+
+function closeDrawers(){
+  document.querySelectorAll('#screen-edit .drawer').forEach(d=>d.classList.remove('open'));
+  document.querySelectorAll('#screen-edit .tab-btn').forEach(b=>b.classList.remove('active'));
+}
+
+// ========== Wire up ==========
+document.getElementById('cta-scan').addEventListener('click', ()=> document.getElementById('cam-input').click());
+document.getElementById('cta-album').addEventListener('click', ()=> document.getElementById('file-input').click());
+document.getElementById('cta-demo').addEventListener('click', ()=> {
+  const d = makeDemoImageDataURL();
+  runAnalyze(d);
+});
+
+function readFile(input){
+  const f = input.files && input.files[0];
+  if(!f) return;
+  const r = new FileReader();
+  r.onload = ()=> runAnalyze(r.result);
+  r.readAsDataURL(f);
+  input.value = '';
+}
+document.getElementById('file-input').addEventListener('change', e=>readFile(e.target));
+document.getElementById('cam-input').addEventListener('change', e=>readFile(e.target));
+
+document.getElementById('btn-retry').addEventListener('click', ()=> go('home'));
+document.getElementById('btn-to-edit').addEventListener('click', ()=> go('edit'));
+document.getElementById('btn-export').addEventListener('click', ()=> go('edit'));
+document.getElementById('btn-back-edit').addEventListener('click', ()=> go('edit'));
+
+document.getElementById('btn-download').addEventListener('click', async ()=>{
+  showExporting(true);
+  try{
+    const posterNode = document.getElementById('poster');
+    const url = await exportNodeToPNG(posterNode, { pixelRatio: 2.5, backgroundColor: '#131313' });
+    showExporting(false);
+    showSaveModal(url, {
+      theme: { bg:'rgba(19,19,19,.92)', accent:'#3cffd0', btnBg:'#3cffd0', btnText:'#000', closeBg:'rgba(255,255,255,.15)' },
+      title: 'POSTER · READY',
+      hint: 'MOBILE: <b style="background:#3cffd0;color:#000;padding:1px 6px;border-radius:3px">LONG PRESS</b> THE IMAGE TO SAVE',
+    });
+  }catch(e){
+    showExporting(false);
+    console.error(e);
+    toast('导出失败，请重试');
+  }
+});
+
+document.getElementById('btn-copy').addEventListener('click', async ()=>{
+  const ok = await copyShareLink();
+  toast(ok ? '链接已复制' : '请手动复制 URL');
+});
+
+document.getElementById('btn-restart').addEventListener('click', ()=>{
+  if(confirm('重新审一张？当前作品会清空')){
+    capturedPhotoURL = null; userPhotoURL = null; lastResult = null;
+    go('home');
+  }
+});
+
+document.getElementById('r-titles').addEventListener('click', e=>{
+  if(!e.target.classList.contains('title-pill')) return;
+  [...document.querySelectorAll('#r-titles .title-pill')].forEach(p=>p.classList.remove('active'));
+  e.target.classList.add('active');
+  selectedTitle = e.target.textContent;
+});
+
+const params = new URLSearchParams(location.search);
+if(params.has('mock') || params.has('autorun')){
+  setTimeout(()=> runAnalyze(makeDemoImageDataURL()), 250);
+}
+</script>
+</body>
+</html>

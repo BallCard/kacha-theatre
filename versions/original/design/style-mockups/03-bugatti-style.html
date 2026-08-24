@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<title>咔嚓剧场 · bugatti 风格 · 终章裁决</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=JetBrains+Mono:wght@400&family=Noto+Serif+SC:wght@300;400;500&family=ZCOOL+QingKe+HuangYou&display=swap" rel="stylesheet">
+<style>
+:root{
+  --canvas:#000; --soft:#0d0d0d; --card:#141414; --elev:#1f1f1f;
+  --hairline:#262626; --hairline-strong:#3a3a3a;
+  --ink:#fff; --body:#cccccc; --strong:#e6e6e6; --muted:#999;
+  --display:"Cormorant Garamond","Noto Serif SC",serif;
+  --display-cn:"ZCOOL QingKe HuangYou","Noto Serif SC",serif;
+  --serif:"Noto Serif SC",serif;
+  --mono:"JetBrains Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--canvas);color:var(--ink);font-family:var(--serif);-webkit-font-smoothing:antialiased}
+body{padding:40px 24px 120px;display:flex;justify-content:center}
+.page{max-width:1080px;width:100%}
+
+/* topbar */
+.topnav{display:flex;justify-content:space-between;align-items:center;padding:8px 0 32px;border-bottom:1px solid var(--hairline);margin-bottom:80px}
+.brand{font-family:var(--display);font-size:14px;font-weight:400;letter-spacing:6px;text-transform:uppercase}
+.nav-links{display:flex;gap:32px}
+.nav-links a{font-family:var(--mono);font-size:11px;font-weight:400;letter-spacing:2px;text-transform:uppercase;color:var(--ink);text-decoration:none}
+
+/* hero ceremony */
+.ceremony-meta{font-family:var(--mono);font-size:11px;font-weight:400;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);margin-bottom:48px;text-align:center}
+.ceremony-meta .sep{margin:0 12px;opacity:.4}
+
+.verdict-headline{font-family:var(--display-cn);font-size:160px;font-weight:400;line-height:.95;letter-spacing:8px;text-align:center;margin-bottom:24px;color:var(--ink)}
+.verdict-sub{font-family:var(--display);font-size:24px;font-weight:300;letter-spacing:6px;text-transform:uppercase;text-align:center;color:var(--muted);margin-bottom:96px}
+
+/* stage divider */
+.divider{display:flex;align-items:center;justify-content:center;gap:24px;margin:96px 0 64px}
+.divider .line{flex:1;height:1px;background:var(--hairline-strong);max-width:280px}
+.divider .glyph{font-family:var(--mono);font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--muted)}
+
+/* verdict body */
+.verdict-card{background:var(--soft);border:1px solid var(--hairline);padding:80px 96px;margin-bottom:96px}
+.verdict-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);margin-bottom:32px}
+.verdict-paragraph{font-family:var(--serif);font-size:24px;font-weight:300;line-height:1.7;color:var(--strong);text-align:justify;text-indent:2em}
+.verdict-paragraph::first-letter{font-family:var(--display-cn);font-size:88px;float:left;line-height:.85;margin:6px 16px 0 0;color:var(--ink)}
+
+/* stats row */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline);margin-bottom:80px}
+.stat{padding:48px 32px;border-right:1px solid var(--hairline);text-align:center}
+.stat:last-child{border-right:0}
+.stat .label{font-family:var(--mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:16px}
+.stat .val{font-family:var(--display);font-size:80px;font-weight:300;line-height:1;letter-spacing:2px;color:var(--ink);margin-bottom:8px}
+.stat .unit{font-family:var(--mono);font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
+
+/* yiji ledger */
+.ledger{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--hairline);margin-bottom:96px}
+.ledger-col{padding:64px 56px;border-right:1px solid var(--hairline)}
+.ledger-col:last-child{border:0}
+.ledger-col .label{font-family:var(--mono);font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);margin-bottom:24px}
+.ledger-col .head{font-family:var(--display-cn);font-size:48px;line-height:1;letter-spacing:6px;color:var(--ink);margin-bottom:32px}
+.ledger-col ul{list-style:none}
+.ledger-col li{font-family:var(--serif);font-size:18px;font-weight:300;color:var(--body);padding:12px 0;border-bottom:1px solid var(--hairline);display:flex;justify-content:space-between}
+.ledger-col li:last-child{border:0}
+.ledger-col li .hits{font-family:var(--mono);font-size:11px;letter-spacing:1.5px;color:var(--muted)}
+
+/* award */
+.award{text-align:center;padding:96px 0}
+.award .label{font-family:var(--mono);font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:32px}
+.award .seal{display:inline-block;border:1px solid var(--ink);padding:48px 80px}
+.award .seal .title{font-family:var(--display-cn);font-size:64px;letter-spacing:8px;line-height:1;color:var(--ink)}
+.award .meta{font-family:var(--mono);font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-top:32px}
+
+/* cta */
+.cta-row{display:flex;gap:16px;justify-content:center;margin-top:64px}
+.btn{font-family:var(--mono);font-size:12px;font-weight:400;letter-spacing:2.5px;text-transform:uppercase;padding:18px 36px;border-radius:9999px;cursor:pointer;background:transparent;color:var(--ink);border:1px solid var(--ink)}
+.btn.fill{background:var(--ink);color:#000}
+
+/* foot */
+.foot{margin-top:120px;padding-top:24px;border-top:1px solid var(--hairline);display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <nav class="topnav">
+    <div class="brand">MOYU · 御史房</div>
+    <div class="nav-links">
+      <a>奏折</a><a>剧情</a><a>裁决</a><a>御史档案</a>
+    </div>
+  </nav>
+
+  <div class="ceremony-meta">
+    <span>SCROLL 0023</span><span class="sep">/</span>
+    <span>VERDICT</span><span class="sep">/</span>
+    <span>ENDING TYPE · TIAN JIANG XIANG RUI</span><span class="sep">/</span>
+    <span>2026.05.23 · 18:30</span>
+  </div>
+
+  <h1 class="verdict-headline">天降祥瑞</h1>
+  <div class="verdict-sub">A FORTUNE BESTOWED · 五节皆顺</div>
+
+  <div class="divider"><div class="line"></div><div class="glyph">御史宣判</div><div class="line"></div></div>
+
+  <div class="verdict-card">
+    <div class="verdict-eyebrow">御史房 · 终章裁决书 · 第 0023 号</div>
+    <p class="verdict-paragraph">卿今日紫微入命，案上冷美式竟得同事新斟之热咖。开会时机巧避三回，PPT 改稿之劫已破，连甲方一句"再改一版"也化作空言。五节皆顺，宜命达四，忌命零中——御史房谨以朱印加盖，封号"祥瑞天尊"，准卿明日继续假寐，无须早朝。</p>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="label">MOYU SCORE</div>
+      <div class="val">87</div>
+      <div class="unit">/ 100</div>
+    </div>
+    <div class="stat">
+      <div class="label">YI HITS · 宜</div>
+      <div class="val">04</div>
+      <div class="unit">/ 05 NODES</div>
+    </div>
+    <div class="stat">
+      <div class="label">JI HITS · 忌</div>
+      <div class="val">00</div>
+      <div class="unit">/ 05 NODES</div>
+    </div>
+  </div>
+
+  <div class="ledger">
+    <div class="ledger-col">
+      <div class="label">YI · 今日宜 · MATCHED</div>
+      <div class="head">宜</div>
+      <ul>
+        <li><span>查文档</span><span class="hits">NODE 01</span></li>
+        <li><span>假装思考</span><span class="hits">NODE 02</span></li>
+        <li><span>看注释</span><span class="hits">NODE 03</span></li>
+        <li><span>划水</span><span class="hits">NODE 05</span></li>
+      </ul>
+    </div>
+    <div class="ledger-col">
+      <div class="label">JI · 今日忌 · MATCHED</div>
+      <div class="head">忌</div>
+      <ul>
+        <li><span>开会</span><span class="hits">—</span></li>
+        <li><span>改 PPT</span><span class="hits">—</span></li>
+        <li><span>接电话</span><span class="hits">—</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="award">
+    <div class="label">封号 · TITLE AWARDED</div>
+    <div class="seal">
+      <div class="title">祥瑞天尊</div>
+    </div>
+    <div class="meta">SEALED BY 御史房 · STAMPED IN VERMILION</div>
+    <div class="cta-row">
+      <button class="btn fill">下载长图卷宗</button>
+      <button class="btn">分享至抖音</button>
+    </div>
+  </div>
+
+  <div class="foot">
+    <span>SCROLL 0023 · MOYU GUSHI HOUSE</span>
+    <span>VLM · DOUBAO VISION-PRO · DOUYIN AI HACKATHON 2026</span>
+  </div>
+
+</div>
+</body>
+</html>

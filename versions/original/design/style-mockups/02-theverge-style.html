@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<title>咔嚓剧场 · the verge 风格 · 奏折页</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo+Black&family=Space+Grotesk:wght@300;400;500;700&family=Space+Mono:wght@400;700&family=Noto+Sans+SC:wght@400;500;700;900&family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+<style>
+:root{
+  --mint:#3cffd0; --mint-border:#309875;
+  --uv:#5200ff; --uv-dark:#3d00bf;
+  --link-blue:#3860be;
+  --black:#131313; --slate:#2d2d2d; --frame:#313131;
+  --white:#ffffff; --abs-black:#000;
+  --txt-2:#949494;
+  --display:"Anton","Archivo Black","Noto Sans SC",sans-serif;
+  --display-cn:"ZCOOL KuaiLe","Noto Sans SC",sans-serif;
+  --sans:"Space Grotesk","Noto Sans SC",sans-serif;
+  --mono:"Space Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--black);color:var(--white);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+body{padding:32px 20px 96px;display:flex;justify-content:center}
+.page{max-width:920px;width:100%}
+
+/* nav */
+.topnav{display:flex;align-items:center;justify-content:space-between;padding:8px 0 24px;border-bottom:1px solid var(--frame);margin-bottom:32px}
+.wordmark{font-family:var(--display);font-size:54px;font-weight:900;line-height:.8;letter-spacing:1px;text-transform:uppercase}
+.wordmark .slash{color:var(--mint)}
+.nav-right{display:flex;align-items:center;gap:20px}
+.nav-link{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:var(--white);text-decoration:none}
+.btn-mint{background:var(--mint);color:#000;font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:10px 20px;border:0;border-radius:24px;cursor:pointer}
+
+/* hero */
+.hero{padding:32px 0 48px}
+.kicker{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:1.8px;text-transform:uppercase;color:var(--mint);margin-bottom:16px}
+.hero h1{font-family:var(--display-cn);font-size:96px;font-weight:900;line-height:.95;letter-spacing:-1px;margin-bottom:24px}
+.hero h1 .uv{color:var(--mint)}
+.hero .deck{font-family:var(--sans);font-size:18px;font-weight:500;line-height:1.6;color:var(--white);max-width:640px}
+
+/* score banner */
+.score-banner{background:var(--mint);color:var(--abs-black);border-radius:30px;padding:48px 40px;display:grid;grid-template-columns:1fr auto;gap:32px;align-items:end;margin-bottom:24px}
+.score-banner .tag{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase}
+.score-banner h2{font-family:var(--display);font-size:120px;font-weight:900;line-height:.8;letter-spacing:-2px}
+.score-banner h2 small{font-size:48px;letter-spacing:0;color:rgba(0,0,0,.5)}
+.score-banner .tier{font-family:var(--display-cn);font-size:48px;font-weight:900;line-height:1;text-align:right}
+.score-banner .meta{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;text-align:right;color:rgba(0,0,0,.7)}
+
+/* stream */
+.stream{position:relative;padding-left:24px;margin-top:16px}
+.stream::before{content:"";position:absolute;left:0;top:8px;bottom:0;width:1px;background:var(--uv-dark);border-left:1px dashed var(--uv-dark)}
+.stream-item{position:relative;background:var(--black);border:1px solid var(--white);border-radius:20px;padding:24px 28px;margin-bottom:14px}
+.stream-item::before{content:"";position:absolute;left:-25px;top:28px;width:8px;height:8px;border-radius:50%;background:var(--mint)}
+.stream-item .ts{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:1.1px;text-transform:uppercase;color:var(--txt-2);margin-bottom:6px}
+.stream-item h3{font-family:var(--display-cn);font-size:28px;font-weight:900;line-height:1.05;margin-bottom:10px}
+.stream-item p{font-family:var(--sans);font-size:15px;font-weight:500;line-height:1.55;color:var(--white)}
+
+.stream-item.fill-uv{background:var(--uv);border-color:var(--uv)}
+.stream-item.fill-uv .ts{color:rgba(255,255,255,.7)}
+.stream-item.fill-yellow{background:#ffd400;border-color:#ffd400;color:#000}
+.stream-item.fill-yellow h3,.stream-item.fill-yellow p{color:#000}
+.stream-item.fill-yellow .ts{color:rgba(0,0,0,.6)}
+
+/* yiji block */
+.yiji-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:24px}
+.yiji-tile{border-radius:24px;padding:28px;border:1px solid var(--white)}
+.yiji-tile.yi{background:var(--mint);color:#000;border-color:var(--mint)}
+.yiji-tile.ji{background:var(--uv);color:#fff;border-color:var(--uv)}
+.yiji-tile .label{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;margin-bottom:12px;opacity:.7}
+.yiji-tile h3{font-family:var(--display-cn);font-size:64px;font-weight:900;line-height:.9;margin-bottom:16px}
+.yiji-tile ul{list-style:none}
+.yiji-tile li{font-family:var(--sans);font-size:18px;font-weight:700;line-height:1.5;padding:6px 0;border-top:1px solid currentColor;opacity:.95}
+.yiji-tile li:first-child{border-top:0}
+
+/* title pills */
+.titles-row{margin-top:24px;display:flex;gap:10px;flex-wrap:wrap}
+.title-pill{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;background:transparent;color:var(--mint);border:1px solid var(--mint);border-radius:40px;padding:10px 18px;cursor:pointer}
+.title-pill.active{background:var(--mint);color:#000}
+
+/* foot */
+.foot{margin-top:48px;padding-top:20px;border-top:1px solid var(--frame);display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--txt-2)}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <nav class="topnav">
+    <div class="wordmark">摸鱼<span class="slash">/</span>御史</div>
+    <div class="nav-right">
+      <a class="nav-link">Stream</a>
+      <a class="nav-link">Plot</a>
+      <a class="nav-link">Archive</a>
+      <button class="btn-mint">导出海报</button>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="kicker">奏折 NO.0023 · 辰时入呈 · VLM 御史房</div>
+    <h1>案上美式已凉，<br/>紫微星偏<span class="uv">三度</span>。</h1>
+    <p class="deck">趴桌型 · 中正姿态。卿之神色介乎入定与出神之间，分明是修为已臻"假寐"，却仍背负"打工"之命。今日宜顺应天命。</p>
+  </section>
+
+  <div class="score-banner">
+    <div>
+      <div class="tag">摸鱼指数 / MOYU SCORE</div>
+      <h2>87<small>/100</small></h2>
+    </div>
+    <div>
+      <div class="meta">LEVEL TIER</div>
+      <div class="tier">摸鱼大将军</div>
+    </div>
+  </div>
+
+  <div class="yiji-row">
+    <div class="yiji-tile yi">
+      <div class="label">YI / 今日宜</div>
+      <h3>宜</h3>
+      <ul><li>摸鱼</li><li>划水</li><li>假装思考</li></ul>
+    </div>
+    <div class="yiji-tile ji">
+      <div class="label">JI / 今日忌</div>
+      <h3>忌</h3>
+      <ul><li>开会</li><li>改 PPT</li><li>接电话</li></ul>
+    </div>
+  </div>
+
+  <h2 style="font-family:var(--display);font-size:34px;font-weight:900;letter-spacing:.32px;margin:48px 0 20px;text-transform:uppercase">PLOT STREAM · 五节剧情时间线</h2>
+
+  <div class="stream">
+    <div class="stream-item">
+      <div class="ts">07:42 · NODE 01 · 辰时·御史临朝</div>
+      <h3>领导踱步而过，神色不明</h3>
+      <p>你刚切到短视频，企业微信突然亮起。是装作专注，是切回文档，还是干脆迎上去？</p>
+    </div>
+    <div class="stream-item fill-uv">
+      <div class="ts">10:18 · NODE 02 · 午前·群中点将</div>
+      <h3>「@所有人 下午 2 点临时复盘」</h3>
+      <p>这是一道经典送命题。三个分支铺在面前：顺应天命、逆天而行、中立观望。</p>
+    </div>
+    <div class="stream-item">
+      <div class="ts">14:05 · NODE 03 · 未时·茶水间偶遇</div>
+      <h3>小李端着保温杯出现</h3>
+      <p>是该聊两句套点情报，还是赶紧回工位假装在看注释？</p>
+    </div>
+    <div class="stream-item fill-yellow">
+      <div class="ts">16:30 · NODE 04 · 申时·甲方加需求</div>
+      <h3>"再改一版就好"</h3>
+      <p>—— 这是 AI 时代仍然成立的一句谎言。</p>
+    </div>
+    <div class="stream-item">
+      <div class="ts">18:00 · NODE 05 · 酉时·御史降罚</div>
+      <h3>终章未启 · 待你抉择</h3>
+      <p>5 节跑完后，前端按宜忌命中数计算结局，调用 /plot/ending 出裁决书。</p>
+    </div>
+  </div>
+
+  <div class="titles-row">
+    <span class="title-pill active">划水大将军</span>
+    <span class="title-pill">假寐侍郎</span>
+    <span class="title-pill">摸鱼世家</span>
+  </div>
+
+  <div class="foot">
+    <span>SCROLL 0023 / DOUYIN AI HACKATHON 2026</span>
+    <span>VLM · DOUBAO VISION-PRO</span>
+  </div>
+
+</div>
+</body>
+</html>

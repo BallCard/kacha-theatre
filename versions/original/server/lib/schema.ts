@@ -1,0 +1,80 @@
+import Ajv from 'ajv';
+import { POSE_TYPES } from './types.js';
+import { SIGN_TYPES, TIERS } from './tier.js';
+
+const ajv = new Ajv({ allErrors: true });
+
+const schema = {
+  type: 'object',
+  required: [
+    'pose_type', 'desk_objects', 'moyu_score', 'sign_type', 'level_tier',
+    'title_candidates', 'report', 'face_boxes', 'initial_stickers',
+  ],
+  additionalProperties: true,
+  properties: {
+    pose_type: { type: 'string', enum: [...POSE_TYPES] },
+    desk_objects: {
+      type: 'array', minItems: 0, maxItems: 5,
+      items: { type: 'string', minLength: 1, maxLength: 30 },
+    },
+    moyu_score: { type: 'integer', minimum: 0, maximum: 100 },
+    sign_type: { type: 'string', enum: [...SIGN_TYPES] },
+    level_tier: { type: 'string', enum: [...TIERS] },
+    title_candidates: {
+      type: 'array', minItems: 3, maxItems: 3,
+      items: { type: 'string', minLength: 2, maxLength: 8 },
+    },
+    report: {
+      type: 'object',
+      required: ['paragraph', 'yi', 'ji'],
+      properties: {
+        paragraph: { type: 'string', minLength: 30, maxLength: 120 },
+        yi: { type: 'array', minItems: 3, maxItems: 3, items: { type: 'string', minLength: 1, maxLength: 6 } },
+        ji: { type: 'array', minItems: 3, maxItems: 3, items: { type: 'string', minLength: 1, maxLength: 6 } },
+      },
+    },
+    face_boxes: {
+      type: 'array',
+      items: {
+        type: 'object',
+        required: ['x', 'y', 'w', 'h'],
+        properties: {
+          x: { type: 'number', minimum: 0, maximum: 1 },
+          y: { type: 'number', minimum: 0, maximum: 1 },
+          w: { type: 'number', minimum: 0, maximum: 1 },
+          h: { type: 'number', minimum: 0, maximum: 1 },
+        },
+      },
+    },
+    initial_stickers: {
+      type: 'array', minItems: 1, maxItems: 2,
+      items: {
+        type: 'object',
+        required: ['id', 'x', 'y', 'rot'],
+        properties: {
+          id: { type: 'string', pattern: '^(yellow_tag|bubble|seal_red|tier_seal)_[0-9]{2}$' },
+          text: { type: 'string', maxLength: 6 },
+          x: { type: 'number', minimum: 0, maximum: 1 },
+          y: { type: 'number', minimum: 0, maximum: 1 },
+          rot: { type: 'number', minimum: -15, maximum: 15 },
+        },
+      },
+    },
+  },
+} as const;
+
+const validate = ajv.compile(schema);
+
+export interface ValidationResult {
+  ok: boolean;
+  errors?: string[];
+}
+
+export function validateAnalyzeResult(data: unknown): ValidationResult {
+  const ok = validate(data);
+  if (ok) return { ok: true };
+  return {
+    ok: false,
+    errors: (validate.errors ?? []).map((e) => `${e.instancePath || '/'} ${e.message}`),
+  };
+}

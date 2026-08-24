@@ -1,0 +1,6 @@
+{
+  "name": "咔嚓剧场",
+  "description": "用 AI 给办公室摸鱼照打分 + 改图玩梗的移动端 H5 趣味工具",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
